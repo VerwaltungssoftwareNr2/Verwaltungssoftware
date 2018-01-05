@@ -159,7 +159,7 @@ public class PdfCreator {
             //Datum richtig formattieren
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate angebotDatum = null;
-            sql.loadDataAngebot();
+            sql.loadDataAngebot(false);
             for (Angebot a : sql.getDataAngebot()) {
                 if (a.getAngebotsnummer().equals(angebotsnummer)) {
                     angebotDatum = LocalDate.parse(a.getDatum(), dtf);
@@ -373,7 +373,7 @@ public class PdfCreator {
             LocalDate angebotDatum;
             LocalDate skontoDatum = null;
             LocalDate zielDatum = null;
-            sql.loadDataAngebot();
+            sql.loadDataAngebot(false);
             for (Angebot a : sql.getDataAngebot()) {
                 if (a.getAngebotsnummer().equals(angebotsnummer)) {
                     angebotDatum = LocalDate.parse(a.getDatum(), dtf);

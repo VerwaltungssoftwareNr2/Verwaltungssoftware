@@ -10,9 +10,11 @@ import com.verwaltungssoftware.database.SqlConnector;
 import com.verwaltungssoftware.objects.Artikel;
 import com.verwaltungssoftware.objects.Kunde;
 import java.sql.SQLException;
+import java.util.Iterator;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -50,31 +52,8 @@ public class GUI_Verwaltungssoftware extends Application {
     ISql sql;
     String[] tempKunde = new String[7];
     String[] tempArtikel = new String[5];
-
-    public GUI_Verwaltungssoftware() {
-        this.sql = new SqlConnector();
-        try {
-            sql.loadDataKunde();
-        } catch (SQLException exc) {
-            System.out.println("Fehler beim laden der Kunden: " + exc.getMessage());
-        }
-        try {
-            sql.loadDataArtikel();
-        } catch (SQLException exc) {
-            System.out.println("Fehler beim laden der Artikel: " + exc.getMessage());
-        }
-        try {
-            sql.loadDataAngebot();
-        } catch (SQLException exc) {
-            System.out.println("Fehler beim laden der Angebote: " + exc.getMessage());
-        }
-        this.rechnungT = createTableRechnung();
-        this.angebotT = createTableAngebot();
-        this.artikelT = new TableView<>();
-        this.artikelVB = createTableArtikel();
-        this.kundenT = new TableView<>();
-        this.kundenVB = createTableKunde();
-    }
+    String username;
+    String password;
 
     @Override
     public void start(Stage primaryStage) {
@@ -89,13 +68,38 @@ public class GUI_Verwaltungssoftware extends Application {
         user.setPromptText("Benutzername");
         pass.setPromptText("Passwort");
 
-        submit.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
+        submit.setOnAction((ActionEvent event) -> {
+            this.sql = new SqlConnector(user.getText(), pass.getText());
+            if (sql.getAuthentication()) {
+                this.username = user.getText();
+                this.password = pass.getText();
                 primaryStage.setScene(mainScreen);
-                /*  if(user.getText().equals("testuser") && pass.getText().equals("test")){
-                    primaryStage.setScene(mainScreen);
+                try {
+                    sql.loadDataKunde();
+                } catch (SQLException exc) {
+                    System.out.println("Fehler beim Laden der Kunden: " + exc.getMessage());
                 }
-                else{System.out.println(user.getText()+ pass.getText());}*/
+                try {
+                    sql.loadDataArtikel();
+                } catch (SQLException exc) {
+                    System.out.println("Fehler beim Laden der Artikel: " + exc.getMessage());
+                }
+                try {
+                    sql.loadDataAngebot(false);
+                } catch (SQLException exc) {
+                    System.out.println("Fehler beim Laden der Angebote: " + exc.getMessage());
+                }
+                try {
+                    sql.loadDataRechnung(false);
+                } catch (SQLException exc) {
+                    System.out.println("Fehler beim Laden der Angebote: " + exc.getMessage());
+                }
+                this.rechnungT = createTableRechnung();
+                this.angebotT = createTableAngebot();
+                this.artikelT = new TableView<>();
+                this.artikelVB = createTableArtikel();
+                this.kundenT = new TableView<>();
+                this.kundenVB = createTableKunde();
             }
         });
         GridPane grid = new GridPane();
@@ -167,10 +171,10 @@ public class GUI_Verwaltungssoftware extends Application {
         MenuItem tableAngebot = new MenuItem("Übersicht anzeigen");
         angebot.getItems().addAll(createAngebot, tableAngebot);
 
-        createAngebot.setOnAction(e -> AngebotAdd.display());
+        createAngebot.setOnAction(e -> AngebotAdd.display(this));
 
         MenuItem createRechnung = new MenuItem("Erstellen");
-        createRechnung.setOnAction(e -> RechnungsAdd.display());
+        createRechnung.setOnAction(e -> RechnungsAdd.display(this));
         MenuItem tableRechnung = new MenuItem("Übersicht anzeigen");
         rechnung.getItems().addAll(createRechnung, tableRechnung);
 
@@ -212,7 +216,7 @@ public class GUI_Verwaltungssoftware extends Application {
         rechnungT.setItems(sql.getDataRechnung());
         rechnungT.getColumns().addAll(rechnungsnummer, kunde, datum);
 
-        VBox fAndT = createFilter(rechnungT, "Rechnung");
+        VBox fAndT = createFilter(rechnungT, "Rechnung", false);
 
         return fAndT;
     }
@@ -240,7 +244,7 @@ public class GUI_Verwaltungssoftware extends Application {
         angebotT.setItems(sql.getDataAngebot());
         angebotT.getColumns().addAll(angebotsnummer, kunde, datum, akzeptiert);
 
-        VBox fAndT = createFilter(angebotT, "Angebot");
+        VBox fAndT = createFilter(angebotT, "Angebot", false);
 
         return fAndT;
     }
@@ -286,7 +290,7 @@ public class GUI_Verwaltungssoftware extends Application {
         artikelT.setItems(sql.getDataArtikel());
         artikelT.getColumns().addAll(artikelnummer, bezeichnung, zusatztext, warengruppe, einkaufspreis, verkaufspreis, mwst, menge, datum);
 
-        VBox fAndT = createFilter(artikelT, "Artikel");
+        VBox fAndT = createFilter(artikelT, "Artikel", false);
 
         return fAndT;
     }
@@ -333,12 +337,12 @@ public class GUI_Verwaltungssoftware extends Application {
         kundenT.setItems(sql.getDataKunde());
         kundenT.getColumns().addAll(kundennummer, vorname, name, straße, hausnummer, plz, ort, land);
 
-        VBox fAndT = createFilter(kundenT, "Kunde");
+        VBox fAndT = createFilter(kundenT, "Kunde", false);
 
         return fAndT;
     }
 
-    public VBox createFilter(TableView t, String identifier) {
+    public VBox createFilter(TableView t, String identifier, boolean all) {
         Label filter = new Label("Filter :");
         TextField filterField = new TextField();
         filterField.setOnKeyReleased((KeyEvent ke) -> {
@@ -361,27 +365,57 @@ public class GUI_Verwaltungssoftware extends Application {
                     }
                 } else if (identifier.equals("Angebot")) {
                     if (filterField.getText().isEmpty()) {
-                        sql.loadDataAngebot();
+                        sql.loadDataAngebot(all);
                         t.setItems(sql.getDataAngebot());
                     } else {
-                        sql.loadFilteredAngebote(filterField.getText());
+                        sql.loadFilteredAngebote(filterField.getText(), all);
                         t.setItems(sql.getDataFilteredAngebot());
                     }
-                } else {
+                } else if (identifier.equals("Rechnung")) {
                     if (filterField.getText().isEmpty()) {
-                        sql.loadDataRechnung();
+                        sql.loadDataRechnung(all);
                         t.setItems(sql.getDataRechnung());
                     } else {
-                        sql.loadFilteredRechnung(filterField.getText());
+                        sql.loadFilteredRechnung(filterField.getText(), all);
                         t.setItems(sql.getDataFilteredRechnung());
                     }
                 }
-
             } catch (SQLException ex) {
                 System.out.println(ex.getMessage() + "käse");
             }
         });
+        HBox filterBox = new HBox();
+        filterBox.setPadding(new Insets(5, 5, 5, 5));
+        filterBox.setSpacing(8);
+        filterBox.setAlignment(Pos.CENTER);
+        filterBox.getChildren().addAll(filter, filterField);
 
+        VBox fAndT = new VBox();
+        fAndT.getChildren().addAll(filterBox, t);
+        return fAndT;
+    }
+
+    public ObservableList<Artikel> filterList(ObservableList<Artikel> inputList, String filter){
+        ObservableList outputList = FXCollections.observableArrayList();
+        for(int index = 0; index < inputList.size(); index++){
+            Artikel filteredObject = inputList.get(index);
+            if(filteredObject.getArtikelnummer().contains(filter)){
+                outputList.add(filteredObject);
+            }
+        }
+        return outputList;
+    }
+    public VBox createFilter(TableView t, ObservableList ol) {
+        Label filter = new Label("Filter :");
+        TextField filterField = new TextField();
+        filterField.setOnKeyReleased((KeyEvent ke) -> {
+            if (filterField.getText().isEmpty()) {
+                t.setItems(ol);
+            } else {
+                ObservableList<Artikel> newList = filterList(ol, filterField.getText());
+                t.setItems(newList);
+            }
+        });
         HBox filterBox = new HBox();
         filterBox.setPadding(new Insets(5, 5, 5, 5));
         filterBox.setSpacing(8);

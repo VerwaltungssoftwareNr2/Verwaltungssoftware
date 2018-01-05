@@ -43,7 +43,7 @@ public class Gui extends Application {
         user = new User("Sparkasse Oberlausitz Niederschlesien", "3100011383", "85050100", "207/146/00045", "DE 251622660", "Baustoffhandel TONAS Limited", "69 Great Hamton Street", "B18 6EW Birmingham",
                 "Registered in England and Wales", "5802531", "Urs", "Kohler",
                 "Jahnring 6a", "02959", "Deutschland", "Schleife", "0152-56840139", "035773-73297", "Sparkasse Oberlausitz Niederschlesien", "WELADED1GRL", "DE37 8505 0100 3100 0113 83", "Amtsgericht Dresden", "HRB 24647");
-        sql = new SqlConnector();
+        sql = new SqlConnector(null, null);
         pdf = new PdfCreator(user, this, sql);
         tableArtikel = new TableView<>();
         tableKunde = new TableView<>();
@@ -82,7 +82,7 @@ public class Gui extends Application {
             System.out.println("Fehler beim laden der Artikel: " + exc.getMessage());
         }
         try {
-            sql.loadDataAngebot();
+            sql.loadDataAngebot(false);
         } catch (SQLException exc) {
             System.out.println("Fehler beim laden der Angebote: " + exc.getMessage());
         }

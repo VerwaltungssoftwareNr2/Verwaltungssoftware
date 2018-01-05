@@ -8,7 +8,13 @@ import java.util.ArrayList;
 import javafx.collections.ObservableList;
 
 public interface ISql {
-
+    
+    public boolean getAuthentication();
+    
+    public String getUsername();
+    
+    public String getPassword();
+    
     public ObservableList<Artikel> getDataArtikel();
 
     public ObservableList<Kunde> getDataKunde();
@@ -27,13 +33,17 @@ public interface ISql {
 
     public ObservableList<Artikel> getDataFilteredArtikel();
     
+    public String generateRandomOfferNumber(String datum) throws SQLException;
+    
+    public String generateRandomBillNumber(String datum) throws SQLException;
+    
     public void loadDataArtikel() throws SQLException;
 
     public void loadDataKunde() throws SQLException;
 
-    public void loadDataAngebot() throws SQLException;
+    public void loadDataAngebot(boolean all) throws SQLException;
     
-    public void loadDataRechnung() throws SQLException;
+    public void loadDataRechnung(boolean all) throws SQLException;
 
     public void loadArtikelFromAngebot(String nummer) throws SQLException;
 
@@ -53,9 +63,9 @@ public interface ISql {
 
     public void updateArtikel(String attr, String id, String eingabe) throws SQLException;
     
-    public void loadFilteredAngebote(String filter) throws SQLException;
+    public void loadFilteredAngebote(String filter, boolean all) throws SQLException;
     
-    public void loadFilteredRechnung(String filter) throws SQLException;
+    public void loadFilteredRechnung(String filter, boolean all) throws SQLException;
     
     public void loadFilteredKunden(String filter) throws SQLException;
     

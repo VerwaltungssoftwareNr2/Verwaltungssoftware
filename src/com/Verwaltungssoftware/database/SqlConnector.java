@@ -3,6 +3,7 @@ package com.verwaltungssoftware.database;
 import com.verwaltungssoftware.objects.Kunde;
 import com.verwaltungssoftware.objects.Artikel;
 import com.verwaltungssoftware.objects.Angebot;
+import com.verwaltungssoftware.objects.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Properties;
 import javafx.collections.FXCollections;
@@ -19,6 +19,9 @@ import javafx.collections.ObservableList;
 public class SqlConnector implements ISql {
 
     Properties userInfo;
+    private boolean authentication;
+    private String username;
+    private String password;
     private ObservableList<Artikel> dataArtikel;
     private ObservableList<Kunde> dataKunde;
     private ObservableList<Angebot> dataAngebot;
@@ -29,10 +32,19 @@ public class SqlConnector implements ISql {
     private ObservableList<Angebot> dataFilteredRechnung;
     private ObservableList<Artikel> dataFilteredArtikel;
 
-    public SqlConnector() {
+    public SqlConnector(String username, String password) {
+        this.authentication = false;
+        this.username = username;
+        this.password = password;
         userInfo = new Properties();
-        userInfo.put("user", "root");
-        userInfo.put("password", "databasemarcel");
+        userInfo.put("user", this.username);
+        userInfo.put("password", this.password);
+        //Test noch in extra private Methode
+        try(Connection testConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)){
+            this.authentication = true;
+        } catch(SQLException exc){
+            System.out.println(exc.getMessage() + "tryConn");
+        }
         dataArtikel = FXCollections.observableArrayList();
         dataKunde = FXCollections.observableArrayList();
         dataAngebot = FXCollections.observableArrayList();
@@ -44,38 +56,62 @@ public class SqlConnector implements ISql {
         dataFilteredArtikel = FXCollections.observableArrayList();
     }
 
+    @Override
+    public boolean getAuthentication(){
+        return this.authentication;
+    }
+    
+    @Override
+    public String getUsername(){
+        return this.username;
+    }
+    
+    @Override
+    public String getPassword(){
+        return this.password;
+    }
+    
+    @Override
     public ObservableList<Artikel> getDataArtikel() {
         return dataArtikel;
     }
 
+    @Override
     public ObservableList<Kunde> getDataKunde() {
         return dataKunde;
     }
 
+    @Override
     public ObservableList<Angebot> getDataRechnung() {
         return dataRechnung;
     }
 
+    @Override
     public ObservableList<Angebot> getDataAngebot() {
         return dataAngebot;
     }
 
+    @Override
     public ObservableList<Artikel> getDataArtikelInAngebot() {
         return dataArtikelInAngebot;
     }
 
+    @Override
     public ObservableList<Kunde> getDataFilteredKunde() {
         return dataFilteredKunde;
     }
 
+    @Override
     public ObservableList<Angebot> getDataFilteredAngebot() {
         return dataFilteredAngebot;
     }
 
+    @Override
     public ObservableList<Angebot> getDataFilteredRechnung() {
         return dataFilteredRechnung;
     }
 
+    @Override
     public ObservableList<Artikel> getDataFilteredArtikel() {
         return dataFilteredArtikel;
     }
@@ -137,12 +173,19 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadDataAngebot() throws SQLException {
+    public void loadDataAngebot(boolean all) throws SQLException {
 
+        String stringAngebot = null;
+        if(all){
+            stringAngebot = "select * from angebot order by angebotsnummer asc;";
+        } else{
+            stringAngebot = "select * from angebot where angebotsnummer like '%A%' order by angebotsnummer asc;";
+        }
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtAngebot = myConn.createStatement();
-                ResultSet rsAngebot = stmtAngebot.executeQuery("select * from angebot order by angebotsnummer asc")) {
+                ResultSet rsAngebot = stmtAngebot.executeQuery(stringAngebot)) {
 
+            dataAngebot.clear();
             while (rsAngebot.next()) {
                 if (rsAngebot.getString("akzeptiert").equals("0")) {
                     dataAngebot.add(new Angebot(
@@ -164,23 +207,47 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadDataRechnung() throws SQLException {
-        try {
+    public void loadDataRechnung(boolean all) throws SQLException {
+        String stringRechnung = null;
+        if(all){
+            stringRechnung = "select * from angebot order by angebotsnummer asc;";
+        } else{
+            stringRechnung = "select * from angebot where angebotsnummer like '%R%' order by angebotsnummer asc;";
+        }
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtRechnung = myConn.createStatement();
+                ResultSet rsRechnung = stmtRechnung.executeQuery(stringRechnung)) {
+
+            dataRechnung.clear();
+            while (rsRechnung.next()) {
+                dataRechnung.add(new Angebot(
+                        rsRechnung.getString("angebotsnummer"),
+                        rsRechnung.getString("kunde"),
+                        rsRechnung.getString("datum"),
+                        null));
+            }
+        } catch (SQLException exc) {
+            throw exc;
+        }
+        /*try {
 
             loadDataAngebot();
+            dataRechnung.clear();
             for (Angebot a : dataAngebot) {
-                if (a.getAkzeptiert().equals("1")) {
+                if (a.getAkzeptiert().equals("ja/Rechnung erstellt")) {
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                    LocalDate aDatum = LocalDate.parse(a.getDatum(), dtf);
                     dataRechnung.add(new Angebot(
                             a.getAngebotsnummer(),
                             a.getKunde(),
-                            a.getDatum(),
+                            aDatum.toString(),
                             "ja/Rechnung erstellt"));
                 }
             }
 
         } catch (SQLException exc) {
             throw exc;
-        }
+        }*/
     }
 
     @Override
@@ -256,8 +323,13 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadFilteredAngebote(String filter) throws SQLException {
-        String searchAngebotString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ? or akzeptiert like ?;";
+    public void loadFilteredAngebote(String filter, boolean all) throws SQLException {
+        String searchAngebotString = null;
+        if (all) {
+            searchAngebotString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ? or akzeptiert like ?;";
+        } else {
+            searchAngebotString = "select * from angebot where (angebotsnummer like ? or kunde like ? or datum like ? or akzeptiert like ?) and angebotsnummer like '%A%';";
+        }
         ResultSet rsSearchAngebot = null;
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -297,8 +369,13 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadFilteredRechnung(String filter) throws SQLException {
-        String searchRechnungString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ?;";
+    public void loadFilteredRechnung(String filter, boolean all) throws SQLException {
+        String searchRechnungString = null;
+        if (all) {
+            searchRechnungString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ?;";
+        } else {
+            searchRechnungString = "select * from angebot where (angebotsnummer like ? or kunde like ? or datum like ?) and angebotsnummer like '%R%';";
+        }
         ResultSet rsSearchRechnung = null;
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -312,7 +389,7 @@ public class SqlConnector implements ISql {
             rsSearchRechnung = stmtSearchRechnung.executeQuery();
 
             while (rsSearchRechnung.next()) {
-                dataFilteredAngebot.add(new Angebot(
+                dataFilteredRechnung.add(new Angebot(
                         rsSearchRechnung.getString("angebotsnummer"),
                         rsSearchRechnung.getString("kunde"),
                         rsSearchRechnung.getString("datum"),
@@ -426,9 +503,9 @@ public class SqlConnector implements ISql {
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement addArtikel = myConn.prepareStatement(addStringArtikel)) {
 
-                for (int i = 0; i < 9; i++) {
-                    addArtikel.setString(i + 1, parameter[i]);
-                }
+            for (int i = 0; i < 9; i++) {
+                addArtikel.setString(i + 1, parameter[i]);
+            }
             addArtikel.executeUpdate();
         } catch (SQLException exc) {
             throw exc;
@@ -447,6 +524,7 @@ public class SqlConnector implements ISql {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)) {
 
+            /*
             //Test ob der Kunde überhaupt existiert
             stmtCheckKunde = myConn.createStatement();
             rsCheckKunde = stmtCheckKunde.executeQuery("select kundennummer from kunde;");
@@ -454,8 +532,7 @@ public class SqlConnector implements ISql {
             while (rsCheckKunde.next()) {
                 String test = rsCheckKunde.getString("kundennummer");
                 kundeExist = test.equals(k);
-            }
-
+            }*/
             //Test ob Angebot bereits existiert
             stmtCheckAngebot = myConn.createStatement();
             rsCheckAngebot = stmtCheckAngebot.executeQuery("select angebotsnummer from angebot;");
@@ -465,7 +542,7 @@ public class SqlConnector implements ISql {
                 angebotExist = test.equals(k);
             }
 
-            if (kundeExist == true && angebotExist == false) {
+            if (/*kundeExist == true && */angebotExist == false) {
 
                 aNumber = generateRandomOfferNumber(d);
                 String addStringAngebot = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert) values(?, ?, ?, ?);";
@@ -645,14 +722,12 @@ public class SqlConnector implements ISql {
      * Generiert die chronologisch nächste Rechnungsnummer für einen bestimmten
      * Kunden
      *
-     * @param letzteRechnung - die letzte gültige Rechnung. kann null sein
-     * @param kunde - Kunde für den die Rechnung bestimmt ist
      * @param datum - aktuelles Datum
      * @return neue Rechnungsnummer
      * @throws SQLException
      */
-    private String generateRandomBillNumber(String datum) throws SQLException {
-        String stringLetzteRechnungen = "select * from angebot order by angebotsnummer asc;";
+    public String generateRandomBillNumber(String datum) throws SQLException {
+        String stringLetzteRechnungen = "select * from angebot where angebotsnummer like '%R%' order by angebotsnummer asc;";
         ResultSet rsLetzteRechnungen = null;
         String letzteRechnung = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -660,6 +735,7 @@ public class SqlConnector implements ISql {
 
             rsLetzteRechnungen = stmtLetzteRechnungen.executeQuery(stringLetzteRechnungen);
 
+            dataRechnung.clear();
             while (rsLetzteRechnungen.next()) {
                 dataRechnung.add(new Angebot(
                         rsLetzteRechnungen.getString("angebotsnummer"),
@@ -679,8 +755,8 @@ public class SqlConnector implements ISql {
         String subYear = null;
         String subNumber = null;
         String newNumber = null;
-        DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate ld = LocalDate.parse(datum, dateTf);
+        //DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate ld = LocalDate.parse(datum);
         if (letzteRechnung != null) {
             subYear = letzteRechnung.substring(0, 4);
             if (subYear.equals(String.valueOf(ld.getYear()))) {
@@ -711,18 +787,20 @@ public class SqlConnector implements ISql {
         }
 
         String fullNumber = subYear + "-" + newNumber + "-R";
+        loadDataRechnung(true);
         return fullNumber;
     }
 
-    private String generateRandomOfferNumber(String datum) throws SQLException {
-        String stringLetzteAngebote = "select * from angebot where kunde = ? order by angebotsnummer asc;";
+    public String generateRandomOfferNumber(String datum) throws SQLException {
+        String stringLetzteAngebote = "select * from angebot where angebotsnummer like '%A%' order by angebotsnummer asc;";
         ResultSet rsLetzteAngebot = null;
         String letztesAngebot = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
-                Statement stmtLetzteRechnungen = myConn.createStatement()) {
+                Statement stmtLetzteAngebote = myConn.createStatement()) {
 
-            rsLetzteAngebot = stmtLetzteRechnungen.executeQuery(stringLetzteAngebote);
+            rsLetzteAngebot = stmtLetzteAngebote.executeQuery(stringLetzteAngebote);
 
+            dataAngebot.clear();
             while (rsLetzteAngebot.next()) {
                 dataAngebot.add(new Angebot(
                         rsLetzteAngebot.getString("angebotsnummer"),
@@ -742,8 +820,8 @@ public class SqlConnector implements ISql {
         String subYear = null;
         String subNumber = null;
         String newNumber = null;
-        DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate ld = LocalDate.parse(datum, dateTf);
+        //DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate ld = LocalDate.parse(datum);
         if (letztesAngebot != null) {
             subYear = letztesAngebot.substring(0, 4);
             if (subYear.equals(String.valueOf(ld.getYear()))) {
@@ -774,6 +852,7 @@ public class SqlConnector implements ISql {
         }
 
         String fullNumber = subYear + "-" + newNumber + "-A";
+        loadDataAngebot(true);
         return fullNumber;
     }
 

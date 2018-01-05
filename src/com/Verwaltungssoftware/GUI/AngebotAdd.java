@@ -40,24 +40,32 @@ public class AngebotAdd {
 
     static Scene kundenInfo, übernahme, posten, summen;
 
-    public static void display() {
-        ISql sql = new SqlConnector();
+    public static void display(GUI_Verwaltungssoftware mainGui) {
+        GUI_Verwaltungssoftware gui = new GUI_Verwaltungssoftware();
+        gui.username = mainGui.username;
+        gui.password = mainGui.password;
+        gui.sql = new SqlConnector(gui.username, gui.password);
+        gui.rechnungT = gui.createTableRechnung();
+        gui.angebotT = gui.createTableAngebot();
+        gui.artikelT = new TableView<>();
+        gui.artikelVB = gui.createTableArtikel();
+        gui.kundenT = new TableView<>();
+        gui.kundenVB = gui.createTableKunde();
         try {
-            sql.loadDataKunde();
+            gui.sql.loadDataKunde();
         } catch (SQLException exc) {
             System.out.println("Fehler beim laden der Kunden: " + exc.getMessage());
         }
         try {
-            sql.loadDataArtikel();
+            gui.sql.loadDataArtikel();
         } catch (SQLException exc) {
             System.out.println("Fehler beim laden der Artikel: " + exc.getMessage());
         }
         try {
-            sql.loadDataAngebot();
+            gui.sql.loadDataAngebot(true);
         } catch (SQLException exc) {
             System.out.println("Fehler beim laden der Angebote: " + exc.getMessage());
         }
-        GUI_Verwaltungssoftware gui = new GUI_Verwaltungssoftware();
         String titleK = "Angebot erstellen: Kundendaten";
         String titleÜ = "Angebot erstellen: Übernahme";
         String titleP = "Angebot erstellen: Posten hinzufügen";
@@ -99,6 +107,11 @@ public class AngebotAdd {
         Button search2 = new Button("Suchen");
         search2.setOnAction(e -> {
             TablePopup.display(gui, "Angebot erstellen: Auswahl des Kunden", gui.kundenT);
+            try {
+                aNRT.setText(gui.sql.generateRandomOfferNumber(ld.toString()));
+            } catch (SQLException exc) {
+                System.out.println(exc.getMessage());
+            }
             kNRT.setText(gui.tempKunde[0]);
             anredeT.setText(gui.tempKunde[1]);
             vornameT.setText(gui.tempKunde[2]);
@@ -204,20 +217,20 @@ public class AngebotAdd {
                 String nummer = aAndR.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer();
                 System.out.println(nummer);
                 try {
-                    sql.loadArtikelFromAngebot(nummer);
+                    gui.sql.loadArtikelFromAngebot(nummer);
                 } catch (SQLException exc) {
                     System.out.println(exc.getMessage());
                 }
 
                 aFromAR.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-                aFromAR.setItems(sql.getDataArtikelInAngebot());
+                aFromAR.setItems(gui.sql.getDataArtikelInAngebot());
                 if (aFromAR.getColumns().isEmpty()) {
                     aFromAR.getColumns().addAll(artikelnummer, bezeichnung, zusatztextTC, einkaufspreis, verkaufspreis, mwst, menge, datumA);
                 }
             }
         });
         aAndR.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        aAndR.setItems(sql.getDataAngebot());
+        aAndR.setItems(gui.sql.getDataAngebot());
         aAndR.getColumns().addAll(angebotsnummer, kunde, datumTC, akzeptiert);
 
         Button add = new Button("Hinzufügen");
@@ -241,8 +254,8 @@ public class AngebotAdd {
         scroll2.setContent(aFromAR);
         scroll2.setPrefSize(320, 180);
 
-        VBox aAndRV = gui.createFilter(aAndR, "Angebot");
-        VBox aFromARV = gui.createFilter(aFromAR, "Artikel");
+        VBox aAndRV = gui.createFilter(aAndR, "Angebot", true);
+        VBox aFromARV = gui.createFilter(aFromAR, gui.sql.getDataArtikelInAngebot());
 
         HBox t1 = new HBox();
         t1.setPadding(new Insets(10));
@@ -306,25 +319,27 @@ public class AngebotAdd {
         angebotEntwurf.setItems(dataNewAngebot);
         angebotEntwurf.getColumns().addAll(artNumEntwurf, bezEntwurf, zusatzEntwurf, ePreisEntwurf, verPreisEntwurf, mwstEntwurf, mengeEntwurf, datumEntwurf);
 
+        //fügt gesamtes Angebot als Vorlage hinzu
         add.setOnAction((ActionEvent) -> {
             dataNewAngebot.clear();
-            for (Artikel a : sql.getDataArtikelInAngebot()) {
+            for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
                 dataNewAngebot.add(a);
-            }   
+            }
         });
 
+        //fügt einzelne Artikel aus bestehenden Angeboten hinzu
         add2.setOnAction((ActionEvent) -> {
             boolean test = false;
             String nummer = aFromAR.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(); //selektiertes Item
             if (dataNewAngebot.isEmpty()) { //wenn neue Liste leer
-                for (Artikel a : sql.getDataArtikelInAngebot()) {
+                for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
                     if (nummer.equals(a.getArtikelnummer())) {
                         dataNewAngebot.add(a);
                         break;
                     }
                 }
             } else {
-                for (Artikel a : sql.getDataArtikelInAngebot()) {
+                for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
                     if (a.getArtikelnummer().equals(nummer)) {
                         for (Artikel b : dataNewAngebot) {
                             if (a.getArtikelnummer().equals(b.getArtikelnummer())) {
@@ -343,7 +358,7 @@ public class AngebotAdd {
         ScrollPane entwurfScroll = new ScrollPane();
         entwurfScroll.setContent(angebotEntwurf);
 
-        VBox entwurfScrollV = gui.createFilterScroll(entwurfScroll);
+        VBox entwurfScrollV = gui.createFilter(angebotEntwurf, dataNewAngebot);
 
         Label artNr = new Label("Artikelnummer");
         Label anzahl = new Label("Anzahl");
@@ -378,6 +393,27 @@ public class AngebotAdd {
             popupStage.setTitle(titleÜ);
         });
         Button add3 = new Button("Hinzufügen");
+        add3.setOnAction(e -> {
+            boolean test = false;
+                try {
+                    gui.sql.loadDataArtikel();
+                } catch (SQLException exc) {
+                    System.out.println(exc.getMessage());
+                }
+                for (Artikel oldA : gui.sql.getDataArtikel()) {
+                    if (oldA.getArtikelnummer().equals(artNrT.getText())) {
+                        for (Artikel newA : dataNewAngebot) {
+                            if(oldA.getArtikelnummer().equals(newA.getArtikelnummer())){
+                                test = true;
+                                break;
+                            }
+                        }
+                        if (test == false) {
+                            dataNewAngebot.add(oldA);
+                        }
+                    }
+                }
+        });
         Button con = new Button("Weiter");
         con.setOnAction(e -> {
             popupStage.setScene(summen);

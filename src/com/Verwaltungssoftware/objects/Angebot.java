@@ -14,7 +14,7 @@ public class Angebot {
         LocalDate aDatum = LocalDate.parse(date);
         angebotsnummer = new SimpleStringProperty(aNummer);
         kunde = new SimpleStringProperty(k);
-        datum = new SimpleStringProperty(aDatum.format(dtf));
+        datum = new SimpleStringProperty(dtf.format(aDatum));
         akzeptiert = new SimpleStringProperty(a);
         //waren = new ArrayList<>();
     }
