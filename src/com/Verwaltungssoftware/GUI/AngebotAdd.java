@@ -5,7 +5,6 @@
  */
 package com.verwaltungssoftware.GUI;
 
-import com.verwaltungssoftware.database.ISql;
 import com.verwaltungssoftware.database.SqlConnector;
 import com.verwaltungssoftware.objects.Angebot;
 import com.verwaltungssoftware.objects.Artikel;

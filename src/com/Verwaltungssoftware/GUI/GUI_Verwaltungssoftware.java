@@ -181,7 +181,6 @@ public class GUI_Verwaltungssoftware extends Application {
         menu.getMenus().addAll(allgemein, kunde, artikel, angebot, rechnung);
         BorderPane pane = new BorderPane();
         pane.setTop(menu);
-        pane.setBottom(null);
         mainScreen = new Scene(pane, 700, 450);
 
         pane.setCenter(kundenVB);
