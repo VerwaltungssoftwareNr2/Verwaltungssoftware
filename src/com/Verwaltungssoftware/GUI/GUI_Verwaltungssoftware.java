@@ -187,6 +187,7 @@ public class GUI_Verwaltungssoftware extends Application {
         tableArtikel.setOnAction(e -> {
             pane.setCenter(artikelVB);
         });
+        pane.setBottom(null);
         tableKunde.setOnAction(e -> pane.setCenter(kundenVB));
         tableAngebot.setOnAction(e -> pane.setCenter(angebotT));
         tableRechnung.setOnAction(e -> pane.setCenter(rechnungT));

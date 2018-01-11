@@ -43,8 +43,10 @@ public class SQLTests{
                 System.out.println("Test fehlgeschlagen. Fehler: "+ ex.getMessage());
             }
             
-            
-            
+            /*sql.safeNewArtikel(aN, bez, z, ePreis, vPreis, mwst, m, d, w);
+            sql.loadDataArtikel();
+            safeNewArtikelTest(sql.getDataArtikel().size(), 1);
+            */
         }
     
     public static void testString(String haben, String soll, String typ){
