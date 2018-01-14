@@ -156,12 +156,12 @@ public class AngebotAdd {
         sumsum.getChildren().addAll(sumL, sumT, searchV);
 
         BorderPane pane = new BorderPane();
-        // pane.setLeft(sumL);
         pane.setCenter(sumsum);
         pane.setBottom(buttons);
         kundenInfo = new Scene(pane, 500, 450); //KUNDENINFO ENDE
 
         TableView<Angebot> aAndR = new TableView();
+        aAndR.setPrefSize(100000, 100000);
         TableColumn angebotsnummer = new TableColumn("Angebotsnummer");
         angebotsnummer.setCellValueFactory(
                 new PropertyValueFactory<>("angebotsnummer"));
@@ -179,6 +179,7 @@ public class AngebotAdd {
                 new PropertyValueFactory<>("akzeptiert"));
 
         TableView<Artikel> aFromAR = new TableView();
+        aFromAR.setPrefSize(100000, 100000);
         TableColumn artikelnummer = new TableColumn("Artikelnummer");
         artikelnummer.setCellValueFactory(
                 new PropertyValueFactory<>("artikelnummer"));
@@ -245,14 +246,7 @@ public class AngebotAdd {
             popupStage.setScene(posten);
             popupStage.setTitle(titleP);
         });
-
-        ScrollPane scroll = new ScrollPane();
-        scroll.setContent(aAndR);
-        scroll.setPrefSize(320, 180);
-        ScrollPane scroll2 = new ScrollPane();
-        scroll2.setContent(aFromAR);
-        scroll2.setPrefSize(320, 180);
-
+     
         VBox aAndRV = gui.createFilter(aAndR, "Angebot", true);
         VBox aFromARV = gui.createFilter(aFromAR, gui.sql.getDataArtikelInAngebot());
 
@@ -327,7 +321,7 @@ public class AngebotAdd {
         });
 
         //fügt einzelne Artikel aus bestehenden Angeboten hinzu
-        add2.setOnAction((ActionEvent) -> {
+     /*   add2.setOnAction((ActionEvent) -> {
             boolean test = false;
             String nummer = aFromAR.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(); //selektiertes Item
             if (dataNewAngebot.isEmpty()) { //wenn neue Liste leer
@@ -352,7 +346,7 @@ public class AngebotAdd {
                     }
                 }
             }
-        });
+        });*/
 
         ScrollPane entwurfScroll = new ScrollPane();
         entwurfScroll.setContent(angebotEntwurf);

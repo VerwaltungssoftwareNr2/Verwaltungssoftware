@@ -10,7 +10,6 @@ import com.verwaltungssoftware.database.SqlConnector;
 import com.verwaltungssoftware.objects.Artikel;
 import com.verwaltungssoftware.objects.Kunde;
 import java.sql.SQLException;
-import java.util.Iterator;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,6 +29,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -57,7 +57,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
+        
         Label benutzer = new Label("Benutzer:");
         Label passwort = new Label("Passwort:");
         //Label welcome = new Label("Willkommen! Bitte loggen sie sich ein.");
@@ -117,7 +117,7 @@ public class GUI_Verwaltungssoftware extends Application {
         grid.setAlignment(Pos.CENTER);
 
         loginScreen = new Scene(grid, 400, 400); //Login screen
-
+        
         MenuBar menu = new MenuBar();
         Menu allgemein = new Menu("Allgemein");
         Menu kunde = new Menu("Kunde");
@@ -199,6 +199,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
     public VBox createTableRechnung() {
         TableView rechnungT = new TableView();
+        rechnungT.setPrefSize(100000, 100000);
 
         TableColumn rechnungsnummer = new TableColumn("Rechnungsnummer");
         rechnungsnummer.setCellValueFactory(
@@ -223,6 +224,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
     public VBox createTableAngebot() {
         TableView angebotT = new TableView();
+        angebotT.setPrefSize(100000, 100000);
 
         TableColumn angebotsnummer = new TableColumn("Angebotsnummer");
         angebotsnummer.setCellValueFactory(
@@ -250,6 +252,8 @@ public class GUI_Verwaltungssoftware extends Application {
     }
 
     public VBox createTableArtikel() {
+        artikelT.setPrefSize(100000, 100000);
+        
         TableColumn artikelnummer = new TableColumn("Artikelnummer");
         artikelnummer.setCellValueFactory(
                 new PropertyValueFactory<>("artikelnummer"));
@@ -296,6 +300,14 @@ public class GUI_Verwaltungssoftware extends Application {
     }
 
     public VBox createTableKunde() {
+        kundenT.setPrefSize(100000, 100000);
+        kundenT.setOnMouseClicked((MouseEvent me) -> {
+            if (me.getClickCount() == 2) {
+                //KundenDetails.display();
+                System.out.println("Was liest du das eigentlich?");
+            }
+            });
+        
         TableColumn kundennummer = new TableColumn("Kundennummer");
         kundennummer.setCellValueFactory(
                 new PropertyValueFactory<>("kundennummer"));
@@ -345,6 +357,7 @@ public class GUI_Verwaltungssoftware extends Application {
     public VBox createFilter(TableView t, String identifier, boolean all) {
         Label filter = new Label("Filter :");
         TextField filterField = new TextField();
+        Button test = new Button("Hinzufügen");
         filterField.setOnKeyReleased((KeyEvent ke) -> {
             try {
                 if (identifier.equals("Kunde")) {
@@ -408,6 +421,7 @@ public class GUI_Verwaltungssoftware extends Application {
     public VBox createFilter(TableView t, ObservableList ol) {
         Label filter = new Label("Filter :");
         TextField filterField = new TextField();
+        Button test = new Button("Hinzufügen");
         filterField.setOnKeyReleased((KeyEvent ke) -> {
             if (filterField.getText().isEmpty()) {
                 t.setItems(ol);

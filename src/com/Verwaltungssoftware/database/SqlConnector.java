@@ -34,8 +34,8 @@ public class SqlConnector implements ISql {
 
     public SqlConnector(String username, String password) {
         this.authentication = false;
-        this.username = username;
-        this.password = password;
+        this.username = "root";
+        this.password = "lucas";
         userInfo = new Properties();
         userInfo.put("user", this.username);
         userInfo.put("password", this.password);

@@ -62,4 +62,33 @@ public class ConfirmBox {
         return bool;
         
     }
+    static void display2(String title, String message){
+        Scene usure;
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle(title);
+        
+        Label text = new Label(message);
+        Button ok = new Button("Okay");
+        ok.setPrefSize(50, 25);
+        
+        ok.setOnAction(e -> {
+             popupStage.close();
+        });
+        
+        HBox buttons = new HBox();
+        buttons.getChildren().addAll(ok);
+        buttons.setPadding(new Insets(10, 10, 10, 10));
+        buttons.setSpacing(8);
+        buttons.setAlignment(Pos.CENTER);
+        
+        BorderPane pane = new BorderPane();
+        pane.setCenter(text);
+        pane.setBottom(buttons);
+        
+        usure = new Scene(pane, 300, 100);
+        popupStage.setScene(usure);
+        popupStage.showAndWait();
+        
+    }
 }
