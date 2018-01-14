@@ -24,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
@@ -84,8 +85,8 @@ public class RechnungsAdd {
         Label straße = new Label("Straße");
         Label plz = new Label("PLZ");
         Label ort = new Label("Ort");
-        Label rabatt = new Label("Rabatt");
         Label datum = new Label("Datum");
+        Label zusatz = new Label("Zusatztext");
 
         TextField anredeT = new TextField();
         TextField aNRT = new TextField();
@@ -95,10 +96,10 @@ public class RechnungsAdd {
         TextField straßeT = new TextField();
         TextField plzT = new TextField();
         TextField ortT = new TextField();
-        TextField rabattT = new TextField();
         DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate ld = LocalDate.now();
         Label datumL = new Label(ld.format(dateTf));
+        TextArea zusatzT = new TextArea();
 
         aNRT.setEditable(false);
         vornameT.setEditable(false);
@@ -106,7 +107,6 @@ public class RechnungsAdd {
         straßeT.setEditable(false);
         plzT.setEditable(false);
         ortT.setEditable(false);
-        rabattT.setEditable(false);
 
         Button search2 = new Button("Suchen");
         search2.setOnAction(e -> {
@@ -123,12 +123,15 @@ public class RechnungsAdd {
             straßeT.setText(gui.tempKunde[4]);
             plzT.setText(gui.tempKunde[5]);
             ortT.setText(gui.tempKunde[6]);
+
         });
 
         TextField space = new TextField();
         space.setVisible(false);
+        TextField space2 = new TextField();
+        space2.setVisible(false);
         VBox searchV = new VBox();
-        searchV.getChildren().addAll(space, search2);
+        searchV.getChildren().addAll(space, space2,  search2);
         searchV.setPadding(new Insets(10));
         searchV.setSpacing(8);
 
@@ -141,12 +144,12 @@ public class RechnungsAdd {
         });
 
         VBox sumL = new VBox();
-        sumL.getChildren().addAll(aNr, kNr, anredeL, vorname, name, straße, plz, ort, rabatt, datum);
+        sumL.getChildren().addAll(aNr, datum, kNr, anredeL, vorname, name, straße, plz, ort, zusatz);
         sumL.setPadding(new Insets(10));
         sumL.setSpacing(16);
 
         VBox sumT = new VBox();
-        sumT.getChildren().addAll(aNRT, kNRT, anredeT, vornameT, nameT, straßeT, plzT, ortT, rabattT, datumL);
+        sumT.getChildren().addAll(aNRT, datumL, kNRT, anredeT, vornameT, nameT, straßeT, plzT, ortT, zusatzT);
         sumT.setPadding(new Insets(10));
         sumT.setSpacing(8);
 
@@ -160,12 +163,12 @@ public class RechnungsAdd {
         sumsum.getChildren().addAll(sumL, sumT, searchV);
 
         BorderPane pane = new BorderPane();
-        // pane.setLeft(sumL);
         pane.setCenter(sumsum);
         pane.setBottom(buttons);
-        kundenInfo = new Scene(pane, 500, 450); //KUNDENINFO ENDE
-        
+        kundenInfo = new Scene(pane, 800, 450); //KUNDENINFO ENDE
+
         TableView<Angebot> aAndR = new TableView();
+        aAndR.setPrefSize(100000, 100000);
         TableColumn rechnungsnummer = new TableColumn("Rechnungsnummer");
         rechnungsnummer.setCellValueFactory(
                 new PropertyValueFactory<>("angebotsnummer"));
@@ -183,6 +186,7 @@ public class RechnungsAdd {
                 new PropertyValueFactory<>("akzeptiert"));
 
         TableView<Artikel> aFromAR = new TableView();
+        aFromAR.setPrefSize(100000, 100000);
         TableColumn artikelnummer = new TableColumn("Artikelnummer");
         artikelnummer.setCellValueFactory(
                 new PropertyValueFactory<>("artikelnummer"));
@@ -249,16 +253,9 @@ public class RechnungsAdd {
             popupStage.setScene(posten);
             popupStage.setTitle(titleP);
         });
-
-        ScrollPane scroll = new ScrollPane();
-        scroll.setContent(aAndR);
-        scroll.setPrefSize(320, 180);
-        ScrollPane scroll2 = new ScrollPane();
-        scroll2.setContent(aFromAR);
-        scroll2.setPrefSize(320, 180);
-
-        VBox aAndRV = gui.createFilter(aAndR, "Rechnung", true);
-        VBox aFromARV = gui.createFilter(aFromAR, gui.sql.getDataArtikelInAngebot());
+     
+        VBox aAndRV = gui.createFilterAngebotRechnung(aAndR, "Rechnung", true, add);
+        VBox aFromARV = gui.createFilterAngebotRechnung(aFromAR, gui.sql.getDataArtikelInAngebot(), add2);
 
         HBox t1 = new HBox();
         t1.setPadding(new Insets(10));
@@ -266,8 +263,8 @@ public class RechnungsAdd {
         HBox t2 = new HBox();
         t2.setPadding(new Insets(10));
         t2.setSpacing(8);
-        t1.getChildren().addAll(aAndRV, add);
-        t2.getChildren().addAll(aFromARV, add2);
+        t1.getChildren().addAll(aAndRV);
+        t2.getChildren().addAll(aFromARV);
 
         VBox tables = new VBox();
         tables.getChildren().addAll(t1, t2);
@@ -283,12 +280,13 @@ public class RechnungsAdd {
         pane2.setCenter(tables);
         pane2.setBottom(buttons2);
 
-        übernahme = new Scene(pane2, 500, 500); //ÜBERNAHME ENDE
+        übernahme = new Scene(pane2, 850, 500); //ÜBERNAHME ENDE
 
         ObservableList<Artikel> dataNewRechnung = FXCollections.observableArrayList();
         TableView<Artikel> rechnungEntwurf = new TableView();
-        TableColumn billNumEntwurf = new TableColumn("Artikelnummer");
-        billNumEntwurf.setCellValueFactory(
+        rechnungEntwurf.setPrefSize(100000, 100000);
+        TableColumn artNumEntwurf = new TableColumn("Artikelnummer");
+        artNumEntwurf.setCellValueFactory(
                 new PropertyValueFactory<>("artikelnummer"));
 
         TableColumn bezEntwurf = new TableColumn("Bezeichnung");
@@ -320,8 +318,9 @@ public class RechnungsAdd {
                 new PropertyValueFactory<>("datum"));
         rechnungEntwurf.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         rechnungEntwurf.setItems(dataNewRechnung);
-        rechnungEntwurf.getColumns().addAll(billNumEntwurf, bezEntwurf, zusatzEntwurf, ePreisEntwurf, verPreisEntwurf, mwstEntwurf, mengeEntwurf, datumEntwurf);
+        rechnungEntwurf.getColumns().addAll(artNumEntwurf, bezEntwurf, zusatzEntwurf, ePreisEntwurf, verPreisEntwurf, mwstEntwurf, mengeEntwurf, datumEntwurf);
 
+        //fügt gesamte Rechnung als Vorlage hinzu
         add.setOnAction((ActionEvent) -> {
             dataNewRechnung.clear();
             for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
@@ -329,6 +328,7 @@ public class RechnungsAdd {
             }
         });
 
+        //fügt einzelne Artikel aus bestehenden Rechnungen hinzu
         add2.setOnAction((ActionEvent) -> {
             boolean test = false;
             String nummer = aFromAR.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(); //selektiertes Item
@@ -356,14 +356,11 @@ public class RechnungsAdd {
             }
         });
 
-        ScrollPane entwurfScroll = new ScrollPane();
-        entwurfScroll.setContent(rechnungEntwurf);
-
-        VBox entwurfScrollV = gui.createFilter(rechnungEntwurf, dataNewRechnung);
+        VBox entwurfV = gui.createFilter(rechnungEntwurf, dataNewRechnung);
 
         Label artNr = new Label("Artikelnummer");
         Label anzahl = new Label("Anzahl");
-        Label bezeichnungL = new Label("Bezeichnung");
+        Label bezeichnung2 = new Label("Bezeichnung");
         Label nettopreis = new Label("Nettopreis");
         Label summe = new Label("Summe");
         Label rabatt2 = new Label("Rabatt in %");
@@ -371,22 +368,22 @@ public class RechnungsAdd {
 
         CheckBox alternativ = new CheckBox("Alternativ");
 
-        TextField artNr2 = new TextField();
-        TextField anzahl2 = new TextField();
-        TextField bezeichnung2 = new TextField();
-        TextField nettopreis2 = new TextField();
-        TextField summe2 = new TextField();
-        TextField rabatt3 = new TextField();
-        TextField zusatztext2 = new TextField();
+        TextField artNrT = new TextField();
+        TextField anzahlT = new TextField();
+        TextField bezeichnungT = new TextField();
+        TextField nettopreisT = new TextField();
+        TextField summeT = new TextField();
+        TextField rabattT = new TextField();
+        TextField zusatztextT = new TextField();
 
         Button search = new Button("Suchen");
         search.setOnAction(e -> {
             TablePopup.displayArtikel(gui, "Rechnung erstellen: Auswahl des Artikels", gui.artikelT);
-            artNr2.setText(gui.tempArtikel[0]);
-            bezeichnung2.setText(gui.tempArtikel[1]);
-            nettopreis2.setText(gui.tempArtikel[2]);
-            anzahl2.setPromptText("Aktueller Bestand: " + gui.tempArtikel[3]);
-            zusatztext2.setText(gui.tempArtikel[4]);
+            artNrT.setText(gui.tempArtikel[0]);
+            bezeichnungT.setText(gui.tempArtikel[1]);
+            nettopreisT.setText(gui.tempArtikel[2]);
+            anzahlT.setPromptText("Aktueller Bestand: " + gui.tempArtikel[3]);
+            zusatztextT.setText(gui.tempArtikel[4]);
         });
         Button back2 = new Button("Zurück");
         back2.setOnAction(e -> {
@@ -394,6 +391,7 @@ public class RechnungsAdd {
             popupStage.setTitle(titleÜ);
         });
         Button add3 = new Button("Hinzufügen");
+        Button delete = new Button("Entfernen");
         add3.setOnAction(e -> {
             boolean test = false;
                 try {
@@ -401,16 +399,16 @@ public class RechnungsAdd {
                 } catch (SQLException exc) {
                     System.out.println(exc.getMessage());
                 }
-                for (Artikel oldR : gui.sql.getDataArtikel()) {
-                    if (oldR.getArtikelnummer().equals(artNr2.getText())) {
-                        for (Artikel newR : dataNewRechnung) {
-                            if(oldR.getArtikelnummer().equals(newR.getArtikelnummer())){
+                for (Artikel oldA : gui.sql.getDataArtikel()) {
+                    if (oldA.getArtikelnummer().equals(artNrT.getText())) {
+                        for (Artikel newA : dataNewRechnung) {
+                            if(oldA.getArtikelnummer().equals(newA.getArtikelnummer())){
                                 test = true;
                                 break;
                             }
                         }
                         if (test == false) {
-                            dataNewRechnung.add(oldR);
+                            dataNewRechnung.add(oldA);
                         }
                     }
                 }
@@ -422,12 +420,12 @@ public class RechnungsAdd {
         });
 
         VBox labelsLeft = new VBox();
-        labelsLeft.getChildren().addAll(artNr, bezeichnungL, nettopreis, summe);
+        labelsLeft.getChildren().addAll(artNr, bezeichnung2, nettopreis, summe);
         labelsLeft.setPadding(new Insets(10));
         labelsLeft.setSpacing(16);
 
         VBox textLeft = new VBox();
-        textLeft.getChildren().addAll(artNr2, bezeichnung2, nettopreis2, summe2);
+        textLeft.getChildren().addAll(artNrT, bezeichnungT, nettopreisT, summeT);
         textLeft.setPadding(new Insets(10));
         textLeft.setSpacing(8);
 
@@ -437,7 +435,7 @@ public class RechnungsAdd {
         labelsRight.setSpacing(16);
 
         VBox textRight = new VBox();
-        textRight.getChildren().addAll(search, anzahl2, rabatt3, zusatztext2);
+        textRight.getChildren().addAll(search, anzahlT, rabattT, zusatztextT);
         textRight.setPadding(new Insets(10));
         textRight.setSpacing(8);
 
@@ -445,24 +443,24 @@ public class RechnungsAdd {
         leftRight.getChildren().addAll(labelsLeft, textLeft, labelsRight, textRight);
 
         HBox buttons3 = new HBox();
-        buttons3.getChildren().addAll(back2, add3, con);
+        buttons3.getChildren().addAll(back2, add3, delete, con);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
 
         VBox tablePosten = new VBox();
-        tablePosten.getChildren().addAll(entwurfScrollV, leftRight);
+        tablePosten.getChildren().addAll(entwurfV, leftRight);
 
         BorderPane pane3 = new BorderPane();
         pane3.setCenter(tablePosten);
         pane3.setBottom(buttons3);
 
-        posten = new Scene(pane3, 700, 500); //ENDE POSTEN
+        posten = new Scene(pane3, 850, 500); //ENDE POSTEN
 
-        Label summe3 = new Label("Summe");
+        Label summe3 = new Label("Nettobetrag");
         Label mwtStr = new Label("Mehrwertsteuer");
-        Label bruttopreis = new Label("Bruttopreis");
-        Label gültig = new Label("Gültig bis");
+        Label bruttopreis = new Label("Bruttobetrag");
+        Label gültig = new Label("Zahlungsziel");
         Label fakturatext = new Label("Fakturatext");
         Label skontotage = new Label("Skontotage");
         Label skonto = new Label("Skonto in Prozent");
@@ -491,7 +489,7 @@ public class RechnungsAdd {
         Button pdf = new Button("In PDF-Datei umwandeln");
         Button done = new Button("Abschließen");
         done.setOnAction(e -> {
-            boolean test = ConfirmBox.display("Rechnungserstellung abschließen", "Möchten sie die Rechnung wirklich erstellen?", 300, 100);
+            boolean test = ConfirmBox.display("Rechnungserstellung abschließen", "Möchten sie die Rechnung wirklich erstellen?", 400, 100);
             if (test == true) {
                 popupStage.close();
             } else {
