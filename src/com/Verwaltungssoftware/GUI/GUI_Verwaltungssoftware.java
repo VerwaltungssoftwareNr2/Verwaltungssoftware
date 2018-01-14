@@ -200,6 +200,11 @@ public class GUI_Verwaltungssoftware extends Application {
     public VBox createTableRechnung() {
         TableView rechnungT = new TableView();
         rechnungT.setPrefSize(100000, 100000);
+        rechnungT.setOnMouseClicked((MouseEvent me) -> {
+            if (me.getClickCount() == 2) {
+                RechnungDetails.display();
+            }
+            });
 
         TableColumn rechnungsnummer = new TableColumn("Rechnungsnummer");
         rechnungsnummer.setCellValueFactory(
@@ -225,6 +230,12 @@ public class GUI_Verwaltungssoftware extends Application {
     public VBox createTableAngebot() {
         TableView angebotT = new TableView();
         angebotT.setPrefSize(100000, 100000);
+        angebotT.setOnMouseClicked((MouseEvent me) -> {
+            if (me.getClickCount() == 2) {
+                AngebotDetails.display();
+            }
+            });
+        
 
         TableColumn angebotsnummer = new TableColumn("Angebotsnummer");
         angebotsnummer.setCellValueFactory(

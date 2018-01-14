@@ -33,7 +33,7 @@ public class ArtikelDetails {
         Stage popupStage = new Stage();
 
         popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setTitle("Artikel hinzufügen");
+        popupStage.setTitle("Artikelinformationen");
 
         Label name = new Label("Bezeichnung");
         Label ztext = new Label("Zusatztext");
