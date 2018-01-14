@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 public class ConfirmBox {
     static boolean bool;
     
-    static boolean display(String title, String message){
+    static boolean display(String title, String message, int first, int second){
         Scene usure;
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
@@ -55,7 +55,7 @@ public class ConfirmBox {
         pane.setCenter(text);
         pane.setBottom(buttons);
         
-        usure = new Scene(pane, 300, 100);
+        usure = new Scene(pane, first, second);
         popupStage.setScene(usure);
         popupStage.showAndWait();
         

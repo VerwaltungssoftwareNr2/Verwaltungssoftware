@@ -139,13 +139,13 @@ public class GUI_Verwaltungssoftware extends Application {
         //Lambda mit einem Ausdruck
         changeUser.setOnAction(e -> primaryStage.setScene(loginScreen));
         close.setOnAction(e -> {
-            boolean test = ConfirmBox.display("Anwendung schließen", "Wollen Sie die Anwendung wirklich verlassen?");
+            boolean test = ConfirmBox.display("Anwendung schließen", "Wollen Sie die Anwendung wirklich verlassen?", 300, 100);
             if (test == true) {
                 primaryStage.close();
             }
         });
         primaryStage.setOnCloseRequest(e -> {
-            boolean test = ConfirmBox.display("Anwendung schließen", "Wollen Sie die Anwendung wirklich verlassen?");
+            boolean test = ConfirmBox.display("Anwendung schließen", "Wollen Sie die Anwendung wirklich verlassen?", 300, 100);
             if (test == true) {
                 primaryStage.close();
             } else {
@@ -181,7 +181,7 @@ public class GUI_Verwaltungssoftware extends Application {
         menu.getMenus().addAll(allgemein, kunde, artikel, angebot, rechnung);
         BorderPane pane = new BorderPane();
         pane.setTop(menu);
-        mainScreen = new Scene(pane, 700, 450);
+        mainScreen = new Scene(pane, 1000, 600);
 
         pane.setCenter(kundenVB);
         tableArtikel.setOnAction(e -> {
@@ -253,6 +253,11 @@ public class GUI_Verwaltungssoftware extends Application {
 
     public VBox createTableArtikel() {
         artikelT.setPrefSize(100000, 100000);
+        artikelT.setOnMouseClicked((MouseEvent me) -> {
+            if (me.getClickCount() == 2) {
+                ArtikelDetails.display(sql);
+            }
+            });
         
         TableColumn artikelnummer = new TableColumn("Artikelnummer");
         artikelnummer.setCellValueFactory(
@@ -303,8 +308,7 @@ public class GUI_Verwaltungssoftware extends Application {
         kundenT.setPrefSize(100000, 100000);
         kundenT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                //KundenDetails.display();
-                System.out.println("Was liest du das eigentlich?");
+                KundeDetails.display();
             }
             });
         
@@ -407,6 +411,59 @@ public class GUI_Verwaltungssoftware extends Application {
         fAndT.getChildren().addAll(filterBox, t);
         return fAndT;
     }
+    
+     public VBox createFilterAngebotRechnung(TableView t, String identifier, boolean all, Button add) {
+        Label filter = new Label("Filter :");
+        TextField filterField = new TextField();
+        filterField.setOnKeyReleased((KeyEvent ke) -> {
+            try {
+                if (identifier.equals("Kunde")) {
+                    if (filterField.getText().isEmpty()) {
+                        sql.loadDataKunde();
+                        t.setItems(sql.getDataKunde());
+                    } else {
+                        sql.loadFilteredKunden(filterField.getText());
+                        t.setItems(sql.getDataFilteredKunde());
+                    }
+                } else if (identifier.equals("Artikel")) {
+                    if (filterField.getText().isEmpty()) {
+                        sql.loadDataArtikel();
+                        t.setItems(sql.getDataArtikel());
+                    } else {
+                        sql.loadFilteredArtikel(filterField.getText());
+                        t.setItems(sql.getDataFilteredArtikel());
+                    }
+                } else if (identifier.equals("Angebot")) {
+                    if (filterField.getText().isEmpty()) {
+                        sql.loadDataAngebot(all);
+                        t.setItems(sql.getDataAngebot());
+                    } else {
+                        sql.loadFilteredAngebote(filterField.getText(), all);
+                        t.setItems(sql.getDataFilteredAngebot());
+                    }
+                } else if (identifier.equals("Rechnung")) {
+                    if (filterField.getText().isEmpty()) {
+                        sql.loadDataRechnung(all);
+                        t.setItems(sql.getDataRechnung());
+                    } else {
+                        sql.loadFilteredRechnung(filterField.getText(), all);
+                        t.setItems(sql.getDataFilteredRechnung());
+                    }
+                }
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage() + "käse");
+            }
+        });
+        HBox filterBox = new HBox();
+        filterBox.setPadding(new Insets(5, 5, 5, 5));
+        filterBox.setSpacing(8);
+        filterBox.setAlignment(Pos.CENTER);
+        filterBox.getChildren().addAll(filter, filterField, add);
+
+        VBox fAndT = new VBox();
+        fAndT.getChildren().addAll(filterBox, t);
+        return fAndT;
+    }
 
     public ObservableList<Artikel> filterList(ObservableList<Artikel> inputList, String filter){
         ObservableList outputList = FXCollections.observableArrayList();
@@ -435,6 +492,28 @@ public class GUI_Verwaltungssoftware extends Application {
         filterBox.setSpacing(8);
         filterBox.setAlignment(Pos.CENTER);
         filterBox.getChildren().addAll(filter, filterField);
+
+        VBox fAndT = new VBox();
+        fAndT.getChildren().addAll(filterBox, t);
+        return fAndT;
+    }
+    
+    public VBox createFilterAngebotRechnung(TableView t, ObservableList ol, Button add) {
+        Label filter = new Label("Filter :");
+        TextField filterField = new TextField();
+        filterField.setOnKeyReleased((KeyEvent ke) -> {
+            if (filterField.getText().isEmpty()) {
+                t.setItems(ol);
+            } else {
+                ObservableList<Artikel> newList = filterList(ol, filterField.getText());
+                t.setItems(newList);
+            }
+        });
+        HBox filterBox = new HBox();
+        filterBox.setPadding(new Insets(5, 5, 5, 5));
+        filterBox.setSpacing(8);
+        filterBox.setAlignment(Pos.CENTER);
+        filterBox.getChildren().addAll(filter, filterField, add);
 
         VBox fAndT = new VBox();
         fAndT.getChildren().addAll(filterBox, t);

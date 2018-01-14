@@ -491,7 +491,7 @@ public class RechnungsAdd {
         Button pdf = new Button("In PDF-Datei umwandeln");
         Button done = new Button("Abschließen");
         done.setOnAction(e -> {
-            boolean test = ConfirmBox.display("Rechnungserstellung abschließen", "Möchten sie die Rechnung wirklich erstellen?");
+            boolean test = ConfirmBox.display("Rechnungserstellung abschließen", "Möchten sie die Rechnung wirklich erstellen?", 300, 100);
             if (test == true) {
                 popupStage.close();
             } else {

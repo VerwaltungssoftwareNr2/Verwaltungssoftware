@@ -33,7 +33,7 @@ public class SQLTests{
             testString("root", sql.getUsername(), "getUsername"); //getUsername()
             testString("lucas", sql.getPassword(), "getPassword"); //getPassword()
             try{
-            testString("", sql.generateRandomOfferNumber(ld.toString()),"RandomOfferNumber"); //generateRandomOfferNumber() CHECK WIE EINE NUMMER AUSSIEHT
+            testString("2018-00001-A", sql.generateRandomOfferNumber(ld.toString()),"RandomOfferNumber"); //generateRandomOfferNumber() CHECK WIE EINE NUMMER AUSSIEHT
             }catch(Exception ex){
                 System.out.println("Test fehlgeschlagen. Fehler: "+ ex.getMessage());
             }

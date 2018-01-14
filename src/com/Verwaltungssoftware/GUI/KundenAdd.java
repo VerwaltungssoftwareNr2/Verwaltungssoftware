@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -78,7 +79,7 @@ public class KundenAdd {
         ortT.setMaxWidth(1000);
         TextField landT = new TextField();
         landT.setMaxWidth(1000);
-        TextField zusatzT = new TextField();
+        TextArea zusatzT = new TextArea();
         zusatzT.setMaxWidth(1000);
         
         Button confirm = new Button("Bestätigen");
@@ -105,7 +106,7 @@ public class KundenAdd {
         border.setCenter(right);
         border.setBottom(hbox);
         
-        kundeninfoP = new Scene(border, 350, 350);
+        kundeninfoP = new Scene(border, 450, 500);
         
         Label unternehmen = new Label("Name des Unternehmen");
         Label anrede2 = new Label("Anrede");
@@ -138,7 +139,7 @@ public class KundenAdd {
         ort2T.setMaxWidth(1000);
         TextField land2T = new TextField();
         land2T.setMaxWidth(1000);
-        TextField zusatz2T = new TextField();
+        TextArea zusatz2T = new TextArea();
         zusatz2T.setMaxWidth(1000);
         
         Button confirm2 = new Button("Bestätigen");
@@ -165,7 +166,7 @@ public class KundenAdd {
         border2.setCenter(right2);
         border2.setBottom(hbox2);
         
-        kundeninfoG = new Scene(border2, 450, 400);
+        kundeninfoG = new Scene(border2, 500, 500);
         
         popupStage.setScene(kundenauswahl);
         popupStage.show();

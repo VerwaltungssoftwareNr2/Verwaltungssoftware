@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
@@ -83,6 +84,7 @@ public class AngebotAdd {
         Label plz = new Label("PLZ");
         Label ort = new Label("Ort");
         Label datum = new Label("Datum");
+        Label zusatz = new Label("Zusatztext");
 
         TextField anredeT = new TextField();
         TextField aNRT = new TextField();
@@ -95,6 +97,7 @@ public class AngebotAdd {
         DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate ld = LocalDate.now();
         Label datumL = new Label(ld.format(dateTf));
+        TextArea zusatzT = new TextArea();
 
         aNRT.setEditable(false);
         vornameT.setEditable(false);
@@ -123,8 +126,10 @@ public class AngebotAdd {
 
         TextField space = new TextField();
         space.setVisible(false);
+        TextField space2 = new TextField();
+        space2.setVisible(false);
         VBox searchV = new VBox();
-        searchV.getChildren().addAll(space, search2);
+        searchV.getChildren().addAll(space, space2,  search2);
         searchV.setPadding(new Insets(10));
         searchV.setSpacing(8);
 
@@ -137,12 +142,12 @@ public class AngebotAdd {
         });
 
         VBox sumL = new VBox();
-        sumL.getChildren().addAll(aNr, kNr, anredeL, vorname, name, straße, plz, ort, datum);
+        sumL.getChildren().addAll(aNr, datum, kNr, anredeL, vorname, name, straße, plz, ort, zusatz);
         sumL.setPadding(new Insets(10));
         sumL.setSpacing(16);
 
         VBox sumT = new VBox();
-        sumT.getChildren().addAll(aNRT, kNRT, anredeT, vornameT, nameT, straßeT, plzT, ortT, datumL);
+        sumT.getChildren().addAll(aNRT, datumL, kNRT, anredeT, vornameT, nameT, straßeT, plzT, ortT, zusatzT);
         sumT.setPadding(new Insets(10));
         sumT.setSpacing(8);
 
@@ -158,7 +163,7 @@ public class AngebotAdd {
         BorderPane pane = new BorderPane();
         pane.setCenter(sumsum);
         pane.setBottom(buttons);
-        kundenInfo = new Scene(pane, 500, 450); //KUNDENINFO ENDE
+        kundenInfo = new Scene(pane, 800, 450); //KUNDENINFO ENDE
 
         TableView<Angebot> aAndR = new TableView();
         aAndR.setPrefSize(100000, 100000);
@@ -247,8 +252,8 @@ public class AngebotAdd {
             popupStage.setTitle(titleP);
         });
      
-        VBox aAndRV = gui.createFilter(aAndR, "Angebot", true);
-        VBox aFromARV = gui.createFilter(aFromAR, gui.sql.getDataArtikelInAngebot());
+        VBox aAndRV = gui.createFilterAngebotRechnung(aAndR, "Angebot", true, add);
+        VBox aFromARV = gui.createFilterAngebotRechnung(aFromAR, gui.sql.getDataArtikelInAngebot(), add2);
 
         HBox t1 = new HBox();
         t1.setPadding(new Insets(10));
@@ -256,8 +261,8 @@ public class AngebotAdd {
         HBox t2 = new HBox();
         t2.setPadding(new Insets(10));
         t2.setSpacing(8);
-        t1.getChildren().addAll(aAndRV, add);
-        t2.getChildren().addAll(aFromARV, add2);
+        t1.getChildren().addAll(aAndRV);
+        t2.getChildren().addAll(aFromARV);
 
         VBox tables = new VBox();
         tables.getChildren().addAll(t1, t2);
@@ -273,10 +278,11 @@ public class AngebotAdd {
         pane2.setCenter(tables);
         pane2.setBottom(buttons2);
 
-        übernahme = new Scene(pane2, 500, 500); //ÜBERNAHME ENDE
+        übernahme = new Scene(pane2, 850, 500); //ÜBERNAHME ENDE
 
         ObservableList<Artikel> dataNewAngebot = FXCollections.observableArrayList();
         TableView<Artikel> angebotEntwurf = new TableView();
+        angebotEntwurf.setPrefSize(100000, 100000);
         TableColumn artNumEntwurf = new TableColumn("Artikelnummer");
         artNumEntwurf.setCellValueFactory(
                 new PropertyValueFactory<>("artikelnummer"));
@@ -321,7 +327,7 @@ public class AngebotAdd {
         });
 
         //fügt einzelne Artikel aus bestehenden Angeboten hinzu
-     /*   add2.setOnAction((ActionEvent) -> {
+        add2.setOnAction((ActionEvent) -> {
             boolean test = false;
             String nummer = aFromAR.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(); //selektiertes Item
             if (dataNewAngebot.isEmpty()) { //wenn neue Liste leer
@@ -346,12 +352,9 @@ public class AngebotAdd {
                     }
                 }
             }
-        });*/
+        });
 
-        ScrollPane entwurfScroll = new ScrollPane();
-        entwurfScroll.setContent(angebotEntwurf);
-
-        VBox entwurfScrollV = gui.createFilter(angebotEntwurf, dataNewAngebot);
+        VBox entwurfV = gui.createFilter(angebotEntwurf, dataNewAngebot);
 
         Label artNr = new Label("Artikelnummer");
         Label anzahl = new Label("Anzahl");
@@ -386,6 +389,7 @@ public class AngebotAdd {
             popupStage.setTitle(titleÜ);
         });
         Button add3 = new Button("Hinzufügen");
+        Button delete = new Button("Entfernen");
         add3.setOnAction(e -> {
             boolean test = false;
                 try {
@@ -437,19 +441,19 @@ public class AngebotAdd {
         leftRight.getChildren().addAll(labelsLeft, textLeft, labelsRight, textRight);
 
         HBox buttons3 = new HBox();
-        buttons3.getChildren().addAll(back2, add3, con);
+        buttons3.getChildren().addAll(back2, add3, delete, con);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
 
         VBox tablePosten = new VBox();
-        tablePosten.getChildren().addAll(entwurfScrollV, leftRight);
+        tablePosten.getChildren().addAll(entwurfV, leftRight);
 
         BorderPane pane3 = new BorderPane();
         pane3.setCenter(tablePosten);
         pane3.setBottom(buttons3);
 
-        posten = new Scene(pane3, 700, 500); //ENDE POSTEN
+        posten = new Scene(pane3, 850, 500); //ENDE POSTEN
 
         Label summe3 = new Label("Nettobetrag");
         Label mwtStr = new Label("Mehrwertsteuer");
@@ -483,7 +487,7 @@ public class AngebotAdd {
         Button pdf = new Button("In PDF-Datei umwandeln");
         Button done = new Button("Abschließen");
         done.setOnAction(e -> {
-            boolean test = ConfirmBox.display("Angebotserstellung abschließen", "Möchten sie das Angebot wirklich erstellen?");
+            boolean test = ConfirmBox.display("Angebotserstellung abschließen", "Möchten sie das Angebot wirklich erstellen?", 400, 100);
             if (test == true) {
                 popupStage.close();
             } else {

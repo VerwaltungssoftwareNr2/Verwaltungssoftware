@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -49,11 +50,17 @@ public class ArtikelAdd {
         //gruppe.setValue("Steine");
 
         TextField nameT = new TextField();
-        TextField ztextT = new TextField();
+        nameT.setMaxWidth(1000);
+        TextArea ztextT = new TextArea();
+        ztextT.setMaxWidth(1000);
         TextField artNrT = new TextField();
+        artNrT.setMaxWidth(1000);
         TextField preisET = new TextField();
+        preisET.setMaxWidth(1000);
         TextField preisVT = new TextField();
+        preisVT.setMaxWidth(1000);
         TextField bestandT = new TextField();
+        bestandT.setMaxWidth(1000);
 
         String n = "19";
         String s = "7";
@@ -83,8 +90,8 @@ public class ArtikelAdd {
         right.setPadding(new Insets(10));
         right.setSpacing(8);
 
-        left.getChildren().addAll(name, ztext, artNr, gruppeL, preis, preisV, bestand, mehrwertSt);
-        right.getChildren().addAll(nameT, ztextT, artNrT, gruppe, preisET, preisVT, bestandT, mehrwertC);
+        left.getChildren().addAll(name, artNr, gruppeL, preis, preisV, bestand, mehrwertSt, ztext);
+        right.getChildren().addAll(nameT, artNrT, gruppe, preisET, preisVT, bestandT, mehrwertC, ztextT);
 
         HBox bottom = new HBox();
         bottom.getChildren().addAll(cancel, confirm);
@@ -97,7 +104,7 @@ public class ArtikelAdd {
         pane.setCenter(right);
         pane.setBottom(bottom);
 
-        artikelInfo = new Scene(pane, 350, 350);
+        artikelInfo = new Scene(pane, 450, 450);
         popupStage.setScene(artikelInfo);
         popupStage.show();
     }
