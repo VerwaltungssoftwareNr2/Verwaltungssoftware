@@ -65,6 +65,7 @@ public class GUI_Verwaltungssoftware extends Application {
         TextField user = new TextField();
         PasswordField pass = new PasswordField();
         Button submit = new Button("Anmelden");
+        submit.setDefaultButton(true);
         user.setPromptText("Benutzername");
         pass.setPromptText("Passwort");
 
@@ -74,6 +75,7 @@ public class GUI_Verwaltungssoftware extends Application {
                 this.username = user.getText();
                 this.password = pass.getText();
                 primaryStage.setScene(mainScreen);
+                pass.clear();
                 try {
                     sql.loadDataKunde();
                 } catch (SQLException exc) {

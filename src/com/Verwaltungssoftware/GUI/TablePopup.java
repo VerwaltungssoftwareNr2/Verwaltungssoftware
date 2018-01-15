@@ -15,6 +15,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -53,7 +54,9 @@ public class TablePopup {
         buttons.setAlignment(Pos.CENTER);
         BorderPane pane = new BorderPane();
         
-        pane.setCenter(box);
+        VBox filterBox = gui.createFilter(box, "Kunde", true);
+        
+        pane.setCenter(filterBox);
         pane.setBottom(buttons);
         
         tablePopup = new Scene(pane, 600, 500);
@@ -88,7 +91,9 @@ public class TablePopup {
         buttons.setAlignment(Pos.CENTER);
         BorderPane pane = new BorderPane();
         
-        pane.setCenter(box);
+        VBox filterBox = gui.createFilter(box, "Artikel", true);
+        
+        pane.setCenter(filterBox);
         pane.setBottom(buttons);
         
         tablePopup = new Scene(pane, 600, 500);
