@@ -129,7 +129,7 @@ public class AngebotAdd {
         TextField space2 = new TextField();
         space2.setVisible(false);
         VBox searchV = new VBox();
-        searchV.getChildren().addAll(space, space2,  search2);
+        searchV.getChildren().addAll(space, space2, search2);
         searchV.setPadding(new Insets(10));
         searchV.setSpacing(8);
 
@@ -251,7 +251,7 @@ public class AngebotAdd {
             popupStage.setScene(posten);
             popupStage.setTitle(titleP);
         });
-     
+
         VBox aAndRV = gui.createFilterAngebotRechnung(aAndR, "Angebot", true, add);
         VBox aFromARV = gui.createFilterAngebotRechnung(aFromAR, gui.sql.getDataArtikelInAngebot(), add2);
 
@@ -390,36 +390,38 @@ public class AngebotAdd {
         });
         Button add3 = new Button("Hinzufügen");
         Button delete = new Button("Entfernen");
-        
+
         delete.setOnAction(e -> {
-           String item = angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer();
-           for(Artikel art: dataNewAngebot){
-               if(item.equals(art.getArtikelnummer())){
-                   dataNewAngebot.remove(art);
-                   break;
-               }
-           }
+            String item = angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer();
+            for (Artikel art : dataNewAngebot) {
+                if (item != null) {
+                    if (item.equals(art.getArtikelnummer())) {
+                        dataNewAngebot.remove(art);
+                        break;
+                    }
+                }
+            }
         });
         add3.setOnAction(e -> {
             boolean test = false;
-                try {
-                    gui.sql.loadDataArtikel();
-                } catch (SQLException exc) {
-                    System.out.println(exc.getMessage());
-                }
-                for (Artikel oldA : gui.sql.getDataArtikel()) {
-                    if (oldA.getArtikelnummer().equals(artNrT.getText())) {
-                        for (Artikel newA : dataNewAngebot) {
-                            if(oldA.getArtikelnummer().equals(newA.getArtikelnummer())){
-                                test = true;
-                                break;
-                            }
-                        }
-                        if (test == false) {
-                            dataNewAngebot.add(oldA);
+            try {
+                gui.sql.loadDataArtikel();
+            } catch (SQLException exc) {
+                System.out.println(exc.getMessage());
+            }
+            for (Artikel oldA : gui.sql.getDataArtikel()) {
+                if (oldA.getArtikelnummer().equals(artNrT.getText())) {
+                    for (Artikel newA : dataNewAngebot) {
+                        if (oldA.getArtikelnummer().equals(newA.getArtikelnummer())) {
+                            test = true;
+                            break;
                         }
                     }
+                    if (test == false) {
+                        dataNewAngebot.add(oldA);
+                    }
                 }
+            }
         });
         Button con = new Button("Weiter");
         con.setOnAction(e -> {
