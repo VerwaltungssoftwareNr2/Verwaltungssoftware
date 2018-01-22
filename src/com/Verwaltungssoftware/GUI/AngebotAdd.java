@@ -390,6 +390,16 @@ public class AngebotAdd {
         });
         Button add3 = new Button("Hinzufügen");
         Button delete = new Button("Entfernen");
+        
+        delete.setOnAction(e -> {
+           String item = angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer();
+           for(Artikel art: dataNewAngebot){
+               if(item.equals(art.getArtikelnummer())){
+                   dataNewAngebot.remove(art);
+                   break;
+               }
+           }
+        });
         add3.setOnAction(e -> {
             boolean test = false;
                 try {

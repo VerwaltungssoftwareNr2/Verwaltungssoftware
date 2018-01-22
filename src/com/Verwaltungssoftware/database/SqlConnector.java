@@ -16,26 +16,30 @@ import java.util.Properties;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+/**
+ * Implementiert alle Methoden zum laden und speichern der Daten aus der Datenbank
+ * @author Marcel
+ */
 public class SqlConnector implements ISql {
 
     Properties userInfo;
     private boolean authentication;
     private String username;
     private String password;
-    private ObservableList<Artikel> dataArtikel;
-    private ObservableList<Kunde> dataKunde;
-    private ObservableList<Angebot> dataAngebot;
-    private ObservableList<Angebot> dataRechnung;
-    private ObservableList<Artikel> dataArtikelInAngebot;
-    private ObservableList<Kunde> dataFilteredKunde;
-    private ObservableList<Angebot> dataFilteredAngebot;
-    private ObservableList<Angebot> dataFilteredRechnung;
-    private ObservableList<Artikel> dataFilteredArtikel;
+    final private ObservableList<Artikel> dataArtikel;
+    final private ObservableList<Kunde> dataKunde;
+    final private ObservableList<Angebot> dataAngebot;
+    final private ObservableList<Angebot> dataRechnung;
+    final private ObservableList<Artikel> dataArtikelInAngebot;
+    final private ObservableList<Kunde> dataFilteredKunde;
+    final private ObservableList<Angebot> dataFilteredAngebot;
+    final private ObservableList<Angebot> dataFilteredRechnung;
+    final private ObservableList<Artikel> dataFilteredArtikel;
 
     public SqlConnector(String username, String password) {
         this.authentication = false;
-        this.username = "root";
-        this.password = "lucas";
+        this.username = username;
+        this.password = password;
         userInfo = new Properties();
         userInfo.put("user", this.username);
         userInfo.put("password", this.password);
@@ -469,8 +473,7 @@ public class SqlConnector implements ISql {
         }
     }
 
-    @Override
-    public void safeNewPlz(String p, String o, String l) throws SQLException {
+    private void safeNewPlz(String p, String o, String l) throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtExistPlz = myConn.createStatement();
