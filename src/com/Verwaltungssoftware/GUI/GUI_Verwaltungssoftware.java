@@ -79,21 +79,25 @@ public class GUI_Verwaltungssoftware extends Application {
                 try {
                     sql.loadDataKunde();
                 } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Kunden");
                     System.out.println("Fehler beim Laden der Kunden: " + exc.getMessage());
                 }
                 try {
                     sql.loadDataArtikel();
                 } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
                     System.out.println("Fehler beim Laden der Artikel: " + exc.getMessage());
                 }
                 try {
                     sql.loadDataAngebot(false);
                 } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Angebote");
                     System.out.println("Fehler beim Laden der Angebote: " + exc.getMessage());
                 }
                 try {
                     sql.loadDataRechnung(false);
                 } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Rechnungen");
                     System.out.println("Fehler beim Laden der Angebote: " + exc.getMessage());
                 }
                 this.rechnungT = createTableRechnung();
@@ -411,6 +415,7 @@ public class GUI_Verwaltungssoftware extends Application {
                     }
                 }
             } catch (SQLException ex) {
+                ConfirmBox.display2("Fehler", "Fehler beim Filtern");
                 System.out.println(ex.getMessage() + "käse");
             }
         });
@@ -464,6 +469,7 @@ public class GUI_Verwaltungssoftware extends Application {
                     }
                 }
             } catch (SQLException ex) {
+                ConfirmBox.display2("Fehler", "Fehler beim Filtern");
                 System.out.println(ex.getMessage() + "käse");
             }
         });

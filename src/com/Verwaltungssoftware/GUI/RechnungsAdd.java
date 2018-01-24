@@ -56,16 +56,19 @@ public class RechnungsAdd {
         try {
             gui.sql.loadDataKunde();
         } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Kunden");
             System.out.println("Fehler beim laden der Kunden: " + exc.getMessage());
         }
         try {
             gui.sql.loadDataArtikel();
         } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
             System.out.println("Fehler beim laden der Artikel: " + exc.getMessage());
         }
         try {
             gui.sql.loadDataRechnung(true);
         } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Rechnungen");
             System.out.println("Fehler beim laden der Rechnungen: " + exc.getMessage());
         }
         String titleK = "Rechnung erstellen: Kundendaten";
@@ -114,6 +117,7 @@ public class RechnungsAdd {
             try {
                 aNRT.setText(gui.sql.generateRandomBillNumber(ld.toString()));
             } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Erstellen einer Rechnungsnummer");
                 System.out.println(exc.getMessage());
             }
             kNRT.setText(gui.tempKunde[0]);
@@ -226,6 +230,7 @@ public class RechnungsAdd {
                 try {
                     gui.sql.loadArtikelFromAngebot(nummer);
                 } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel des Angebotes");
                     System.out.println(exc.getMessage());
                 }
 
@@ -410,6 +415,7 @@ public class RechnungsAdd {
             try {
                 gui.sql.loadDataArtikel();
             } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
                 System.out.println(exc.getMessage());
             }
             for (Artikel oldA : gui.sql.getDataArtikel()) {
