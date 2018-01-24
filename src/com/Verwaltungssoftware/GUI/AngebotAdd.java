@@ -399,7 +399,7 @@ public class AngebotAdd {
                         dataNewAngebot.remove(art);
                         break;
                     }
-                }
+                }   
             }
         });
         add3.setOnAction(e -> {
