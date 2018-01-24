@@ -62,7 +62,7 @@ public class ConfirmBox {
         return bool;
         
     }
-    static void display2(String title, String message){
+   public static void display2(String title, String message){
         Scene usure;
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
@@ -86,7 +86,7 @@ public class ConfirmBox {
         pane.setCenter(text);
         pane.setBottom(buttons);
         
-        usure = new Scene(pane, 300, 100);
+        usure = new Scene(pane, 400, 100);
         popupStage.setScene(usure);
         popupStage.showAndWait();
         

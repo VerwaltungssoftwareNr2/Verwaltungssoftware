@@ -78,6 +78,7 @@ public class ArtikelAdd {
                 sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(), bestandT.getText(), ld.toString(), null);
                 sql.loadDataArtikel();
             } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Erstellen der Artikel");
                 System.out.println(exc.getMessage());
             }
             popupStage.close();

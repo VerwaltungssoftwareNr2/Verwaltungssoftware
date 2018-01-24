@@ -1,5 +1,6 @@
 package com.verwaltungssoftware.database;
 
+import com.verwaltungssoftware.GUI.ConfirmBox;
 import com.verwaltungssoftware.objects.Kunde;
 import com.verwaltungssoftware.objects.Artikel;
 import com.verwaltungssoftware.objects.Angebot;
@@ -47,6 +48,7 @@ public class SqlConnector implements ISql {
         try(Connection testConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)){
             this.authentication = true;
         } catch(SQLException exc){
+            ConfirmBox.display2("Fehler", "Login nicht erfolgreich. Überprüfen sie Username und Passwort!");
             System.out.println(exc.getMessage() + "tryConn");
         }
         dataArtikel = FXCollections.observableArrayList();

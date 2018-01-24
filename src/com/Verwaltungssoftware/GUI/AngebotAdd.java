@@ -54,16 +54,19 @@ public class AngebotAdd {
         try {
             gui.sql.loadDataKunde();
         } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Kunden");
             System.out.println("Fehler beim laden der Kunden: " + exc.getMessage());
         }
         try {
             gui.sql.loadDataArtikel();
         } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
             System.out.println("Fehler beim laden der Artikel: " + exc.getMessage());
         }
         try {
             gui.sql.loadDataAngebot(true);
         } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Angebote");
             System.out.println("Fehler beim laden der Angebote: " + exc.getMessage());
         }
         String titleK = "Angebot erstellen: Kundendaten";
@@ -112,6 +115,7 @@ public class AngebotAdd {
             try {
                 aNRT.setText(gui.sql.generateRandomOfferNumber(ld.toString()));
             } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Erstellen einer Angebotsnummer");
                 System.out.println(exc.getMessage());
             }
             kNRT.setText(gui.tempKunde[0]);
@@ -224,6 +228,7 @@ public class AngebotAdd {
                 try {
                     gui.sql.loadArtikelFromAngebot(nummer);
                 } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden des Angebots");
                     System.out.println(exc.getMessage());
                 }
 
@@ -407,6 +412,7 @@ public class AngebotAdd {
             try {
                 gui.sql.loadDataArtikel();
             } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
                 System.out.println(exc.getMessage());
             }
             for (Artikel oldA : gui.sql.getDataArtikel()) {
