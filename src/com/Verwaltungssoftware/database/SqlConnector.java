@@ -18,13 +18,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- * Implementiert alle Methoden zum laden und speichern der Daten aus der Datenbank
+ * Implementiert alle Methoden zum laden und speichern der Daten aus der
+ * Datenbank
+ *
  * @author Marcel
  */
 public class SqlConnector implements ISql {
 
     Properties userInfo;
     private boolean authentication;
+    private boolean checkUserConfig;
     private String username;
     private String password;
     final private ObservableList<Artikel> dataArtikel;
@@ -45,9 +48,9 @@ public class SqlConnector implements ISql {
         userInfo.put("user", this.username);
         userInfo.put("password", this.password);
         //Test noch in extra private Methode
-        try(Connection testConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)){
+        try (Connection testConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)) {
             this.authentication = true;
-        } catch(SQLException exc){
+        } catch (SQLException exc) {
             ConfirmBox.display2("Fehler", "Login nicht erfolgreich. Überprüfen sie Username und Passwort!");
             System.out.println(exc.getMessage() + "tryConn");
         }
@@ -63,20 +66,25 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public boolean getAuthentication(){
+    public boolean getCheckUserConfig() {
+        return this.checkUserConfig;
+    }
+
+    @Override
+    public boolean getAuthentication() {
         return this.authentication;
     }
-    
+
     @Override
-    public String getUsername(){
+    public String getUsername() {
         return this.username;
     }
-    
+
     @Override
-    public String getPassword(){
+    public String getPassword() {
         return this.password;
     }
-    
+
     @Override
     public ObservableList<Artikel> getDataArtikel() {
         return dataArtikel;
@@ -122,9 +130,94 @@ public class SqlConnector implements ISql {
         return dataFilteredArtikel;
     }
 
-    //statements und resultssets schließen
     @Override
-    public void loadDataArtikel() throws SQLException {
+    public void checkUserConfig() throws SQLException {
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtCheck = myConn.createStatement();
+                ResultSet rsCheck = stmtCheck.executeQuery("SELECT table_name "
+                        + "FROM information_schema.tables "
+                        + "WHERE table_schema = 'verwaltungssoftware' "
+                        + "AND table_name = 'user_config';")) {
+
+            String tempString = null;
+            while (rsCheck.next()) {
+                tempString = rsCheck.getString("table_name");
+            }
+            if (tempString != null) {
+                checkUserConfig = true;
+            }
+
+        }
+    }
+
+    @Override
+    public void createUserConfig(User user) throws SQLException {
+        String insertString = "insert into User_config(BID, bankName, kontoNr, blz, steuerNummer, ustId, company, street, town, country, companyNo,"
+                + "preName, lastName, aStreet, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtCreate = myConn.createStatement();
+                PreparedStatement stmtInsert = myConn.prepareStatement(insertString)) {
+            
+            System.out.println("vorher");
+            stmtCreate.executeUpdate("CREATE TABLE User_config("
+                    + "    BID INTEGER PRIMARY KEY,"
+                    + "    bankName VARCHAR(50) NOT NULL,"
+                    + "    kontoNr VARCHAR(50) NOT NULL,"
+                    + "    blz VARCHAR(50) NOT NULL,"
+                    + "    steuerNummer VARCHAR(50) NOT NULL,"
+                    + "    ustId VARCHAR(50) NOT NULL,"
+                    + "    company VARCHAR(50) NOT NULL,"
+                    + "    street VARCHAR(50) NOT NULL,"
+                    + "    town VARCHAR(50) NOT NULL,"
+                    + "    country VARCHAR(50) NOT NULL,"
+                    + "    companyNo VARCHAR(50) NOT NULL,"
+                    + "    preName VARCHAR(50) NOT NULL,"
+                    + "    lastName VARCHAR(50) NOT NULL,"
+                    + "    aStreet VARCHAR(50) NOT NULL,"
+                    + "    aPlz VARCHAR(50) NOT NULL,"
+                    + "    aLand VARCHAR(50) NOT NULL,"
+                    + "    aOrt VARCHAR(50) NOT NULL,"
+                    + "    aTel VARCHAR(50) NOT NULL,"
+                    + "    aFax VARCHAR(50) NOT NULL,"
+                    + "    aBankName VARCHAR(50) NOT NULL,"
+                    + "    aBic VARCHAR(50) NOT NULL,"
+                    + "    aIban VARCHAR(50) NOT NULL,"
+                    + "    aAmt VARCHAR(50) NOT NULL,"
+                    + "    aHrb VARCHAR(50) NOT NULL);");
+            System.out.println("nachher");
+            stmtInsert.setInt(1, 1);
+            stmtInsert.setString(2, user.getBankName());
+            stmtInsert.setString(3, user.getKontoNr());
+            stmtInsert.setString(4, user.getBlz());
+            stmtInsert.setString(5, user.getSteuerNummer());
+            stmtInsert.setString(6, user.getUstId());
+            stmtInsert.setString(7, user.getCompany());
+            stmtInsert.setString(8, user.getStreet());
+            stmtInsert.setString(9, user.getTown());
+            stmtInsert.setString(10, user.getCountry());
+            stmtInsert.setString(11, user.getCompanyNo());
+            stmtInsert.setString(12, user.getPreName());
+            stmtInsert.setString(13, user.getLastName());
+            stmtInsert.setString(14, user.getaStreet());
+            stmtInsert.setString(15, user.getaPlz());
+            stmtInsert.setString(16, user.getaLand());
+            stmtInsert.setString(17, user.getaOrt());
+            stmtInsert.setString(18, user.getaTel());
+            stmtInsert.setString(19, user.getaFax());
+            stmtInsert.setString(20, user.getaBankName());
+            stmtInsert.setString(21, user.getaBic());
+            stmtInsert.setString(22, user.getaIban());
+            stmtInsert.setString(23, user.getaAmt());
+            stmtInsert.setString(24, user.getaHrb());
+
+            stmtInsert.executeUpdate();
+        }
+    }
+
+
+@Override
+        public void loadDataArtikel() throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtArtikel = myConn.createStatement();
@@ -153,7 +246,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadDataKunde() throws SQLException {
+        public void loadDataKunde() throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtKunde = myConn.createStatement();
@@ -179,12 +272,12 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadDataAngebot(boolean all) throws SQLException {
+        public void loadDataAngebot(boolean all) throws SQLException {
 
         String stringAngebot = null;
-        if(all){
+        if (all) {
             stringAngebot = "select * from angebot order by angebotsnummer asc;";
-        } else{
+        } else {
             stringAngebot = "select * from angebot where angebotsnummer like '%A%' order by angebotsnummer asc;";
         }
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -213,11 +306,11 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadDataRechnung(boolean all) throws SQLException {
+        public void loadDataRechnung(boolean all) throws SQLException {
         String stringRechnung = null;
-        if(all){
+        if (all) {
             stringRechnung = "select * from angebot order by angebotsnummer asc;";
-        } else{
+        } else {
             stringRechnung = "select * from angebot where angebotsnummer like '%R%' order by angebotsnummer asc;";
         }
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -257,7 +350,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadArtikelFromAngebot(String nummer) throws SQLException {
+        public void loadArtikelFromAngebot(String nummer) throws SQLException {
         String searchArtikelString = "select * from artikel join artikelinangebot as aia on artikel.artikelnummer = aia.artikel where aia.angebot = '" + nummer + "' ;";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -287,7 +380,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadFilteredKunden(String filter) throws SQLException {
+        public void loadFilteredKunden(String filter) throws SQLException {
         String searchKundeString = "select * from kunde join postleitzahl on kunde.postleitzahl = postleitzahl.plz where vorname like ? or name like ? or kundennummer like ? or "
                 + "straße like ? or kunde.postleitzahl like ? or ort like ? or land like ?;";
         ResultSet rsSearchKunde = null;
@@ -329,7 +422,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadFilteredAngebote(String filter, boolean all) throws SQLException {
+        public void loadFilteredAngebote(String filter, boolean all) throws SQLException {
         String searchAngebotString = null;
         if (all) {
             searchAngebotString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ? or akzeptiert like ?;";
@@ -375,7 +468,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadFilteredRechnung(String filter, boolean all) throws SQLException {
+        public void loadFilteredRechnung(String filter, boolean all) throws SQLException {
         String searchRechnungString = null;
         if (all) {
             searchRechnungString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ?;";
@@ -412,7 +505,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void loadFilteredArtikel(String filter) throws SQLException {
+        public void loadFilteredArtikel(String filter) throws SQLException {
         String searchArtikelString = "select * from artikel where artikelnummer like ? or bezeichnung like ? or warengruppe like ?;";
         ResultSet rsSearchArtikel = null;
 
@@ -451,7 +544,11 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewKunde(String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException {
+        public void safeNewKunde(String a, String vn,
+            String n, String s,
+            String h, String z,
+            String p, String o,
+            String l) throws SQLException {
         String addStringKunde = "insert into kunde(kundennummer, anrede, vorname, name, straße, hausnummer, zusatz, postleitzahl) values(?, ?, ?, ?, ?, ?, ?, ?);";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -501,7 +598,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewArtikel(String aN, String bez, String z, String ePreis, String vPreis, String mwst, String m, String d, String w) throws SQLException {
+        public void safeNewArtikel(String aN, String bez, String z, String ePreis, String vPreis, String mwst, String m, String d, String w) throws SQLException {
         String[] parameter = {aN, bez, z, ePreis, vPreis, mwst, m, d, w};
         String addStringArtikel = "insert into artikel(artikelnummer, bezeichnung, zusatztext, einkaufspreis, verkaufspreis, mwst, bestand, datum, warengruppe) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
@@ -518,7 +615,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewAngebot(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException {
+        public void safeNewAngebot(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException {
 
         Statement stmtCheckKunde = null;
         ResultSet rsCheckKunde = null;
@@ -586,7 +683,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewRechnung(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException {
+        public void safeNewRechnung(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException {
 
         Statement stmtCheckKunde = null;
         ResultSet rsCheckKunde = null;
@@ -655,7 +752,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt, double r) throws SQLException {
+        public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt, double r) throws SQLException {
         String addStringArtikelInAngebot = "insert into artikelinangebot(angebot, artikel, menge, alternativ, rabatt) values(?, ?, ?, ?, ?);";
         String checkMengeString = "select menge from artikel join angebot on artikel.artikelnummer = angebot.artikel where angebot.artikel = ?";
         ResultSet rsCheckMenge = null;
@@ -692,7 +789,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void updateKunde(String attr, String id, String eingabe) throws SQLException {
+        public void updateKunde(String attr, String id, String eingabe) throws SQLException {
         String updateKundeString = "update kunde set ? = ? where kundennummer = ?";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -708,7 +805,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void updateArtikel(String attr, String id, String eingabe) throws SQLException {
+        public void updateArtikel(String attr, String id, String eingabe) throws SQLException {
         String updateArtikelString = "update artikel set ? = ? where artikelnummer = ?";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);

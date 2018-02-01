@@ -3,12 +3,15 @@ package com.verwaltungssoftware.database;
 import com.verwaltungssoftware.objects.Angebot;
 import com.verwaltungssoftware.objects.Artikel;
 import com.verwaltungssoftware.objects.Kunde;
+import com.verwaltungssoftware.objects.User;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javafx.collections.ObservableList;
 
 public interface ISql {
 
+    public boolean getCheckUserConfig();
+    
     public boolean getAuthentication();
 
     public String getUsername();
@@ -186,4 +189,7 @@ public interface ISql {
      */
     public void loadFilteredArtikel(String filter) throws SQLException;
 
+    public void checkUserConfig() throws SQLException;
+    
+    public void createUserConfig(User user) throws SQLException;  
 }

@@ -68,6 +68,7 @@ public class GUI_Verwaltungssoftware extends Application {
         submit.setDefaultButton(true);
         user.setPromptText("Benutzername");
         pass.setPromptText("Passwort");
+                
 
         submit.setOnAction((ActionEvent event) -> {
             this.sql = new SqlConnector(user.getText(), pass.getText());
@@ -76,29 +77,30 @@ public class GUI_Verwaltungssoftware extends Application {
                 this.password = pass.getText();
                 primaryStage.setScene(mainScreen);
                 pass.clear();
+                try{
+                    sql.checkUserConfig();
+                } catch(SQLException exc){
+                    ConfirmBox.display2("Fehler", "Fehler beim Überprüfen der Unternehmenskonfiguration");
+                }
                 try {
                     sql.loadDataKunde();
                 } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Laden der Kunden");
-                    System.out.println("Fehler beim Laden der Kunden: " + exc.getMessage());
                 }
                 try {
                     sql.loadDataArtikel();
                 } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
-                    System.out.println("Fehler beim Laden der Artikel: " + exc.getMessage());
                 }
                 try {
                     sql.loadDataAngebot(false);
                 } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Laden der Angebote");
-                    System.out.println("Fehler beim Laden der Angebote: " + exc.getMessage());
                 }
                 try {
                     sql.loadDataRechnung(false);
                 } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Laden der Rechnungen");
-                    System.out.println("Fehler beim Laden der Angebote: " + exc.getMessage());
                 }
                 this.rechnungT = createTableRechnung();
                 this.angebotT = createTableAngebot();
@@ -106,6 +108,9 @@ public class GUI_Verwaltungssoftware extends Application {
                 this.artikelVB = createTableArtikel();
                 this.kundenT = new TableView<>();
                 this.kundenVB = createTableKunde();
+                if(!sql.getCheckUserConfig()){
+                    InfoBox.display(sql);
+                }
             }
         });
         GridPane grid = new GridPane();
@@ -139,7 +144,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
         //Lambda mit "mehreren" Ausdrücken
         infoChange.setOnAction(e -> {
-            InfoBox.display();
+            InfoBox.display(sql);
         });
         //passChange.setOnAction(e -> PasswordChange.display());
         //Lambda mit einem Ausdruck

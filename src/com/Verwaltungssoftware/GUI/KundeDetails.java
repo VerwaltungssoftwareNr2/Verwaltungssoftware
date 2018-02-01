@@ -5,7 +5,6 @@
  */
 package com.verwaltungssoftware.GUI;
 
-import static com.verwaltungssoftware.GUI.KundenAdd.kundenauswahl;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
