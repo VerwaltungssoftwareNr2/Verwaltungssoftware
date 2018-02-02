@@ -619,20 +619,20 @@ public class AngebotAdd {
                     if (a.getAlternative() != null) {
                         if (a.getAlternative().equals("0") || a.getAlternative().equals("false")) {
                             verkaufsPreis = Double.parseDouble(a.getVerkaufspreis());
-                            m = Double.parseDouble(a.getMengeTemp());
-                            if (a.getRabattmenge() == null) {
+                            m = Double.valueOf(a.getMengeTemp());
+                            if (a.getRabattTemp() == null) {
                                 gesamtpreis = verkaufsPreis * m;
                             } else { //wenn Rabatt besteht
-                                gesamtpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattmenge()) / 100);
+                                gesamtpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattTemp()) / 100);
                             }
                         } else if (a.getAlternative().equals("1") || a.getAlternative().equals("true")) { //wenn Artikel alternativ ist
                             gesamtpreis = 0;
                             verkaufsPreis = Double.parseDouble(a.getVerkaufspreis());
                             m = Double.parseDouble(a.getMengeTemp());
-                            if (a.getRabattmenge() == null) {
+                            if (a.getRabattTemp() == null) {
                                 alternativpreis = verkaufsPreis * m;
                             } else { //wenn Rabatt besteht
-                                alternativpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattmenge()) / 100);
+                                alternativpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattTemp()) / 100);
                             }
                         }
                     }

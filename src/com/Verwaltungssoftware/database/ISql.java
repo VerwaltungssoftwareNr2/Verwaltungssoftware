@@ -11,12 +11,14 @@ import javafx.collections.ObservableList;
 public interface ISql {
 
     public boolean getCheckUserConfig();
-    
+
     public boolean getAuthentication();
 
     public String getUsername();
 
     public String getPassword();
+
+    public ObservableList<String> getDataWarengruppe();
 
     public ObservableList<Artikel> getDataArtikel();
 
@@ -54,12 +56,16 @@ public interface ISql {
      */
     public String generateRandomBillNumber(String datum) throws SQLException;
 
+    public void loadDataWarengruppe() throws SQLException;
+
     /**
      * Lädt alle vorhandenen Artikel der Datenbank
      *
      * @throws SQLException
      */
     public void loadDataArtikel() throws SQLException;
+    
+    public Artikel loadDataArtikel(String artNummer) throws SQLException;
 
     /**
      * Lädt alle vorhandenen Kunden der Datenbank
@@ -68,6 +74,8 @@ public interface ISql {
      */
     public void loadDataKunde() throws SQLException;
 
+    public Kunde loadDataKunde(String kNummer) throws SQLException;
+
     /**
      * Lädt alle vorhandenen Angebote der Datenbank
      *
@@ -75,6 +83,8 @@ public interface ISql {
      * @throws SQLException
      */
     public void loadDataAngebot(boolean all) throws SQLException;
+
+    public Angebot loadDataAngebot(String aNummer) throws SQLException;
 
     /**
      * Lädt alle vorhandenen Rechnungen der Datenbank
@@ -92,8 +102,13 @@ public interface ISql {
      */
     public void loadArtikelFromAngebot(String nummer) throws SQLException;
 
+    public void deleteKunde(String kNummer) throws SQLException;
+
+    public void deleteAngebot(String aNummer) throws SQLException;
+
     /**
      * Erstellt neuen Kunden in der Datenbank
+     *
      * @param a - Anrede
      * @param vn - Vorname
      * @param n - Nachname
@@ -107,8 +122,10 @@ public interface ISql {
      */
     public void safeNewKunde(String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException;
 
+    public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException;
     /**
      * Erstellt neues Artikel in der Datenbank
+     *
      * @param aN - Artikelnummer
      * @param bez - Bezeichnung
      * @param z - Zusatz
@@ -118,80 +135,87 @@ public interface ISql {
      * @param m - Bestand
      * @param d - Datum
      * @param w - Warengruppe
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void safeNewArtikel(String aN, String bez, String z, String ePreis, String vPreis, String mwst, String m, String d, String w) throws SQLException;
 
     /**
      * Erstellt neues Angebot in der Datenbank
-     * 
-     * @throws SQLException 
+     *
+     * @throws SQLException
      */
     public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
-    int zZ, int skontoT) throws SQLException;
+            int zZ, int skontoT) throws SQLException;
 
     /**
      * Erstellt neue Rechnung in der Datenbank
+     *
      * @param k - Kunde
      * @param d - Datum
      * @param ak - akzeptiert
      * @param art - ArrayList mit allen Artikeln
      * @param m - Menge der Artikel im Rechnung
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void safeNewRechnung(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException;
 
     /**
      * Speichert einen Artikel in ein Angebot
+     *
      * @param angebot
      * @param artikel
      * @param menge
      * @param alt
      * @param r
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt, double r) throws SQLException;
-    
+
     public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt) throws SQLException;
 
-    public void updateKunde(String attr, String id, String eingabe) throws SQLException;
+    //public void updateKunde(String attr, String id, String eingabe) throws SQLException;
 
     public void updateArtikelVerkaufsPreis(String id, String eingabe) throws SQLException;
-    
+
     public void updateArtikelNummer(String oldId, String newId) throws SQLException;
 
     public User loadUser() throws SQLException;
+
     /**
      * Lädt alle Angebote die dem Filter entsprechen
+     *
      * @param filter - String um Angebote zu filtern
      * @param all - wenn false dann auch Rechnungen mitladen
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void loadFilteredAngebote(String filter, boolean all) throws SQLException;
 
     /**
      * Lädt alle Rechnungen die dem Filter entsprechen
+     *
      * @param filter - String um Angebote zu filtern
      * @param all - wenn false dann auch Angebote mitladen
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void loadFilteredRechnung(String filter, boolean all) throws SQLException;
 
     /**
      * Lädt alle Kunden die dem Filter entsprechen
+     *
      * @param filter - String um Kunden zu filtern
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void loadFilteredKunden(String filter) throws SQLException;
 
     /**
      * Lädt alle Artikel die dem Filter entsprechen
+     *
      * @param filter - String um Artikel zu filtern
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void loadFilteredArtikel(String filter) throws SQLException;
 
     public void checkUserConfig() throws SQLException;
-    
-    public void createUserConfig(User user) throws SQLException;  
+
+    public void createUserConfig(User user) throws SQLException;
 }

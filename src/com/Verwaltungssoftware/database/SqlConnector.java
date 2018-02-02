@@ -31,6 +31,7 @@ public class SqlConnector implements ISql {
     private boolean checkUserConfig;
     private String username;
     private String password;
+    final private ObservableList<String> dataWarengruppe;
     final private ObservableList<Artikel> dataArtikel;
     final private ObservableList<Kunde> dataKunde;
     final private ObservableList<Angebot> dataAngebot;
@@ -55,6 +56,7 @@ public class SqlConnector implements ISql {
             ConfirmBox.display2("Fehler", "Login nicht erfolgreich. Überprüfen sie Username und Passwort!");
             System.out.println(exc.getMessage() + "tryConn");
         }
+        dataWarengruppe = FXCollections.observableArrayList();
         dataArtikel = FXCollections.observableArrayList();
         dataKunde = FXCollections.observableArrayList();
         dataAngebot = FXCollections.observableArrayList();
@@ -84,6 +86,11 @@ public class SqlConnector implements ISql {
     @Override
     public String getPassword() {
         return this.password;
+    }
+
+    @Override
+    public ObservableList<String> getDataWarengruppe() {
+        return dataWarengruppe;
     }
 
     @Override
@@ -254,6 +261,20 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public void loadDataWarengruppe() throws SQLException {
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtWarengruppe = myConn.createStatement();
+                ResultSet rsWarengruppe = stmtWarengruppe.executeQuery("select * from warengruppe")) {
+
+            dataWarengruppe.clear();
+            while (rsWarengruppe.next()) {
+                dataWarengruppe.add(rsWarengruppe.getString("bezeichnung"));
+            }
+
+        }
+    }
+
+    @Override
     public void loadDataArtikel() throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -285,6 +306,37 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public Artikel loadDataArtikel(String artNummer) throws SQLException {
+        Artikel artikel = null;
+        String artString = "select * from artikel where artikelnummer = ?;";
+        ResultSet rsArtikel = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtArtikel = myConn.prepareStatement(artString)) {
+
+            stmtArtikel.setString(1, artNummer);
+            rsArtikel = stmtArtikel.executeQuery();
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate ld = null;
+            while (rsArtikel.next()) {
+                ld = LocalDate.parse(rsArtikel.getString("Datum"));
+                artikel = new Artikel(
+                        rsArtikel.getString("Artikelnummer"),
+                        rsArtikel.getString("Bezeichnung"),
+                        rsArtikel.getString("Zusatztext"),
+                        rsArtikel.getString("Einkaufspreis"),
+                        rsArtikel.getString("Verkaufspreis"),
+                        rsArtikel.getString("Mwst"),
+                        rsArtikel.getString("Bestand"),
+                        ld.format(dtf),
+                        "0",
+                        null,
+                        rsArtikel.getString("Warengruppe"));
+            }
+        }
+        return artikel;
+    }
+
+    @Override
     public void loadDataKunde() throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -301,6 +353,7 @@ public class SqlConnector implements ISql {
                         rsKunde.getString("name"),
                         rsKunde.getString("straße"),
                         rsKunde.getString("hausnummer"),
+                        rsKunde.getString("zusatz"),
                         rsKunde.getString("plz"),
                         rsKunde.getString("ort"),
                         rsKunde.getString("land")));
@@ -308,6 +361,29 @@ public class SqlConnector implements ISql {
         } catch (SQLException exc) {
             throw exc;
         }
+    }
+
+    @Override
+    public Kunde loadDataKunde(String kNummer) throws SQLException {
+        Kunde kunde = null;
+        ResultSet rsKunde = null;
+        String searchString = "select * from kunde join postleitzahl on kunde.postleitzahl = postleitzahl.plz where kundennummer = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtKunde = myConn.prepareStatement(searchString)) {
+
+            stmtKunde.setString(1, kNummer);
+            rsKunde = stmtKunde.executeQuery();
+            while (rsKunde.next()) {
+                kunde = new Kunde(kNummer, rsKunde.getString("anrede"), rsKunde.getString("vorname"), rsKunde.getString("name"), 
+                        rsKunde.getString("straße"), rsKunde.getString("hausnummer"), rsKunde.getString("zusatz"),
+                        rsKunde.getString("plz"), rsKunde.getString("ort"), rsKunde.getString("land"));
+            }
+        } finally {
+            if (rsKunde != null) {
+                rsKunde.close();
+            }
+        }
+        return kunde;
     }
 
     @Override
@@ -355,9 +431,56 @@ public class SqlConnector implements ISql {
                             rsAngebot.getString("Fakturatext")));
                 }
             }
-        } catch (SQLException exc) {
-            throw exc;
         }
+    }
+
+    @Override
+    public Angebot loadDataAngebot(String aNummer) throws SQLException {
+        Angebot angebot = null;
+        String stringAngebot = "select * from angebot where angebotsnummer = ?;";
+        ResultSet rsAngebot = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtAngebot = myConn.prepareStatement(stringAngebot)) {
+
+            stmtAngebot.setString(1, aNummer);
+            rsAngebot = stmtAngebot.executeQuery();
+            while (rsAngebot.next()) {
+                if (rsAngebot.getString("akzeptiert").equals("0")) {
+                    angebot = new Angebot(
+                            rsAngebot.getString("angebotsnummer"),
+                            rsAngebot.getString("kunde"),
+                            rsAngebot.getString("datum"),
+                            "noch ausstehend/nein",
+                            rsAngebot.getDouble("Nettobetrag"),
+                            rsAngebot.getDouble("Bruttobetrag"),
+                            rsAngebot.getDouble("Mehrwertsteuer"),
+                            rsAngebot.getDouble("Skontobetrag"),
+                            rsAngebot.getDouble("SkontoProzent"),
+                            rsAngebot.getInt("Zahlungsziel"),
+                            rsAngebot.getInt("Skontotage"),
+                            rsAngebot.getString("Fakturatext"));
+                } else {
+                    angebot = new Angebot(
+                            rsAngebot.getString("angebotsnummer"),
+                            rsAngebot.getString("kunde"),
+                            rsAngebot.getString("datum"),
+                            "Ja/Rechnung erstellt",
+                            rsAngebot.getDouble("Nettobetrag"),
+                            rsAngebot.getDouble("Bruttobetrag"),
+                            rsAngebot.getDouble("Mehrwertsteuer"),
+                            rsAngebot.getDouble("Skontobetrag"),
+                            rsAngebot.getDouble("SkontoProzent"),
+                            rsAngebot.getInt("Zahlungsziel"),
+                            rsAngebot.getInt("Skontotage"),
+                            rsAngebot.getString("Fakturatext"));
+                }
+            }
+        } finally {
+            if (rsAngebot != null) {
+                rsAngebot.close();
+            }
+        }
+        return angebot;
     }
 
     @Override
@@ -473,6 +596,7 @@ public class SqlConnector implements ISql {
                         rsSearchKunde.getString("Name"),
                         rsSearchKunde.getString("Straße"),
                         rsSearchKunde.getString("Hausnummer"),
+                        rsSearchKunde.getString("Zusatz"),
                         rsSearchKunde.getString("postleitzahl"),
                         rsSearchKunde.getString("ort"),
                         rsSearchKunde.getString("land")));
@@ -610,18 +734,33 @@ public class SqlConnector implements ISql {
             rsSearchArtikel = stmtSearchArtikel.executeQuery();
 
             while (rsSearchArtikel.next()) {
-                dataFilteredArtikel.add(new Artikel(
-                        rsSearchArtikel.getString("Artikelnummer"),
-                        rsSearchArtikel.getString("Bezeichnung"),
-                        rsSearchArtikel.getString("Zusatztext"),
-                        rsSearchArtikel.getString("Einkaufspreis"),
-                        rsSearchArtikel.getString("Verkaufspreis"),
-                        rsSearchArtikel.getString("Mwst"),
-                        rsSearchArtikel.getString("Bestand"),
-                        rsSearchArtikel.getString("Datum"),
-                        null,
-                        null,
-                        rsSearchArtikel.getString("Warengruppe")));
+                if (rsSearchArtikel.getString("warengruppe") != null) {
+                    dataFilteredArtikel.add(new Artikel(
+                            rsSearchArtikel.getString("Artikelnummer"),
+                            rsSearchArtikel.getString("Bezeichnung"),
+                            rsSearchArtikel.getString("Zusatztext"),
+                            rsSearchArtikel.getString("Einkaufspreis"),
+                            rsSearchArtikel.getString("Verkaufspreis"),
+                            rsSearchArtikel.getString("Mwst"),
+                            rsSearchArtikel.getString("Bestand"),
+                            rsSearchArtikel.getString("Datum"),
+                            null,
+                            null,
+                            rsSearchArtikel.getString("Warengruppe")));
+                } else {
+                    dataFilteredArtikel.add(new Artikel(
+                            rsSearchArtikel.getString("Artikelnummer"),
+                            rsSearchArtikel.getString("Bezeichnung"),
+                            rsSearchArtikel.getString("Zusatztext"),
+                            rsSearchArtikel.getString("Einkaufspreis"),
+                            rsSearchArtikel.getString("Verkaufspreis"),
+                            rsSearchArtikel.getString("Mwst"),
+                            rsSearchArtikel.getString("Bestand"),
+                            rsSearchArtikel.getString("Datum"),
+                            null,
+                            null,
+                            null));
+                }
             }
 
         } catch (SQLException exc) {
@@ -630,6 +769,28 @@ public class SqlConnector implements ISql {
             if (rsSearchArtikel != null) {
                 rsSearchArtikel.close();
             }
+        }
+    }
+
+    @Override
+    public void deleteKunde(String kNummer) throws SQLException {
+        String deleteString = "delete from kunde where kundennummer = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement deleteKunde = myConn.prepareStatement(deleteString)) {
+
+            deleteKunde.setString(1, kNummer);
+            deleteKunde.executeUpdate();
+        }
+    }
+
+    @Override
+    public void deleteAngebot(String aNummer) throws SQLException {
+        String deleteString = "delete from angebot where angebotsnummer = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement deleteKunde = myConn.prepareStatement(deleteString)) {
+
+            deleteKunde.setString(1, aNummer);
+            deleteKunde.executeUpdate();
         }
     }
 
@@ -657,8 +818,6 @@ public class SqlConnector implements ISql {
                 addKunde.setString(i + 1, parameter[i]);
             }
             addKunde.executeUpdate();
-        } catch (SQLException exc) {
-            throw exc;
         }
     }
 
@@ -838,6 +997,7 @@ public class SqlConnector implements ISql {
             throw exc;
         }
     }
+
     @Override
     public void safeArtikelInAngebot(String angebot, String artikel,
             int menge, boolean alt) throws SQLException {
@@ -859,6 +1019,45 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException{
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement updateAnrede = myConn.prepareStatement("update kunde set anrede = ? where kundennummer = ?;");
+                PreparedStatement updateVorname = myConn.prepareStatement("update kunde set vorname = ? where kundennummer = ?;");
+                PreparedStatement updateNachname = myConn.prepareStatement("update kunde set name = ? where kundennummer = ?;");
+                PreparedStatement updateStrasse = myConn.prepareStatement("update kunde set straße = ? where kundennummer = ?;");
+                PreparedStatement updateHausnummer = myConn.prepareStatement("update kunde set hausnummer = ? where kundennummer = ?;");
+                PreparedStatement updateZusatz = myConn.prepareStatement("update kunde set zusatz = ? where kundennummer = ?;")) {
+            
+            
+            updateAnrede.setString(1, a);
+            updateAnrede.setString(2, kNummer);
+            
+            updateVorname.setString(1, vn);
+            updateVorname.setString(2, kNummer);
+            
+            updateNachname.setString(1, n);
+            updateNachname.setString(2, kNummer);
+            
+            updateStrasse.setString(1, s);
+            updateStrasse.setString(2, kNummer);
+            
+            updateHausnummer.setString(1, h);
+            updateHausnummer.setString(2, kNummer);
+            
+            updateZusatz.setString(1, z);
+            updateZusatz.setString(2, kNummer);
+            
+            updateAnrede.executeUpdate();
+            updateVorname.executeUpdate();
+            updateNachname.executeUpdate();
+            updateStrasse.executeUpdate();
+            updateHausnummer.executeUpdate();
+            updateZusatz.executeUpdate();
+            
+        }
+    }
+    /*
+    @Override
     public void updateKunde(String attr, String id,
             String eingabe) throws SQLException {
         String updateKundeString = "update kunde set ? = ? where kundennummer = ?";
@@ -874,7 +1073,7 @@ public class SqlConnector implements ISql {
             throw exc;
         }
     }
-
+     */
     @Override
     public void updateArtikelVerkaufsPreis(String id, String eingabe) throws SQLException {
         String updateArtikelString = "update artikel set verkaufspreis = ? where artikelnummer = ?;";
@@ -1039,7 +1238,8 @@ public class SqlConnector implements ISql {
                     newNumber = subNumber;
                 } else {
                     for (int i = 0; i < 5; i++) { //5-stellige Ziffer mit Nullen auffüllen
-                        zeroTemp += "o";System.out.println(zeroTemp+ "zeroTemP");
+                        zeroTemp += "o";
+                        System.out.println(zeroTemp + "zeroTemP");
                         newNumber = zeroTemp + subNumber;
                         if (newNumber.length() == 5) {
                             System.out.println("länge" + newNumber.length());//Abbruch, wenn vorzeitig fertig ausgefüllt

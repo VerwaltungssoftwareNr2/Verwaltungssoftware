@@ -83,15 +83,6 @@ public class RechnungDetails {
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button pdf = new Button("In PDF umwandeln");
-        Button delete = new Button("Rechnung löschen");
-        delete.setOnAction(e -> {
-            boolean test = com.verwaltungssoftware.GUI.ConfirmBox.display("Rechnung löschen", "Möchten Sie die Rechnung wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
-            if (test == true) {
-                popupStage.close();
-            } else {
-                e.consume();
-            }
-        });
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> popupStage.close());
         
@@ -106,7 +97,7 @@ public class RechnungDetails {
         sumT.setSpacing(8);
 
         HBox buttons = new HBox();
-        buttons.getChildren().addAll(cancel, pdf, delete, confirm);
+        buttons.getChildren().addAll(cancel, pdf, confirm);
         buttons.setPadding(new Insets(10, 10, 10, 10));
         buttons.setSpacing(8);
         buttons.setAlignment(Pos.CENTER);
@@ -171,20 +162,11 @@ public class RechnungDetails {
         Button cancel2 = new Button("Abbrechen");
         cancel2.setOnAction(e -> popupStage.close());
         Button pdf2 = new Button("In PDF umwandeln");
-        Button delete2 = new Button("Rechnung löschen");
-        delete2.setOnAction(e -> {
-            boolean test = com.verwaltungssoftware.GUI.ConfirmBox.display("Rechnung löschen", "Möchten Sie die Rechnung wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
-            if (test == true) {
-                popupStage.close();
-            } else {
-                e.consume();
-            }
-        });
         Button confirm2 = new Button("Bestätigen");
         confirm2.setOnAction(e -> popupStage.close());
         
         HBox buttons2 = new HBox();
-        buttons2.getChildren().addAll(cancel2, pdf2, delete2, confirm2);
+        buttons2.getChildren().addAll(cancel2, pdf2, confirm2);
         buttons2.setPadding(new Insets(10, 10, 10, 10));
         buttons2.setSpacing(8);
         buttons2.setAlignment(Pos.CENTER);
@@ -221,20 +203,11 @@ public class RechnungDetails {
         Button cancel3 = new Button("Abbrechen");
         cancel3.setOnAction(e -> popupStage.close());
         Button pdf3 = new Button("In PDF umwandeln");
-        Button delete3 = new Button("Rechnung löschen");
-        delete3.setOnAction(e -> {
-            boolean test = com.verwaltungssoftware.GUI.ConfirmBox.display("Rechnung löschen", "Möchten Sie die Rechnung wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
-            if (test == true) {
-                popupStage.close();
-            } else {
-                e.consume();
-            }
-        });
         Button confirm3 = new Button("Bestätigen");
         confirm3.setOnAction(e -> popupStage.close());
         
         HBox buttons3 = new HBox();
-        buttons3.getChildren().addAll(cancel3, pdf3, delete3, confirm3);
+        buttons3.getChildren().addAll(cancel3, pdf3, confirm3);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);

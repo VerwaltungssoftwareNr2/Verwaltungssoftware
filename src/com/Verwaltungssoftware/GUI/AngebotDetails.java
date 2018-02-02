@@ -5,10 +5,15 @@
  */
 package com.verwaltungssoftware.GUI;
 
+import com.itextpdf.text.DocumentException;
 import com.verwaltungssoftware.database.ISql;
+import com.verwaltungssoftware.objects.Angebot;
+import com.verwaltungssoftware.objects.Kunde;
+import com.verwaltungssoftware.objects.User;
+import com.verwaltungssoftware.pdf.PdfCreator;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,6 +28,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -31,16 +37,19 @@ import javafx.stage.Stage;
  * @author Lucas
  */
 public class AngebotDetails {
+
     static Scene details;
-    
-    public static void display(ISql sql, String nummer) {
+    static Kunde kunde = null;
+    static Angebot angebot = null;
+
+    public static void display(ISql sql, String aNummer, String kNummer, String aDatum) {
         Stage popupStage = new Stage();
 
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Angebotsinformationen");
-        
+
         TabPane tabs = new TabPane();
-        
+
         Tab info = new Tab("Kundeninformationen");
         Tab posten = new Tab("Posten");
         Tab summen = new Tab("Summen");
@@ -48,7 +57,14 @@ public class AngebotDetails {
         posten.setClosable(false);
         summen.setClosable(false);
         tabs.getTabs().addAll(info, posten, summen);
-        
+
+        try {
+            kunde = sql.loadDataKunde(kNummer);
+            angebot = sql.loadDataAngebot(aNummer);
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Daten");
+            System.out.println(exc.getMessage());
+        }
         Label aNr = new Label("Angebotsnummer");
         Label kNr = new Label("Kundennummer");
         Label anredeL = new Label("Anrede");
@@ -60,17 +76,15 @@ public class AngebotDetails {
         Label datum = new Label("Datum");
         Label zusatz = new Label("Zusatztext");
 
-        TextField anredeT = new TextField();
-        TextField aNRT = new TextField();
-        TextField kNRT = new TextField();
-        TextField vornameT = new TextField();
-        TextField nameT = new TextField();
-        TextField straßeT = new TextField();
-        TextField plzT = new TextField();
-        TextField ortT = new TextField();
-        DateTimeFormatter dateTf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate ld = LocalDate.now();
-        Label datumL = new Label(ld.format(dateTf));
+        TextField anredeT = new TextField(kunde.getAnrede());
+        TextField aNRT = new TextField(aNummer);
+        TextField kNRT = new TextField(kNummer);
+        TextField vornameT = new TextField(kunde.getVorname());
+        TextField nameT = new TextField(kunde.getName());
+        TextField straßeT = new TextField(kunde.getStraße());
+        TextField plzT = new TextField(kunde.getPlz());
+        TextField ortT = new TextField(kunde.getOrt());
+        Label datumL = new Label(aDatum);
         TextArea zusatzT = new TextArea();
 
         aNRT.setEditable(false);
@@ -79,7 +93,7 @@ public class AngebotDetails {
         straßeT.setEditable(false);
         plzT.setEditable(false);
         ortT.setEditable(false);
-        
+
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button pdf = new Button("In PDF umwandeln");
@@ -87,14 +101,51 @@ public class AngebotDetails {
         delete.setOnAction(e -> {
             boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
+                try{
+                    sql.deleteAngebot(aNummer);
+                } catch(SQLException exc){
+                    ConfirmBox.display2("Fehler", "Fehler beim Löschen des Angebots");
+                }
                 popupStage.close();
             } else {
                 e.consume();
             }
         });
+
+        pdf.setOnAction(e -> {
+            try {
+                User user = sql.loadUser();
+                PdfCreator pdfC = new PdfCreator(user, sql);
+                FileChooser fc = new FileChooser();
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF (*.pdf)", "*pdf"));
+                File f = fc.showSaveDialog(new Stage());
+                System.out.println(f);
+                if (f != null && !f.getName().contains(".")) {
+                    f = new File(f.getAbsolutePath() + ".pdf");
+                }
+                if (f != null) {
+                    try {
+                        pdfC.createDocument(kNRT.getText(),
+                                aNRT.getText(),
+                                zusatzT.getText(),
+                                angebot.getZahlungsZiel(),
+                                angebot.getSkontoTage(),
+                                angebot.getSkontoProzent(),
+                                angebot.getFakturaText(),
+                                f);
+                    } catch (DocumentException | IOException | SQLException exc) {
+                        System.out.println(exc.getMessage());
+                    }
+                }
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim erzeugen des neuen Angebots.");
+                System.out.println(exc.getMessage());
+            }
+        });
+
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> popupStage.close());
-        
+
         VBox sumL = new VBox();
         sumL.getChildren().addAll(aNr, datum, kNr, anredeL, vorname, name, straße, plz, ort, zusatz);
         sumL.setPadding(new Insets(10));
@@ -115,9 +166,9 @@ public class AngebotDetails {
         sumsum.getChildren().addAll(sumL, sumT);
         VBox sumsumButtons = new VBox();
         sumsumButtons.getChildren().addAll(sumsum, buttons);
-        
+
         info.setContent(sumsumButtons); // TAB KUNDENINFORMATIONEN
-        
+
         TableView artInAng = new TableView();
         artInAng.setPrefSize(100000, 100000);
         TableColumn artikelnummer = new TableColumn("Artikelnummer");
@@ -148,26 +199,24 @@ public class AngebotDetails {
         mwst.setCellValueFactory(
                 new PropertyValueFactory<>("mwst"));
 
-        TableColumn menge = new TableColumn("Bestand");
+        TableColumn menge = new TableColumn("Menge");
         menge.setCellValueFactory(
                 new PropertyValueFactory<>("bestand"));
 
-        TableColumn datumT = new TableColumn("Datum");
-        datumT.setCellValueFactory(
-                new PropertyValueFactory<>("datum"));
+        TableColumn alternativT = new TableColumn("Alternative");
+        alternativT.setCellValueFactory(
+                new PropertyValueFactory<>("alternativtext"));
 
         artInAng.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        try{
-            sql.loadArtikelFromAngebot(nummer);
+        try {
+            sql.loadArtikelFromAngebot(aNummer);
             artInAng.setItems(sql.getDataArtikelInAngebot());
-        } catch(SQLException exc){
+        } catch (SQLException exc) {
             ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
         }
-        artInAng.getColumns().addAll(artikelnummer, bezeichnung, zusatztext, warengruppe, einkaufspreis, verkaufspreis, mwst, menge, datumT);
+        artInAng.getColumns().addAll(artikelnummer, bezeichnung, zusatztext, warengruppe, einkaufspreis, verkaufspreis, mwst, menge, alternativT);
         artInAng.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        
 
-        
         Button cancel2 = new Button("Abbrechen");
         cancel2.setOnAction(e -> popupStage.close());
         Button pdf2 = new Button("In PDF umwandeln");
@@ -175,25 +224,61 @@ public class AngebotDetails {
         delete2.setOnAction(e -> {
             boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
+                try{
+                    sql.deleteAngebot(aNummer);
+                } catch(SQLException exc){
+                    ConfirmBox.display2("Fehler", "Fehler beim Löschen des Angebots");
+                }
                 popupStage.close();
             } else {
                 e.consume();
             }
         });
+
+        pdf2.setOnAction(e -> {
+            try {
+                User user = sql.loadUser();
+                PdfCreator pdfC = new PdfCreator(user, sql);
+                FileChooser fc = new FileChooser();
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF (*.pdf)", "*pdf"));
+                File f = fc.showSaveDialog(new Stage());
+                System.out.println(f);
+                if (f != null && !f.getName().contains(".")) {
+                    f = new File(f.getAbsolutePath() + ".pdf");
+                }
+                if (f != null) {
+                    try {
+                        pdfC.createDocument(kNRT.getText(),
+                                aNRT.getText(),
+                                zusatzT.getText(),
+                                angebot.getZahlungsZiel(),
+                                angebot.getSkontoTage(),
+                                angebot.getSkontoProzent(),
+                                angebot.getFakturaText(),
+                                f);
+                    } catch (DocumentException | IOException | SQLException exc) {
+                        System.out.println(exc.getMessage());
+                    }
+                }
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim erzeugen des neuen Angebots.");
+                System.out.println(exc.getMessage());
+            }
+        });
         Button confirm2 = new Button("Bestätigen");
         confirm2.setOnAction(e -> popupStage.close());
-        
+
         HBox buttons2 = new HBox();
         buttons2.getChildren().addAll(cancel2, pdf2, delete2, confirm2);
         buttons2.setPadding(new Insets(10, 10, 10, 10));
         buttons2.setSpacing(8);
         buttons2.setAlignment(Pos.CENTER);
-        
+
         VBox tableButtons = new VBox();
         tableButtons.getChildren().addAll(artInAng, buttons2);
-        
+
         posten.setContent(tableButtons); // TAB POSTEN ENDE
-        
+
         Label summe3 = new Label("Nettobetrag");
         Label mwtStr = new Label("Mehrwertsteuer");
         Label bruttopreis = new Label("Bruttobetrag");
@@ -203,17 +288,17 @@ public class AngebotDetails {
         Label skonto = new Label("Skonto in Prozent");
         Label skontobetrag = new Label("Skontobetrag");
 
-        TextField summe4 = new TextField();
+        TextField summe4 = new TextField(String.valueOf(angebot.getNettoBetrag()));
         summe4.setEditable(false);
-        TextField mwtStrT = new TextField();
+        TextField mwtStrT = new TextField(String.valueOf(angebot.getMwSt()));
         mwtStrT.setEditable(false);
-        TextField bruttopreisT = new TextField();
+        TextField bruttopreisT = new TextField(String.valueOf(angebot.getBruttoBetrag()));
         bruttopreisT.setEditable(false);
-        TextField gültigT = new TextField();
-        TextField fakturatextT = new TextField();
-        TextField skontotageT = new TextField();
-        TextField skontoT = new TextField();
-        TextField skontobetragT = new TextField();
+        TextField gültigT = new TextField(String.valueOf(angebot.getZahlungsZiel()));
+        TextField fakturatextT = new TextField(angebot.getFakturaText());
+        TextField skontotageT = new TextField(String.valueOf(angebot.getSkontoTage()));
+        TextField skontoT = new TextField(String.valueOf(angebot.getSkontoProzent()));
+        TextField skontobetragT = new TextField(String.valueOf(angebot.getSkontoBetrag()));
         skontobetragT.setEditable(false);
 
         Button cancel3 = new Button("Abbrechen");
@@ -223,6 +308,11 @@ public class AngebotDetails {
         delete3.setOnAction(e -> {
             boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
+                try{
+                    sql.deleteAngebot(aNummer);
+                } catch(SQLException exc){
+                    ConfirmBox.display2("Fehler", "Fehler beim Löschen des Angebots");
+                }
                 popupStage.close();
             } else {
                 e.consume();
@@ -230,28 +320,28 @@ public class AngebotDetails {
         });
         Button confirm3 = new Button("Bestätigen");
         confirm3.setOnAction(e -> popupStage.close());
-        
+
         HBox buttons3 = new HBox();
         buttons3.getChildren().addAll(cancel3, pdf3, delete3, confirm3);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
-        
+
         VBox labels = new VBox();
         labels.setPadding(new Insets(10));
         labels.setSpacing(16);
-        labels.getChildren().addAll(summe3, mwtStr, bruttopreis, gültig, fakturatext,skontotage, skonto, skontobetrag);
-        
+        labels.getChildren().addAll(summe3, mwtStr, bruttopreis, gültig, fakturatext, skontotage, skonto, skontobetrag);
+
         VBox text = new VBox();
         text.getChildren().addAll(summe4, mwtStrT, bruttopreisT, gültigT, fakturatextT, skontotageT, skontoT, skontobetragT);
         text.setPadding(new Insets(10));
         text.setSpacing(8);
-        
+
         HBox labelsText = new HBox();
         labelsText.getChildren().addAll(labels, text);
         VBox all = new VBox();
         all.getChildren().addAll(labelsText, buttons3);
-        
+
         summen.setContent(all);
 
         details = new Scene(tabs, 800, 450);

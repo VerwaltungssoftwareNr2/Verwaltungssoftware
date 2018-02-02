@@ -6,6 +6,7 @@
 package com.verwaltungssoftware.GUI;
 
 import com.verwaltungssoftware.database.ISql;
+import com.verwaltungssoftware.objects.Artikel;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import javafx.geometry.Insets;
@@ -27,9 +28,11 @@ import javafx.stage.Stage;
  * @author Lucas
  */
 public class ArtikelDetails {
-    static Scene details;
 
-    public static void display(ISql sql) {
+    static Scene details;
+    static Artikel artikel = null;
+
+    public static void display(String artNummer, ISql sql) {
         Stage popupStage = new Stage();
 
         popupStage.initModality(Modality.APPLICATION_MODAL);
@@ -45,28 +48,30 @@ public class ArtikelDetails {
         Label mehrwertSt = new Label("Mehrwertsteuer in %");
 
         ChoiceBox gruppe = new ChoiceBox();
-        gruppe.getItems().addAll("Steine", "Rohre", "Zäune", "Kabel");
-        //gruppe.setValue("Steine");
+        try {
+            artikel = sql.loadDataArtikel(artNummer);
+            sql.loadDataWarengruppe();
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Warengruppen");
+        }
+        for (String s : sql.getDataWarengruppe()) {
+            gruppe.getItems().add(s);
+        }
 
-        TextField nameT = new TextField();
+        TextField nameT = new TextField(artikel.getBezeichnung());
         nameT.setMaxWidth(1000);
-        TextArea ztextT = new TextArea();
+        TextArea ztextT = new TextArea(artikel.getZusatztext());
         ztextT.setMaxWidth(1000);
-        TextField artNrT = new TextField();
+        TextField artNrT = new TextField(artikel.getArtikelnummer());
         artNrT.setMaxWidth(1000);
-        TextField preisET = new TextField();
+        TextField preisET = new TextField(artikel.getEinkaufspreis());
         preisET.setMaxWidth(1000);
-        TextField preisVT = new TextField();
+        TextField preisVT = new TextField(artikel.getVerkaufspreis());
         preisVT.setMaxWidth(1000);
-        TextField bestandT = new TextField();
+        TextField bestandT = new TextField(artikel.getBestand());
         bestandT.setMaxWidth(1000);
-
-        String n = "19";
-        String s = "7";
-
-        ChoiceBox mehrwertC = new ChoiceBox();
-        mehrwertC.getItems().addAll(n, s);
-        mehrwertC.setValue(n);
+        TextField mwstT = new TextField(artikel.getMwst());
+        mwstT.setMaxWidth(1000);
 
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
@@ -74,7 +79,7 @@ public class ArtikelDetails {
         confirm.setOnAction(e -> {
             try {
                 LocalDate ld = LocalDate.now();
-                sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(), bestandT.getText(), ld.toString(), null);
+                sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), preisET.getText(), preisVT.getText(), mwstT.getText(), bestandT.getText(), ld.toString(), null);
                 sql.loadDataArtikel();
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Speichern der Artikeldetails");
@@ -91,7 +96,6 @@ public class ArtikelDetails {
                 e.consume();
             }
         });
-        
 
         VBox left = new VBox();
         VBox right = new VBox();
@@ -101,7 +105,7 @@ public class ArtikelDetails {
         right.setSpacing(8);
 
         left.getChildren().addAll(name, artNr, gruppeL, preis, preisV, bestand, mehrwertSt, ztext);
-        right.getChildren().addAll(nameT, artNrT, gruppe, preisET, preisVT, bestandT, mehrwertC, ztextT);
+        right.getChildren().addAll(nameT, artNrT, gruppe, preisET, preisVT, bestandT, mwstT, ztextT);
 
         HBox bottom = new HBox();
         bottom.getChildren().addAll(cancel, delete, confirm);

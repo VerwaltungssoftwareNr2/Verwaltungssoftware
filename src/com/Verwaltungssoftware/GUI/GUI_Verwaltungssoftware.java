@@ -58,7 +58,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        
+
         Label benutzer = new Label("Benutzer:");
         Label passwort = new Label("Passwort:");
         //Label welcome = new Label("Willkommen! Bitte loggen sie sich ein.");
@@ -69,7 +69,6 @@ public class GUI_Verwaltungssoftware extends Application {
         submit.setDefaultButton(true);
         user.setPromptText("Benutzername");
         pass.setPromptText("Passwort");
-                
 
         submit.setOnAction((ActionEvent event) -> {
             this.sql = new SqlConnector(user.getText(), pass.getText());
@@ -78,9 +77,9 @@ public class GUI_Verwaltungssoftware extends Application {
                 this.password = pass.getText();
                 primaryStage.setScene(mainScreen);
                 pass.clear();
-                try{
+                try {
                     sql.checkUserConfig();
-                } catch(SQLException exc){
+                } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Überprüfen der Unternehmenskonfiguration");
                 }
                 try {
@@ -109,7 +108,7 @@ public class GUI_Verwaltungssoftware extends Application {
                 this.artikelVB = createTableArtikel();
                 this.kundenT = new TableView<>();
                 this.kundenVB = createTableKunde();
-                if(!sql.getCheckUserConfig()){
+                if (!sql.getCheckUserConfig()) {
                     InfoBox.display(sql);
                 }
             }
@@ -129,7 +128,7 @@ public class GUI_Verwaltungssoftware extends Application {
         grid.setAlignment(Pos.CENTER);
 
         loginScreen = new Scene(grid, 400, 400); //Login screen
-        
+
         MenuBar menu = new MenuBar();
         Menu allgemein = new Menu("Allgemein");
         Menu kunde = new Menu("Kunde");
@@ -197,12 +196,38 @@ public class GUI_Verwaltungssoftware extends Application {
 
         pane.setCenter(kundenVB);
         tableArtikel.setOnAction(e -> {
+            try {
+                sql.loadDataArtikel();
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
+            }
             pane.setCenter(artikelVB);
         });
         pane.setBottom(null);
-        tableKunde.setOnAction(e -> pane.setCenter(kundenVB));
-        tableAngebot.setOnAction(e -> pane.setCenter(angebotT));
-        tableRechnung.setOnAction(e -> pane.setCenter(rechnungT));
+        tableKunde.setOnAction(e -> {
+            try {
+                sql.loadDataKunde();
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Kunden");
+            }
+            pane.setCenter(kundenVB);
+        });
+        tableAngebot.setOnAction(e -> {
+            try {
+                sql.loadDataAngebot(false);
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Angebote");
+            }
+            pane.setCenter(angebotT);
+        });
+        tableRechnung.setOnAction(e -> {
+            try {
+                sql.loadDataRechnung(false);
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Rechnungen");
+            }
+            pane.setCenter(rechnungT);
+        });
 
         primaryStage.setScene(loginScreen);
         primaryStage.setTitle("Verwaltungssoftware ");
@@ -215,8 +240,9 @@ public class GUI_Verwaltungssoftware extends Application {
         rechnungT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
                 RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer());
+                rechnungT.refresh();
             }
-            });
+        });
 
         TableColumn rechnungsnummer = new TableColumn("Rechnungsnummer");
         rechnungsnummer.setCellValueFactory(
@@ -241,7 +267,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
     public VBox createTableAngebot() {
         TableView<Angebot> angebotT = new TableView();
-        angebotT.setPrefSize(100000, 100000);     
+        angebotT.setPrefSize(100000, 100000);
 
         TableColumn angebotsnummer = new TableColumn("Angebotsnummer");
         angebotsnummer.setCellValueFactory(
@@ -263,11 +289,14 @@ public class GUI_Verwaltungssoftware extends Application {
         angebotT.setItems(sql.getDataAngebot());
         angebotT.getColumns().addAll(angebotsnummer, kunde, datum, akzeptiert);
 
-         angebotT.setOnMouseClicked((MouseEvent me) -> {
+        angebotT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer());
+                AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(), 
+                        angebotT.getSelectionModel().getSelectedItems().get(0).getKunde(),
+                        angebotT.getSelectionModel().getSelectedItems().get(0).getDatum());
+                angebotT.refresh();
             }
-            });
+        });
         VBox fAndT = createFilter(angebotT, "Angebot", false);
 
         return fAndT;
@@ -277,10 +306,11 @@ public class GUI_Verwaltungssoftware extends Application {
         artikelT.setPrefSize(100000, 100000);
         artikelT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                ArtikelDetails.display(sql);
+                ArtikelDetails.display(artikelT.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(), sql);
+                artikelT.refresh();
             }
-            });
-        
+        });
+
         TableColumn artikelnummer = new TableColumn("Artikelnummer");
         artikelnummer.setCellValueFactory(
                 new PropertyValueFactory<>("artikelnummer"));
@@ -330,10 +360,11 @@ public class GUI_Verwaltungssoftware extends Application {
         kundenT.setPrefSize(100000, 100000);
         kundenT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                KundeDetails.display();
+                KundeDetails.display(kundenT.getSelectionModel().getSelectedItems().get(0).getKundennummer(), sql);
+                kundenT.refresh();
             }
-            });
-        
+        });
+
         TableColumn kundennummer = new TableColumn("Kundennummer");
         kundennummer.setCellValueFactory(
                 new PropertyValueFactory<>("kundennummer"));
@@ -434,8 +465,8 @@ public class GUI_Verwaltungssoftware extends Application {
         fAndT.getChildren().addAll(filterBox, t);
         return fAndT;
     }
-    
-     public VBox createFilterAngebotRechnung(TableView t, String identifier, boolean all, Button add) {
+
+    public VBox createFilterAngebotRechnung(TableView t, String identifier, boolean all, Button add) {
         Label filter = new Label("Filter :");
         TextField filterField = new TextField();
         filterField.setOnKeyReleased((KeyEvent ke) -> {
@@ -489,16 +520,17 @@ public class GUI_Verwaltungssoftware extends Application {
         return fAndT;
     }
 
-    public ObservableList<Artikel> filterList(ObservableList<Artikel> inputList, String filter){
+    public ObservableList<Artikel> filterList(ObservableList<Artikel> inputList, String filter) {
         ObservableList outputList = FXCollections.observableArrayList();
-        for(int index = 0; index < inputList.size(); index++){
+        for (int index = 0; index < inputList.size(); index++) {
             Artikel filteredObject = inputList.get(index);
-            if(filteredObject.getArtikelnummer().contains(filter)){
+            if (filteredObject.getArtikelnummer().contains(filter)) {
                 outputList.add(filteredObject);
             }
         }
         return outputList;
     }
+
     public VBox createFilter(TableView t, ObservableList ol) {
         Label filter = new Label("Filter :");
         TextField filterField = new TextField();
@@ -521,7 +553,7 @@ public class GUI_Verwaltungssoftware extends Application {
         fAndT.getChildren().addAll(filterBox, t);
         return fAndT;
     }
-    
+
     public VBox createFilterAngebotRechnung(TableView t, ObservableList ol, Button add) {
         Label filter = new Label("Filter :");
         TextField filterField = new TextField();

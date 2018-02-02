@@ -4,15 +4,16 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class Kunde {
 
-    SimpleStringProperty kundennummer, anrede, vorname, name, straße, hausnummer, plz, ort, land;
+    SimpleStringProperty kundennummer, anrede, vorname, name, straße, hausnummer, zusatz, plz, ort, land;
 
-    public Kunde(String kNummer, String a, String vn, String n, String s, String h, String p, String o, String l) {
+    public Kunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) {
         kundennummer = new SimpleStringProperty(kNummer);
         anrede = new SimpleStringProperty(a);
         vorname = new SimpleStringProperty(vn);
         name = new SimpleStringProperty(n);
         straße = new SimpleStringProperty(s);
         hausnummer = new SimpleStringProperty(h);
+        zusatz = new SimpleStringProperty(z);
         plz = new SimpleStringProperty(p);
         ort = new SimpleStringProperty(o);
         land = new SimpleStringProperty(l);
@@ -65,6 +66,14 @@ public class Kunde {
 
     public void setHausnummer(String h) {
         hausnummer.set(h);
+    }
+    
+    public String getZusatz() {
+        return zusatz.get();
+    }
+
+    public void setZusatz(String z) {
+        zusatz.set(z);
     }
 
     public String getPlz() {
