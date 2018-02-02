@@ -218,4 +218,6 @@ public interface ISql {
     public void checkUserConfig() throws SQLException;
 
     public void createUserConfig(User user) throws SQLException;
+    
+    public void updateUserConfig(User user) throws SQLException;
 }

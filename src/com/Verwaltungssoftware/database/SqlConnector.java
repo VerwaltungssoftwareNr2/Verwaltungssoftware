@@ -224,6 +224,71 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public void updateUserConfig(User user) throws SQLException {
+        String insertString = "insert into User_config(BID, bankName, kontoNr, blz, steuerNummer, ustId, company, street, town, country, companyNo,"
+                + "preName, lastName, aStreet, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtDelete = myConn.createStatement();
+                Statement stmtCreate = myConn.createStatement();
+                PreparedStatement stmtInsert = myConn.prepareStatement(insertString)) {
+
+            stmtDelete.executeUpdate("drop table User_config;");
+            
+            stmtCreate.executeUpdate("CREATE TABLE User_config("
+                    + "    BID INTEGER PRIMARY KEY,"
+                    + "    bankName VARCHAR(50) NOT NULL,"
+                    + "    kontoNr VARCHAR(50) NOT NULL,"
+                    + "    blz VARCHAR(50) NOT NULL,"
+                    + "    steuerNummer VARCHAR(50) NOT NULL,"
+                    + "    ustId VARCHAR(50) NOT NULL,"
+                    + "    company VARCHAR(50) NOT NULL,"
+                    + "    street VARCHAR(50) NOT NULL,"
+                    + "    town VARCHAR(50) NOT NULL,"
+                    + "    country VARCHAR(50) NOT NULL,"
+                    + "    companyNo VARCHAR(50) NOT NULL,"
+                    + "    preName VARCHAR(50) NOT NULL,"
+                    + "    lastName VARCHAR(50) NOT NULL,"
+                    + "    aStreet VARCHAR(50) NOT NULL,"
+                    + "    aPlz VARCHAR(50) NOT NULL,"
+                    + "    aLand VARCHAR(50) NOT NULL,"
+                    + "    aOrt VARCHAR(50) NOT NULL,"
+                    + "    aTel VARCHAR(50) NOT NULL,"
+                    + "    aFax VARCHAR(50) NOT NULL,"
+                    + "    aBankName VARCHAR(50) NOT NULL,"
+                    + "    aBic VARCHAR(50) NOT NULL,"
+                    + "    aIban VARCHAR(50) NOT NULL,"
+                    + "    aAmt VARCHAR(50) NOT NULL,"
+                    + "    aHrb VARCHAR(50) NOT NULL);");
+            stmtInsert.setInt(1, 1);
+            stmtInsert.setString(2, user.getBankName());
+            stmtInsert.setString(3, user.getKontoNr());
+            stmtInsert.setString(4, user.getBlz());
+            stmtInsert.setString(5, user.getSteuerNummer());
+            stmtInsert.setString(6, user.getUstId());
+            stmtInsert.setString(7, user.getCompany());
+            stmtInsert.setString(8, user.getStreet());
+            stmtInsert.setString(9, user.getTown());
+            stmtInsert.setString(10, user.getCountry());
+            stmtInsert.setString(11, user.getCompanyNo());
+            stmtInsert.setString(12, user.getPreName());
+            stmtInsert.setString(13, user.getLastName());
+            stmtInsert.setString(14, user.getaStreet());
+            stmtInsert.setString(15, user.getaPlz());
+            stmtInsert.setString(16, user.getaLand());
+            stmtInsert.setString(17, user.getaOrt());
+            stmtInsert.setString(18, user.getaTel());
+            stmtInsert.setString(19, user.getaFax());
+            stmtInsert.setString(20, user.getaBankName());
+            stmtInsert.setString(21, user.getaBic());
+            stmtInsert.setString(22, user.getaIban());
+            stmtInsert.setString(23, user.getaAmt());
+            stmtInsert.setString(24, user.getaHrb());
+
+            stmtInsert.executeUpdate();
+        }
+    }
+    @Override
     public User loadUser() throws SQLException {
         User user = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
