@@ -7,6 +7,7 @@ package com.verwaltungssoftware.GUI;
 
 import com.verwaltungssoftware.database.ISql;
 import com.verwaltungssoftware.database.SqlConnector;
+import com.verwaltungssoftware.objects.Angebot;
 import com.verwaltungssoftware.objects.Artikel;
 import com.verwaltungssoftware.objects.Kunde;
 import java.sql.SQLException;
@@ -209,11 +210,11 @@ public class GUI_Verwaltungssoftware extends Application {
     }
 
     public VBox createTableRechnung() {
-        TableView rechnungT = new TableView();
+        TableView<Angebot> rechnungT = new TableView();
         rechnungT.setPrefSize(100000, 100000);
         rechnungT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                RechnungDetails.display();
+                RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer());
             }
             });
 
@@ -239,14 +240,8 @@ public class GUI_Verwaltungssoftware extends Application {
     }
 
     public VBox createTableAngebot() {
-        TableView angebotT = new TableView();
-        angebotT.setPrefSize(100000, 100000);
-        angebotT.setOnMouseClicked((MouseEvent me) -> {
-            if (me.getClickCount() == 2) {
-                AngebotDetails.display();
-            }
-            });
-        
+        TableView<Angebot> angebotT = new TableView();
+        angebotT.setPrefSize(100000, 100000);     
 
         TableColumn angebotsnummer = new TableColumn("Angebotsnummer");
         angebotsnummer.setCellValueFactory(
@@ -268,6 +263,11 @@ public class GUI_Verwaltungssoftware extends Application {
         angebotT.setItems(sql.getDataAngebot());
         angebotT.getColumns().addAll(angebotsnummer, kunde, datum, akzeptiert);
 
+         angebotT.setOnMouseClicked((MouseEvent me) -> {
+            if (me.getClickCount() == 2) {
+                AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer());
+            }
+            });
         VBox fAndT = createFilter(angebotT, "Angebot", false);
 
         return fAndT;

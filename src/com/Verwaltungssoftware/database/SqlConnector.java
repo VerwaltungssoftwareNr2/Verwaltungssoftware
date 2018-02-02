@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Properties;
 import javafx.collections.FXCollections;
@@ -158,7 +159,7 @@ public class SqlConnector implements ISql {
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtCreate = myConn.createStatement();
                 PreparedStatement stmtInsert = myConn.prepareStatement(insertString)) {
-            
+
             System.out.println("vorher");
             stmtCreate.executeUpdate("CREATE TABLE User_config("
                     + "    BID INTEGER PRIMARY KEY,"
@@ -215,17 +216,55 @@ public class SqlConnector implements ISql {
         }
     }
 
+    @Override
+    public User loadUser() throws SQLException {
+        User user = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtUser = myConn.createStatement();
+                ResultSet rsUser = stmtUser.executeQuery("select * from user_config")) {
 
-@Override
-        public void loadDataArtikel() throws SQLException {
+            while (rsUser.next()) {
+                user = new User(rsUser.getString("bankname"),
+                        rsUser.getString("kontonr"),
+                        rsUser.getString("blz"),
+                        rsUser.getString("steuernummer"),
+                        rsUser.getString("ustid"),
+                        rsUser.getString("company"),
+                        rsUser.getString("street"),
+                        rsUser.getString("town"),
+                        rsUser.getString("country"),
+                        rsUser.getString("companyno"),
+                        rsUser.getString("prename"),
+                        rsUser.getString("lastname"),
+                        rsUser.getString("astreet"),
+                        rsUser.getString("aplz"),
+                        rsUser.getString("aland"),
+                        rsUser.getString("aort"),
+                        rsUser.getString("atel"),
+                        rsUser.getString("afax"),
+                        rsUser.getString("abankname"),
+                        rsUser.getString("abic"),
+                        rsUser.getString("aiban"),
+                        rsUser.getString("aamt"),
+                        rsUser.getString("ahrb")
+                );
+            }
+        }
+        return user;
+    }
+
+    @Override
+    public void loadDataArtikel() throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtArtikel = myConn.createStatement();
                 ResultSet rsArtikel = stmtArtikel.executeQuery("select * from artikel")) {
 
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate ld = null;
             dataArtikel.clear();
             while (rsArtikel.next()) {
-
+                ld = LocalDate.parse(rsArtikel.getString("Datum"));
                 dataArtikel.add(new Artikel(
                         rsArtikel.getString("Artikelnummer"),
                         rsArtikel.getString("Bezeichnung"),
@@ -234,8 +273,8 @@ public class SqlConnector implements ISql {
                         rsArtikel.getString("Verkaufspreis"),
                         rsArtikel.getString("Mwst"),
                         rsArtikel.getString("Bestand"),
-                        rsArtikel.getString("Datum"),
-                        null,
+                        ld.format(dtf),
+                        "0",
                         null,
                         rsArtikel.getString("Warengruppe")));
             }
@@ -246,7 +285,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadDataKunde() throws SQLException {
+    public void loadDataKunde() throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtKunde = myConn.createStatement();
@@ -272,7 +311,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadDataAngebot(boolean all) throws SQLException {
+    public void loadDataAngebot(boolean all) throws SQLException {
 
         String stringAngebot = null;
         if (all) {
@@ -291,13 +330,29 @@ public class SqlConnector implements ISql {
                             rsAngebot.getString("angebotsnummer"),
                             rsAngebot.getString("kunde"),
                             rsAngebot.getString("datum"),
-                            "noch ausstehend/nein"));
+                            "noch ausstehend/nein",
+                            rsAngebot.getDouble("Nettobetrag"),
+                            rsAngebot.getDouble("Bruttobetrag"),
+                            rsAngebot.getDouble("Mehrwertsteuer"),
+                            rsAngebot.getDouble("Skontobetrag"),
+                            rsAngebot.getDouble("SkontoProzent"),
+                            rsAngebot.getInt("Zahlungsziel"),
+                            rsAngebot.getInt("Skontotage"),
+                            rsAngebot.getString("Fakturatext")));
                 } else {
                     dataAngebot.add(new Angebot(
                             rsAngebot.getString("angebotsnummer"),
                             rsAngebot.getString("kunde"),
                             rsAngebot.getString("datum"),
-                            "ja/Rechnung erstellt"));
+                            "Ja/Rechnung erstellt",
+                            rsAngebot.getDouble("Nettobetrag"),
+                            rsAngebot.getDouble("Bruttobetrag"),
+                            rsAngebot.getDouble("Mehrwertsteuer"),
+                            rsAngebot.getDouble("Skontobetrag"),
+                            rsAngebot.getDouble("SkontoProzent"),
+                            rsAngebot.getInt("Zahlungsziel"),
+                            rsAngebot.getInt("Skontotage"),
+                            rsAngebot.getString("Fakturatext")));
                 }
             }
         } catch (SQLException exc) {
@@ -306,7 +361,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadDataRechnung(boolean all) throws SQLException {
+    public void loadDataRechnung(boolean all) throws SQLException {
         String stringRechnung = null;
         if (all) {
             stringRechnung = "select * from angebot order by angebotsnummer asc;";
@@ -323,7 +378,15 @@ public class SqlConnector implements ISql {
                         rsRechnung.getString("angebotsnummer"),
                         rsRechnung.getString("kunde"),
                         rsRechnung.getString("datum"),
-                        null));
+                        null,
+                        rsRechnung.getDouble("Nettobetrag"),
+                        rsRechnung.getDouble("Bruttobetrag"),
+                        rsRechnung.getDouble("Mehrwertsteuer"),
+                        rsRechnung.getDouble("Skontobetrag"),
+                        rsRechnung.getDouble("SkontoProzent"),
+                        rsRechnung.getInt("Zahlungsziel"),
+                        rsRechnung.getInt("Skontotage"),
+                        rsRechnung.getString("Fakturatext")));
             }
         } catch (SQLException exc) {
             throw exc;
@@ -350,7 +413,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadArtikelFromAngebot(String nummer) throws SQLException {
+    public void loadArtikelFromAngebot(String nummer) throws SQLException {
         String searchArtikelString = "select * from artikel join artikelinangebot as aia on artikel.artikelnummer = aia.artikel where aia.angebot = '" + nummer + "' ;";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -359,7 +422,10 @@ public class SqlConnector implements ISql {
 
             dataArtikelInAngebot.clear();
 
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate ld = null;
             while (rsSearchArtikel.next()) {
+                ld = LocalDate.parse(rsSearchArtikel.getString("Datum"));
                 dataArtikelInAngebot.add(new Artikel(
                         rsSearchArtikel.getString("Artikelnummer"),
                         rsSearchArtikel.getString("Bezeichnung"),
@@ -368,7 +434,7 @@ public class SqlConnector implements ISql {
                         rsSearchArtikel.getString("Verkaufspreis"),
                         rsSearchArtikel.getString("Mwst"),
                         rsSearchArtikel.getString("Menge"),
-                        rsSearchArtikel.getString("Datum"),
+                        ld.format(dtf),
                         rsSearchArtikel.getString("Alternativ"),
                         rsSearchArtikel.getString("aia.rabatt"),
                         rsSearchArtikel.getString("Warengruppe")));
@@ -380,7 +446,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadFilteredKunden(String filter) throws SQLException {
+    public void loadFilteredKunden(String filter) throws SQLException {
         String searchKundeString = "select * from kunde join postleitzahl on kunde.postleitzahl = postleitzahl.plz where vorname like ? or name like ? or kundennummer like ? or "
                 + "straße like ? or kunde.postleitzahl like ? or ort like ? or land like ?;";
         ResultSet rsSearchKunde = null;
@@ -422,7 +488,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadFilteredAngebote(String filter, boolean all) throws SQLException {
+    public void loadFilteredAngebote(String filter, boolean all) throws SQLException {
         String searchAngebotString = null;
         if (all) {
             searchAngebotString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ? or akzeptiert like ?;";
@@ -448,13 +514,29 @@ public class SqlConnector implements ISql {
                             rsSearchAngebot.getString("angebotsnummer"),
                             rsSearchAngebot.getString("kunde"),
                             rsSearchAngebot.getString("datum"),
-                            "noch ausstehend/nein"));
+                            "noch ausstehend/nein",
+                            rsSearchAngebot.getDouble("Nettobetrag"),
+                            rsSearchAngebot.getDouble("Bruttobetrag"),
+                            rsSearchAngebot.getDouble("Mehrwertsteuer"),
+                            rsSearchAngebot.getDouble("Skontobetrag"),
+                            rsSearchAngebot.getDouble("SkontoProzent"),
+                            rsSearchAngebot.getInt("Zahlungsziel"),
+                            rsSearchAngebot.getInt("Skontotage"),
+                            rsSearchAngebot.getString("Fakturatext")));
                 } else {
                     dataFilteredAngebot.add(new Angebot(
                             rsSearchAngebot.getString("angebotsnummer"),
                             rsSearchAngebot.getString("kunde"),
                             rsSearchAngebot.getString("datum"),
-                            "ja/Rechnung erstellt"));
+                            "ja/Rechnung erstellt",
+                            rsSearchAngebot.getDouble("Nettobetrag"),
+                            rsSearchAngebot.getDouble("Bruttobetrag"),
+                            rsSearchAngebot.getDouble("Mehrwertsteuer"),
+                            rsSearchAngebot.getDouble("Skontobetrag"),
+                            rsSearchAngebot.getDouble("SkontoProzent"),
+                            rsSearchAngebot.getInt("Zahlungsziel"),
+                            rsSearchAngebot.getInt("Skontotage"),
+                            rsSearchAngebot.getString("Fakturatext")));
                 }
             }
 
@@ -468,7 +550,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadFilteredRechnung(String filter, boolean all) throws SQLException {
+    public void loadFilteredRechnung(String filter, boolean all) throws SQLException {
         String searchRechnungString = null;
         if (all) {
             searchRechnungString = "select * from angebot where angebotsnummer like ? or kunde like ? or datum like ?;";
@@ -492,7 +574,15 @@ public class SqlConnector implements ISql {
                         rsSearchRechnung.getString("angebotsnummer"),
                         rsSearchRechnung.getString("kunde"),
                         rsSearchRechnung.getString("datum"),
-                        "ja/Rechnung erstellt"));
+                        null,
+                        rsSearchRechnung.getDouble("Nettobetrag"),
+                        rsSearchRechnung.getDouble("Bruttobetrag"),
+                        rsSearchRechnung.getDouble("Mehrwertsteuer"),
+                        rsSearchRechnung.getDouble("Skontobetrag"),
+                        rsSearchRechnung.getDouble("SkontoProzent"),
+                        rsSearchRechnung.getInt("Zahlungsziel"),
+                        rsSearchRechnung.getInt("Skontotage"),
+                        rsSearchRechnung.getString("Fakturatext")));
             }
 
         } catch (SQLException exc) {
@@ -505,7 +595,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void loadFilteredArtikel(String filter) throws SQLException {
+    public void loadFilteredArtikel(String filter) throws SQLException {
         String searchArtikelString = "select * from artikel where artikelnummer like ? or bezeichnung like ? or warengruppe like ?;";
         ResultSet rsSearchArtikel = null;
 
@@ -544,7 +634,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void safeNewKunde(String a, String vn,
+    public void safeNewKunde(String a, String vn,
             String n, String s,
             String h, String z,
             String p, String o,
@@ -598,7 +688,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void safeNewArtikel(String aN, String bez, String z, String ePreis, String vPreis, String mwst, String m, String d, String w) throws SQLException {
+    public void safeNewArtikel(String aN, String bez, String z, String ePreis, String vPreis, String mwst, String m, String d, String w) throws SQLException {
         String[] parameter = {aN, bez, z, ePreis, vPreis, mwst, m, d, w};
         String addStringArtikel = "insert into artikel(artikelnummer, bezeichnung, zusatztext, einkaufspreis, verkaufspreis, mwst, bestand, datum, warengruppe) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
@@ -615,75 +705,52 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void safeNewAngebot(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException {
+    public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+            int zZ, int skontoT) throws SQLException {
 
-        Statement stmtCheckKunde = null;
-        ResultSet rsCheckKunde = null;
-        Statement stmtCheckAngebot = null;
-        ResultSet rsCheckAngebot = null;
-        PreparedStatement stmtAddAngebot = null;
-        String aNumber = null;
+        String angebotString = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert, nettobetrag, bruttobetrag, mehrwertsteuer, zahlungsziel, skontotage, skontoprozent, skontobetrag, fakturatext) "
+                + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)) {
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtNewAngebot = myConn.prepareStatement(angebotString)) {
 
-            /*
-            //Test ob der Kunde überhaupt existiert
-            stmtCheckKunde = myConn.createStatement();
-            rsCheckKunde = stmtCheckKunde.executeQuery("select kundennummer from kunde;");
-            boolean kundeExist = false;
-            while (rsCheckKunde.next()) {
-                String test = rsCheckKunde.getString("kundennummer");
-                kundeExist = test.equals(k);
-            }*/
-            //Test ob Angebot bereits existiert
-            stmtCheckAngebot = myConn.createStatement();
-            rsCheckAngebot = stmtCheckAngebot.executeQuery("select angebotsnummer from angebot;");
-            boolean angebotExist = false;
-            while (rsCheckAngebot.next()) {
-                String test = rsCheckAngebot.getString("angebotsnummer");
-                angebotExist = test.equals(k);
-            }
+            LocalDate ld = LocalDate.now();
+            stmtNewAngebot.setString(1, aNummer);
+            stmtNewAngebot.setString(2, kNummer);
+            stmtNewAngebot.setString(3, ld.toString());
+            stmtNewAngebot.setString(4, "0");
+            stmtNewAngebot.setDouble(5, nettoBetrag);
+            stmtNewAngebot.setDouble(6, bruttoBetrag);
+            stmtNewAngebot.setDouble(7, mwst);
+            stmtNewAngebot.setInt(8, zZ);
+            stmtNewAngebot.setInt(9, skontoT);
+            stmtNewAngebot.setDouble(10, skontoPr);
+            stmtNewAngebot.setDouble(11, skontoBetrag);
+            stmtNewAngebot.setString(12, faktura);
 
-            if (/*kundeExist == true && */angebotExist == false) {
+            stmtNewAngebot.executeUpdate();
 
-                aNumber = generateRandomOfferNumber(d);
-                String addStringAngebot = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert) values(?, ?, ?, ?);";
-                stmtAddAngebot = myConn.prepareStatement(addStringAngebot);
-                stmtAddAngebot.setString(1, aNumber);
-                stmtAddAngebot.setString(2, k);
-                stmtAddAngebot.setString(3, d);
-                stmtAddAngebot.setString(4, ak);
-                stmtAddAngebot.executeUpdate();
-            }
-
-            int countM = 0;
-            for (Artikel it : art) {
-                safeArtikelInAngebot(aNumber, it.getArtikelnummer(), m.get(countM), Boolean.parseBoolean(it.getAlternative()), Double.parseDouble(it.getRabattmenge()));
-                countM++;
-            }
-        } catch (SQLException exc) {
-            throw exc;
-        } finally {
-            if (rsCheckKunde != null) {
-                rsCheckKunde.close();
-            }
-            if (stmtCheckKunde != null) {
-                stmtCheckKunde.close();
-            }
-            if (rsCheckAngebot != null) {
-                rsCheckAngebot.close();
-            }
-            if (stmtCheckAngebot != null) {
-                stmtCheckAngebot.close();
-            }
-            if (stmtAddAngebot != null) {
-                stmtAddAngebot.close();
+            for (Artikel art : artInAng) {
+                if (art.getRabattTemp() != null) {
+                    safeArtikelInAngebot(aNummer, art.getArtikelnummer(),
+                            Integer.valueOf(art.getMengeTemp()),
+                            Boolean.valueOf(art.getAlternative()),
+                            Double.valueOf(art.getRabattTemp()));
+                    System.out.println(Boolean.valueOf(art.getAlternative()));
+                } else {
+                    safeArtikelInAngebot(aNummer, art.getArtikelnummer(),
+                            Integer.valueOf(art.getMengeTemp()),
+                            Boolean.valueOf(art.getAlternative()));
+                    System.out.println(Boolean.valueOf(art.getAlternative()));
+                }
             }
         }
     }
 
     @Override
-        public void safeNewRechnung(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException {
+    public void safeNewRechnung(String k, String d,
+            String ak, ArrayList<Artikel> art,
+            ArrayList<Integer> m) throws SQLException {
 
         Statement stmtCheckKunde = null;
         ResultSet rsCheckKunde = null;
@@ -752,44 +819,48 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt, double r) throws SQLException {
+    public void safeArtikelInAngebot(String angebot, String artikel,
+            int menge, boolean alt, double r) throws SQLException {
         String addStringArtikelInAngebot = "insert into artikelinangebot(angebot, artikel, menge, alternativ, rabatt) values(?, ?, ?, ?, ?);";
-        String checkMengeString = "select menge from artikel join angebot on artikel.artikelnummer = angebot.artikel where angebot.artikel = ?";
         ResultSet rsCheckMenge = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
-                PreparedStatement stmtCheckMenge = myConn.prepareStatement(checkMengeString);
                 PreparedStatement stmtAddArtikelInAngebot = myConn.prepareStatement(addStringArtikelInAngebot)) {
 
-            //Testen ob die Menge des Artikels für das Angebot ausreicht
-            stmtCheckMenge.setInt(1, menge);
-            rsCheckMenge = stmtCheckMenge.executeQuery();
-            boolean testMenge = false;
-            while (rsCheckMenge.next()) {
-                if (rsCheckMenge.getInt("menge") >= menge) {
-                    testMenge = true;
-                }
-            }
+            stmtAddArtikelInAngebot.setString(1, angebot);
+            stmtAddArtikelInAngebot.setString(2, artikel);
+            stmtAddArtikelInAngebot.setInt(3, menge);
+            stmtAddArtikelInAngebot.setBoolean(4, alt);
+            stmtAddArtikelInAngebot.setDouble(5, r);
 
-            if (testMenge == true) {
-                stmtAddArtikelInAngebot.setString(1, angebot);
-                stmtAddArtikelInAngebot.setString(2, artikel);
-                stmtAddArtikelInAngebot.setInt(3, menge);
-                stmtAddArtikelInAngebot.setBoolean(4, alt);
-                stmtAddArtikelInAngebot.setDouble(5, r);
-                stmtAddArtikelInAngebot.executeUpdate();
-            }
+            stmtAddArtikelInAngebot.executeUpdate();
 
         } catch (SQLException exc) {
             throw exc;
-        } finally {
-            if (rsCheckMenge != null) {
-                rsCheckMenge.close();
-            }
+        }
+    }
+    @Override
+    public void safeArtikelInAngebot(String angebot, String artikel,
+            int menge, boolean alt) throws SQLException {
+        String addStringArtikelInAngebot = "insert into artikelinangebot(angebot, artikel, menge, alternativ) values(?, ?, ?, ?);";
+        ResultSet rsCheckMenge = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtAddArtikelInAngebot = myConn.prepareStatement(addStringArtikelInAngebot)) {
+
+            stmtAddArtikelInAngebot.setString(1, angebot);
+            stmtAddArtikelInAngebot.setString(2, artikel);
+            stmtAddArtikelInAngebot.setInt(3, menge);
+            stmtAddArtikelInAngebot.setBoolean(4, alt);
+
+            stmtAddArtikelInAngebot.executeUpdate();
+
+        } catch (SQLException exc) {
+            throw exc;
         }
     }
 
     @Override
-        public void updateKunde(String attr, String id, String eingabe) throws SQLException {
+    public void updateKunde(String attr, String id,
+            String eingabe) throws SQLException {
         String updateKundeString = "update kunde set ? = ? where kundennummer = ?";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -805,15 +876,29 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-        public void updateArtikel(String attr, String id, String eingabe) throws SQLException {
-        String updateArtikelString = "update artikel set ? = ? where artikelnummer = ?";
+    public void updateArtikelVerkaufsPreis(String id, String eingabe) throws SQLException {
+        String updateArtikelString = "update artikel set verkaufspreis = ? where artikelnummer = ?;";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtUpdateArtikel = myConn.prepareStatement(updateArtikelString)) {
 
-            stmtUpdateArtikel.setString(1, attr);
-            stmtUpdateArtikel.setString(2, eingabe);
-            stmtUpdateArtikel.setString(3, id);
+            stmtUpdateArtikel.setString(1, eingabe);
+            stmtUpdateArtikel.setString(2, id);
+            stmtUpdateArtikel.executeUpdate();
+        } catch (SQLException exc) {
+            throw exc;
+        }
+    }
+
+    @Override
+    public void updateArtikelNummer(String oldId, String newId) throws SQLException {
+        String updateArtikelString = "update artikel set artikelnummer = ? where artikelnummer = ?;";
+
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtUpdateArtikel = myConn.prepareStatement(updateArtikelString)) {
+
+            stmtUpdateArtikel.setString(1, oldId);
+            stmtUpdateArtikel.setString(2, newId);
             stmtUpdateArtikel.executeUpdate();
         } catch (SQLException exc) {
             throw exc;
@@ -843,7 +928,15 @@ public class SqlConnector implements ISql {
                         rsLetzteRechnungen.getString("angebotsnummer"),
                         rsLetzteRechnungen.getString("kunde"),
                         rsLetzteRechnungen.getString("datum"),
-                        rsLetzteRechnungen.getString("akzeptiert")));
+                        rsLetzteRechnungen.getString("akzeptiert"),
+                        rsLetzteRechnungen.getDouble("Nettobetrag"),
+                        rsLetzteRechnungen.getDouble("Bruttobetrag"),
+                        rsLetzteRechnungen.getDouble("Mehrwertsteuer"),
+                        rsLetzteRechnungen.getDouble("Skontobetrag"),
+                        rsLetzteRechnungen.getDouble("SkontoProzent"),
+                        rsLetzteRechnungen.getInt("Zahlungsziel"),
+                        rsLetzteRechnungen.getInt("Skontotage"),
+                        rsLetzteRechnungen.getString("Fakturatext")));
             }
             for (Angebot aIt : dataRechnung) {
                 letzteRechnung = aIt.getAngebotsnummer();
@@ -863,7 +956,7 @@ public class SqlConnector implements ISql {
             subYear = letzteRechnung.substring(0, 4);
             if (subYear.equals(String.valueOf(ld.getYear()))) {
                 subNumber = letzteRechnung.substring(5, 10);
-                subNumber = subNumber.replace("0", "");
+                subNumber = subNumber.replace("o", "");
                 String zeroTemp = "";
                 int number = Integer.parseInt(subNumber);
                 number++; //Nummer um 1 erhöhen
@@ -872,7 +965,7 @@ public class SqlConnector implements ISql {
                     newNumber = subNumber;
                 } else {
                     for (int i = 0; i < 5; i++) { //5-stellige Ziffer mit Nullen auffüllen
-                        zeroTemp += "0";
+                        zeroTemp += "o";
                         newNumber = zeroTemp + subNumber;
                         if (newNumber.length() == 5) { //Abbruch, wenn vorzeitig fertig ausgefüllt
                             break;
@@ -881,11 +974,11 @@ public class SqlConnector implements ISql {
                 }
             } else { //wenn die letzte Rechnung aus dem vorherigen Jahr oder früher stammt
                 subYear = String.valueOf(ld.getYear());
-                newNumber = "00001";
+                newNumber = "oooo1";
             }
         } else {
             subYear = String.valueOf(ld.getYear());
-            newNumber = "00001";
+            newNumber = "oooo1";
         }
 
         String fullNumber = subYear + "-" + newNumber + "-R";
@@ -893,6 +986,7 @@ public class SqlConnector implements ISql {
         return fullNumber;
     }
 
+    @Override
     public String generateRandomOfferNumber(String datum) throws SQLException {
         String stringLetzteAngebote = "select * from angebot where angebotsnummer like '%A%' order by angebotsnummer asc;";
         ResultSet rsLetzteAngebot = null;
@@ -908,7 +1002,15 @@ public class SqlConnector implements ISql {
                         rsLetzteAngebot.getString("angebotsnummer"),
                         rsLetzteAngebot.getString("kunde"),
                         rsLetzteAngebot.getString("datum"),
-                        rsLetzteAngebot.getString("akzeptiert")));
+                        rsLetzteAngebot.getString("akzeptiert"),
+                        rsLetzteAngebot.getDouble("Nettobetrag"),
+                        rsLetzteAngebot.getDouble("Bruttobetrag"),
+                        rsLetzteAngebot.getDouble("Mehrwertsteuer"),
+                        rsLetzteAngebot.getDouble("Skontobetrag"),
+                        rsLetzteAngebot.getDouble("SkontoProzent"),
+                        rsLetzteAngebot.getInt("Zahlungsziel"),
+                        rsLetzteAngebot.getInt("Skontotage"),
+                        rsLetzteAngebot.getString("Fakturatext")));
             }
             for (Angebot aIt : dataAngebot) {
                 letztesAngebot = aIt.getAngebotsnummer();
@@ -928,29 +1030,30 @@ public class SqlConnector implements ISql {
             subYear = letztesAngebot.substring(0, 4);
             if (subYear.equals(String.valueOf(ld.getYear()))) {
                 subNumber = letztesAngebot.substring(5, 10);
-                subNumber = subNumber.replace("0", "");
+                subNumber = subNumber.replace("o", "");
                 String zeroTemp = "";
                 int number = Integer.parseInt(subNumber);
-                number++; //Nummer um 1 erhöhen
+                number++;//Nummer um 1 erhöhen 
                 subNumber = String.valueOf(number);
                 if (subNumber.length() == 5) {
                     newNumber = subNumber;
                 } else {
                     for (int i = 0; i < 5; i++) { //5-stellige Ziffer mit Nullen auffüllen
-                        zeroTemp += "0";
+                        zeroTemp += "o";System.out.println(zeroTemp+ "zeroTemP");
                         newNumber = zeroTemp + subNumber;
-                        if (newNumber.length() == 5) { //Abbruch, wenn vorzeitig fertig ausgefüllt
+                        if (newNumber.length() == 5) {
+                            System.out.println("länge" + newNumber.length());//Abbruch, wenn vorzeitig fertig ausgefüllt
                             break;
                         }
                     }
                 }
             } else { //wenn die letzte Rechnung aus dem vorherigen Jahr oder früher stammt
                 subYear = String.valueOf(ld.getYear());
-                newNumber = "00001";
+                newNumber = "oooo1";
             }
         } else {
             subYear = String.valueOf(ld.getYear());
-            newNumber = "00001";
+            newNumber = "oooo1";
         }
 
         String fullNumber = subYear + "-" + newNumber + "-A";
@@ -961,7 +1064,7 @@ public class SqlConnector implements ISql {
     private String generateRandomClientNumber(String kunde) {
 
         String newKunde = kunde.substring(1, 6);
-        newKunde = newKunde.replace("0", "");
+        newKunde = newKunde.replace("o", "");
         int plusKunde = Integer.parseInt(newKunde);
         plusKunde++;
         String newKundeTemp = String.valueOf(plusKunde);
@@ -970,7 +1073,7 @@ public class SqlConnector implements ISql {
             newKunde = newKundeTemp;
         } else {
             for (int i = 0; i < 5; i++) {
-                zeroTemp += "0";
+                zeroTemp += "o";
                 newKunde = zeroTemp + newKundeTemp;
                 if (newKunde.length() == 5) {
                     break;

@@ -5,9 +5,14 @@
  */
 package com.verwaltungssoftware.GUI;
 
+import com.itextpdf.text.DocumentException;
 import com.verwaltungssoftware.database.SqlConnector;
 import com.verwaltungssoftware.objects.Angebot;
 import com.verwaltungssoftware.objects.Artikel;
+import com.verwaltungssoftware.objects.User;
+import com.verwaltungssoftware.pdf.PdfCreator;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,16 +24,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -39,6 +45,15 @@ import javafx.stage.Stage;
 public class AngebotAdd {
 
     static Scene kundenInfo, übernahme, posten, summen;
+    static String tempOldId = null;
+    static double verkaufsPreis = 0; //Einzelpreis
+    static double m = 0;
+    static double mwstEinzeln = 0;
+    static double mwstGesamt = 0;
+    static double gesamtpreis = 0; //Verkaufspreis * Menge pro Artikel/Zeile
+    static double alternativpreis = 0;
+    static double endpreisNetto = 0;
+    static double endpreisBrutto = 0;
 
     public static void display(GUI_Verwaltungssoftware mainGui) {
         GUI_Verwaltungssoftware gui = new GUI_Verwaltungssoftware();
@@ -90,7 +105,8 @@ public class AngebotAdd {
         Label zusatz = new Label("Zusatztext");
 
         TextField anredeT = new TextField();
-        TextField aNRT = new TextField();
+        Label aNRT = new Label();
+        aNRT.setText(null);
         TextField kNRT = new TextField();
         TextField vornameT = new TextField();
         TextField nameT = new TextField();
@@ -102,7 +118,8 @@ public class AngebotAdd {
         Label datumL = new Label(ld.format(dateTf));
         TextArea zusatzT = new TextArea();
 
-        aNRT.setEditable(false);
+        kNRT.setEditable(false);
+        anredeT.setEditable(false);
         vornameT.setEditable(false);
         nameT.setEditable(false);
         straßeT.setEditable(false);
@@ -141,8 +158,10 @@ public class AngebotAdd {
         cancel.setOnAction(e -> popupStage.close());
         Button cont = new Button("Weiter");
         cont.setOnAction(e -> {
-            popupStage.setScene(übernahme);
-            popupStage.setTitle(titleÜ);
+            if (aNRT.getText() != null) {
+                popupStage.setScene(übernahme);
+                popupStage.setTitle(titleÜ);
+            }
         });
 
         VBox sumL = new VBox();
@@ -314,7 +333,7 @@ public class AngebotAdd {
 
         TableColumn mengeEntwurf = new TableColumn("Menge");
         mengeEntwurf.setCellValueFactory(
-                new PropertyValueFactory<>("bestand"));
+                new PropertyValueFactory<>("mengeTemp"));
 
         TableColumn datumEntwurf = new TableColumn("Datum");
         datumEntwurf.setCellValueFactory(
@@ -375,10 +394,140 @@ public class AngebotAdd {
         TextField anzahlT = new TextField();
         TextField bezeichnungT = new TextField();
         TextField nettopreisT = new TextField();
-        TextField summeT = new TextField();
+        Label summeT = new Label();
         TextField rabattT = new TextField();
         TextField zusatztextT = new TextField();
 
+        artNrT.setOnKeyReleased((KeyEvent ke) -> {
+            if (summeT.getText() != null) {
+                for (Artikel art : dataNewAngebot) {
+                    if (tempOldId.equals(art.getArtikelnummer())) {
+                        try {
+                            gui.sql.updateArtikelNummer(art.getArtikelnummer(), artNrT.getText());
+                            art.setArtikelnummer(artNrT.getText());
+                            tempOldId = artNrT.getText();
+                        } catch (SQLException exc) {
+                            ConfirmBox.display2("Fehler", "Fehler beim aktualisieren der Artikelnummer");
+                        }
+                        angebotEntwurf.refresh();
+                        break;
+                    }
+                }
+            }
+        });
+        alternativ.setOnMouseClicked((MouseEvent me) -> {
+            for (Artikel art : dataNewAngebot) {
+                if (artNrT.getText().equals(art.getArtikelnummer())) {
+                    if (alternativ.isSelected()) {
+                        art.setAlternative("true");
+                        System.out.println(art.getAlternative());
+                    } else {
+                        art.setAlternative("false");
+                        System.out.println(art.getAlternative());
+                    }
+                }
+            }
+        });
+
+        nettopreisT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!artNrT.getText().isEmpty() && !nettopreisT.getText().isEmpty() && nettopreisT.getText().matches("\\d*(\\.\\d*)?")) {
+                for (Artikel art : dataNewAngebot) {
+                    if (art.getArtikelnummer().equals(artNrT.getText())) {
+                        try {
+                            gui.sql.updateArtikelVerkaufsPreis(art.getArtikelnummer(), nettopreisT.getText());
+                            art.setVerkaufspreis(nettopreisT.getText());
+                            angebotEntwurf.refresh();
+                        } catch (SQLException exc) {
+                            ConfirmBox.display2("Fehler", "Fehler beim aktualisieren des Artikels");
+                            System.out.println(exc.getMessage());
+                        }
+                        if (art.getMengeTemp() != null) {
+                            if (art.getRabattTemp() != null) {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                            }
+                        } else {
+                            if (art.getRabattTemp() != null) {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        anzahlT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!artNrT.getText().isEmpty() && anzahlT.getText().matches("[0-9]")) {
+                for (Artikel art : dataNewAngebot) {
+                    if (art.getArtikelnummer().equals(artNrT.getText())) {
+                        if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) {
+                            art.setMengeTemp(anzahlT.getText());
+                            if (art.getRabattTemp() != null) {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                            }
+                            angebotEntwurf.refresh();
+                            break;
+                        }
+                    }
+                }
+                System.out.println(dataNewAngebot.get(0).getMengeTemp() + "schauen");
+
+            }
+        });
+        rabattT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!artNrT.getText().isEmpty() && !rabattT.getText().isEmpty() && rabattT.getText().matches("\\d*(\\.\\d*)?")) {
+                for (Artikel art : dataNewAngebot) {
+                    if (art.getArtikelnummer().equals(artNrT.getText())) {
+                        art.setRabattTemp(rabattT.getText());
+                        if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
+                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (Double.valueOf(rabattT.getText()) / 100)));
+                        } else {
+                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(rabattT.getText()) / 100)));
+                        }
+                    }
+                }
+            } else {
+                for (Artikel art : dataNewAngebot) {
+                    if (art.getArtikelnummer().equals(artNrT.getText())) {
+                        summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
+                    }
+                }
+            }
+        });
+        angebotEntwurf.setOnMouseClicked((MouseEvent me) -> {
+            if (me.getClickCount() == 2) {
+                double summeTemp;
+                artNrT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer());
+                tempOldId = artNrT.getText();
+                bezeichnungT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBezeichnung());
+                nettopreisT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
+                rabattT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
+                if (rabattT.getText() == null) {
+                    summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                } else {
+                    summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                }
+                summeT.setText(String.valueOf(summeTemp));
+                anzahlT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                zusatztextT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getZusatztext());
+                for (Artikel art : dataNewAngebot) {
+                    if (artNrT.getText().equals(art.getArtikelnummer())) {
+                        if (art.getAlternative() != null) {
+                            if (art.getAlternative().equals("1")) {
+                                alternativ.setSelected(true);
+                            } else {
+                                alternativ.setSelected(false);
+                            }
+                        }
+                    }
+                }
+            }
+        });
         Button search = new Button("Suchen");
         search.setOnAction(e -> {
             TablePopup.displayArtikel(gui, "Angebot erstellen: Auswahl des Artikels", gui.artikelT);
@@ -390,6 +539,13 @@ public class AngebotAdd {
         });
         Button back2 = new Button("Zurück");
         back2.setOnAction(e -> {
+            artNrT.clear();
+            anzahlT.clear();
+            bezeichnungT.clear();
+            nettopreisT.clear();
+            summeT.setText(null);
+            rabattT.clear();
+            zusatztextT.clear();
             popupStage.setScene(übernahme);
             popupStage.setTitle(titleÜ);
         });
@@ -404,7 +560,7 @@ public class AngebotAdd {
                         dataNewAngebot.remove(art);
                         break;
                     }
-                }   
+                }
             }
         });
         add3.setOnAction(e -> {
@@ -429,10 +585,74 @@ public class AngebotAdd {
                 }
             }
         });
+
+        TextField summe4 = new TextField();
+        summe4.setEditable(false);
+        TextField mwtStrT = new TextField();
+        mwtStrT.setEditable(false);
+        TextField bruttopreisT = new TextField();
+        bruttopreisT.setEditable(false);
+        TextField gültigT = new TextField();
+        TextField fakturatextT = new TextField();
+        TextField skontotageT = new TextField();
+        TextField skontoT = new TextField();
+        TextField nettoT = new TextField();
+        TextField skontobetragT = new TextField();
+        skontobetragT.setEditable(false);
+
+        skontoT.setOnKeyReleased((KeyEvent ke) -> {
+            if (skontoT.getText() != null && skontoT.getText().matches("\\d*(\\.\\d*)?")) {
+                skontobetragT.setText(String.valueOf(endpreisBrutto * (1 - (Double.valueOf(skontoT.getText()) / 100))));
+            }
+        });
         Button con = new Button("Weiter");
         con.setOnAction(e -> {
-            popupStage.setScene(summen);
-            popupStage.setTitle(titleS);
+            boolean test = false;
+            for (Artikel aTest : dataNewAngebot) {
+                if (aTest.getMengeTemp() == null) {
+                    test = true;
+                    break;
+                }
+            }
+            if (test != true) {
+                for (Artikel a : dataNewAngebot) {
+                    if (a.getAlternative() != null) {
+                        if (a.getAlternative().equals("0") || a.getAlternative().equals("false")) {
+                            verkaufsPreis = Double.parseDouble(a.getVerkaufspreis());
+                            m = Double.parseDouble(a.getMengeTemp());
+                            if (a.getRabattmenge() == null) {
+                                gesamtpreis = verkaufsPreis * m;
+                            } else { //wenn Rabatt besteht
+                                gesamtpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattmenge()) / 100);
+                            }
+                        } else if (a.getAlternative().equals("1") || a.getAlternative().equals("true")) { //wenn Artikel alternativ ist
+                            gesamtpreis = 0;
+                            verkaufsPreis = Double.parseDouble(a.getVerkaufspreis());
+                            m = Double.parseDouble(a.getMengeTemp());
+                            if (a.getRabattmenge() == null) {
+                                alternativpreis = verkaufsPreis * m;
+                            } else { //wenn Rabatt besteht
+                                alternativpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattmenge()) / 100);
+                            }
+                        }
+                    }
+                    mwstEinzeln = gesamtpreis * (Double.parseDouble(a.getMwst()) / 100);
+                    mwstGesamt += mwstEinzeln;
+                    endpreisNetto += gesamtpreis;
+                }
+                endpreisBrutto = endpreisNetto + mwstGesamt;
+
+                summe4.setText(String.valueOf(endpreisNetto));
+                summe4.setEditable(false);
+                mwtStrT.setText(String.valueOf(mwstGesamt));
+                mwtStrT.setEditable(false);
+                bruttopreisT.setText(String.valueOf(endpreisBrutto));
+                bruttopreisT.setEditable(false);
+                nettoT.setText(String.valueOf(endpreisNetto));
+
+                popupStage.setScene(summen);
+                popupStage.setTitle(titleS);
+            }
         });
 
         VBox labelsLeft = new VBox();
@@ -483,34 +703,72 @@ public class AngebotAdd {
         Label netto = new Label("Netto");
         Label skontobetrag = new Label("Skontobetrag");
 
-        TextField summe4 = new TextField();
-        summe4.setEditable(false);
-        TextField mwtStrT = new TextField();
-        mwtStrT.setEditable(false);
-        TextField bruttopreisT = new TextField();
-        bruttopreisT.setEditable(false);
-        TextField gültigT = new TextField();
-        TextField fakturatextT = new TextField();
-        TextField skontotageT = new TextField();
-        TextField skontoT = new TextField();
-        TextField nettoT = new TextField();
-        TextField skontobetragT = new TextField();
-        skontobetragT.setEditable(false);
-
         Button abort = new Button("Zurück");
         abort.setOnAction(e -> {
+            verkaufsPreis = 0; //Einzelpreis
+            m = 0;
+            mwstEinzeln = 0;
+            mwstGesamt = 0;
+            gesamtpreis = 0; //Verkaufspreis * Menge pro Artikel/Zeile
+            alternativpreis = 0;
+            endpreisNetto = 0;
+            endpreisBrutto = 0;
             popupStage.setScene(posten);
             popupStage.setTitle(titleP);
         });
-        Button pdf = new Button("In PDF-Datei umwandeln");
+        Button pdfButton = new Button("In PDF-Datei umwandeln");
         Button done = new Button("Abschließen");
         done.setOnAction(e -> {
             boolean test = ConfirmBox.display("Angebotserstellung abschließen", "Möchten sie das Angebot wirklich erstellen?", 400, 100);
             if (test == true) {
+                try {
+                    gui.sql.safeNewAngebot(aNRT.getText(), kNRT.getText(), dataNewAngebot, endpreisNetto, endpreisBrutto, mwstGesamt,
+                            Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()), fakturatextT.getText(),
+                            Integer.valueOf(gültigT.getText()), Integer.valueOf(skontoT.getText()));
+                    gui.sql.loadDataAngebot(false);
+                } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim erzeugen des neuen Angebots.");
+                }
                 popupStage.close();
             } else {
                 e.consume();
             }
+        });
+
+        pdfButton.setOnAction(e -> {
+            try {
+                gui.sql.safeNewAngebot(aNRT.getText(), kNRT.getText(), dataNewAngebot, endpreisNetto, endpreisBrutto, mwstGesamt,
+                        Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()), fakturatextT.getText(),
+                        Integer.valueOf(gültigT.getText()), Integer.valueOf(skontoT.getText()));
+                gui.sql.loadDataAngebot(false);
+                User user = gui.sql.loadUser();
+                PdfCreator pdf = new PdfCreator(user, gui.sql);
+                FileChooser fc = new FileChooser();
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF (*.pdf)", "*pdf"));
+                File f = fc.showSaveDialog(new Stage());
+                System.out.println(f);
+                if (f != null && !f.getName().contains(".")) {
+                    f = new File(f.getAbsolutePath() + ".pdf");
+                }
+                if (f != null) {
+                    try {
+                        pdf.createDocument(kNRT.getText(),
+                                aNRT.getText(),
+                                zusatzT.getText(),
+                                Integer.valueOf(gültigT.getText()),
+                                Integer.valueOf(skontotageT.getText()),
+                                Double.valueOf(skontoT.getText()),
+                                fakturatextT.getText(),
+                                f);
+                    } catch (DocumentException | IOException | SQLException exc) {
+                        System.out.println(exc.getMessage());
+                    }
+                }
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim erzeugen des neuen Angebots.");
+                System.out.println(exc.getMessage());
+            }
+            popupStage.close();
         });
 
         VBox labels = new VBox();
@@ -535,7 +793,7 @@ public class AngebotAdd {
         leftAndRight.getChildren().addAll(labels, tLeft, labelsSkonto, tRight);
 
         HBox buttons4 = new HBox();
-        buttons4.getChildren().addAll(abort, pdf, done);
+        buttons4.getChildren().addAll(abort, pdfButton, done);
         buttons4.setPadding(new Insets(10, 10, 10, 10));
         buttons4.setSpacing(8);
         buttons4.setAlignment(Pos.CENTER);

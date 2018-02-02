@@ -124,14 +124,11 @@ public interface ISql {
 
     /**
      * Erstellt neues Angebot in der Datenbank
-     * @param k - Kunde
-     * @param d - Datum
-     * @param ak - akzeptiert
-     * @param art - ArrayList mit allen Artikeln
-     * @param m - Menge der Artikel im Angebot
+     * 
      * @throws SQLException 
      */
-    public void safeNewAngebot(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException;
+    public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+    int zZ, int skontoT) throws SQLException;
 
     /**
      * Erstellt neue Rechnung in der Datenbank
@@ -154,11 +151,16 @@ public interface ISql {
      * @throws SQLException 
      */
     public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt, double r) throws SQLException;
+    
+    public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt) throws SQLException;
 
     public void updateKunde(String attr, String id, String eingabe) throws SQLException;
 
-    public void updateArtikel(String attr, String id, String eingabe) throws SQLException;
+    public void updateArtikelVerkaufsPreis(String id, String eingabe) throws SQLException;
+    
+    public void updateArtikelNummer(String oldId, String newId) throws SQLException;
 
+    public User loadUser() throws SQLException;
     /**
      * Lädt alle Angebote die dem Filter entsprechen
      * @param filter - String um Angebote zu filtern

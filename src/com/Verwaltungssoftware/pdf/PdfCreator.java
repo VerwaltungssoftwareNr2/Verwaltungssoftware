@@ -19,14 +19,13 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.VerticalPositionMark;
-import com.verwaltungssoftware.main.Gui;
+import com.verwaltungssoftware.database.ISql;
 import com.verwaltungssoftware.objects.Angebot;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,17 +34,15 @@ public class PdfCreator {
 
     private Document document;
     private User user;
-    private SqlConnector sql;
-    private Gui gui;
+    private ISql sql;
 
-    public PdfCreator(User u, Gui g, SqlConnector s) {
+    public PdfCreator(User u, ISql s) {
         document = new Document();
         user = u;
         sql = s;
-        gui = g;
     }
 
-    public void createDocument(String kunde, String angebot, String hinweis, int zahlungsziel, int skontoZeit, double skontoBetrag, File f) throws DocumentException, IOException, SQLException {
+    public void createDocument(String kunde, String angebot, String hinweis, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura, File f) throws DocumentException, IOException, SQLException {
         if (document.isOpen() == false) {
             document = new Document();
         }
@@ -56,7 +53,7 @@ public class PdfCreator {
             document.open();
 
             loadHeaderData(kunde, angebot, hinweis, file);
-            loadTableData(angebot, zahlungsziel, skontoZeit, skontoBetrag);
+            loadTableData(angebot, zahlungsziel, skontoZeit, skontoBetrag, faktura);
 
             document.close();
             writer.close();
@@ -207,7 +204,7 @@ public class PdfCreator {
         }
     }
 
-    public void loadTableData(String angebotsnummer, int zahlungsziel, int skontoZeit, double skontoBetrag) throws SQLException, DocumentException, IOException {
+    public void loadTableData(String angebotsnummer, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura) throws SQLException, DocumentException, IOException {
         try {
             //Haupttabelle
             float[] est = {1.5f, 3, 5, 3, 4, 2, 4};
@@ -294,7 +291,7 @@ public class PdfCreator {
                     }
                     tableAlt.addCell(String.valueOf(alternativpreis));
                 }
-                mwstEinzeln = gesamtpreis * Double.parseDouble(a.getMwst());
+                mwstEinzeln = gesamtpreis * (Double.parseDouble(a.getMwst())/100);
                 mwstGesamt += mwstEinzeln;
                 endpreisNetto += gesamtpreis;
             }
@@ -361,13 +358,13 @@ public class PdfCreator {
             tableEnd.addCell(cBruttoWert);
 
             document.add(tableEnd);
-            loadFooterData(12, 7, 2, endpreisBrutto, angebotsnummer);
+            loadFooterData(zahlungsziel, skontoZeit, skontoBetrag, endpreisBrutto, angebotsnummer, faktura);
         } catch (SQLException | DocumentException | IOException exc) {
             throw exc;
         }
     }
 
-    public void loadFooterData(int zahlungsziel, int skontoZeit, double skontoBetrag, double endpreisBrutto, String angebotsnummer) throws DocumentException, SQLException, IOException {
+    public void loadFooterData(int zahlungsziel, int skontoZeit, double skontoBetrag, double endpreisBrutto, String angebotsnummer, String faktura) throws DocumentException, SQLException, IOException {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate angebotDatum;
@@ -391,7 +388,7 @@ public class PdfCreator {
             PdfPCell payC1 = new PdfPCell(paragraph1);
             Font payFont = FontFactory.getFont(FontFactory.HELVETICA, 7);
             PdfPCell payC2 = new PdfPCell(new Paragraph("Zahlungsziel " + zahlungsziel + " Netto, " + skontoZeit + " Tage " + skontoBetrag + "% Skonto.", payFont));
-            PdfPCell payC3 = new PdfPCell(new Paragraph("Die Ware bleibt unser Eigentum bis zur vollständigen Bezahlung.\nDienstleistungen sind nicht skontierfähig.", payFont));
+            PdfPCell payC3 = new PdfPCell(new Paragraph(faktura/*"Die Ware bleibt unser Eigentum bis zur vollständigen Bezahlung.\nDienstleistungen sind nicht skontierfähig."*/, payFont));
             PdfPCell payC4 = new PdfPCell(new Paragraph("entspricht:            " + round(endpreisBrutto * (1 - (skontoBetrag / 100)), 2) + " € bis: " + skontoDatum.format(dtf) + ",         " + endpreisBrutto + " € bis: " + zielDatum.format(dtf), payFont));
 
             payC1.setBorderColor(BaseColor.WHITE);

@@ -8,6 +8,8 @@ public class Artikel {
             zusatztext, einkaufspreis, verkaufspreis,
             mwst, bestand, datum, 
             alternative, rabattmenge, warengruppe;
+    //temporäres Abspeichern neuer Werte für neues Angebot oder Rechnung
+    private final SimpleStringProperty mengeTemp, rabattTemp;
 
     public Artikel(String aNummer, String bez, String extra, 
             String ePreis, String vPreis, String m, String num, 
@@ -24,6 +26,8 @@ public class Artikel {
         alternative = new SimpleStringProperty(alt);
         rabattmenge = new SimpleStringProperty(rb);
         warengruppe = new SimpleStringProperty(w);
+        mengeTemp = new SimpleStringProperty(null);
+        rabattTemp = new SimpleStringProperty(null);
     }
 
     //getter and setter
@@ -113,5 +117,21 @@ public class Artikel {
     
     public void setWarengruppe(String w){
         warengruppe.set(w);
+    }
+    
+    public String getMengeTemp() {
+        return mengeTemp.get();
+    }
+
+    public void setMengeTemp(String mengeTemp) {
+        this.mengeTemp.set(mengeTemp);
+    }
+
+    public String getRabattTemp() {
+        return rabattTemp.get();
+    }
+
+    public void setRabattTemp(String rabattTemp) {
+        this.rabattTemp.set(rabattTemp);
     }
 }

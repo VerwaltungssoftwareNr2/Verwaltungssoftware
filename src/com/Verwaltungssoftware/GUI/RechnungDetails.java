@@ -5,6 +5,8 @@
  */
 package com.verwaltungssoftware.GUI;
 
+import com.verwaltungssoftware.database.ISql;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javafx.geometry.Insets;
@@ -14,9 +16,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -29,7 +33,7 @@ import javafx.stage.Stage;
 public class RechnungDetails {
         static Scene details;
     
-    public static void display() {
+    public static void display(ISql sql, String nummer) {
         Stage popupStage = new Stage();
 
         popupStage.initModality(Modality.APPLICATION_MODAL);
@@ -114,9 +118,53 @@ public class RechnungDetails {
         
         info.setContent(sumsumButtons); // TAB KUNDENINFORMATIONEN
         
-        TableView artInAng = new TableView();
-        artInAng.setPrefSize(100000, 100000);
-        artInAng.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableView artInRech = new TableView();
+        artInRech.setPrefSize(100000, 100000);
+        TableColumn artikelnummer = new TableColumn("Artikelnummer");
+        artikelnummer.setCellValueFactory(
+                new PropertyValueFactory<>("artikelnummer"));
+
+        TableColumn bezeichnung = new TableColumn("Bezeichnung");
+        bezeichnung.setCellValueFactory(
+                new PropertyValueFactory<>("bezeichnung"));
+
+        TableColumn zusatztext = new TableColumn("Zusatztext");
+        zusatztext.setCellValueFactory(
+                new PropertyValueFactory<>("zusatztext"));
+
+        TableColumn warengruppe = new TableColumn("Warengruppe");
+        warengruppe.setCellValueFactory(
+                new PropertyValueFactory<>("warengruppe"));
+
+        TableColumn einkaufspreis = new TableColumn("Einkaufspreis");
+        einkaufspreis.setCellValueFactory(
+                new PropertyValueFactory<>("einkaufspreis"));
+
+        TableColumn verkaufspreis = new TableColumn("Verkaufspreis");
+        verkaufspreis.setCellValueFactory(
+                new PropertyValueFactory<>("verkaufspreis"));
+
+        TableColumn mwst = new TableColumn("MwSt.");
+        mwst.setCellValueFactory(
+                new PropertyValueFactory<>("mwst"));
+
+        TableColumn menge = new TableColumn("Bestand");
+        menge.setCellValueFactory(
+                new PropertyValueFactory<>("bestand"));
+
+        TableColumn datumT = new TableColumn("Datum");
+        datumT.setCellValueFactory(
+                new PropertyValueFactory<>("datum"));
+
+        artInRech.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        try{
+            sql.loadArtikelFromAngebot(nummer);
+            artInRech.setItems(sql.getDataArtikelInAngebot());
+        } catch(SQLException exc){
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
+        }
+        artInRech.getColumns().addAll(artikelnummer, bezeichnung, zusatztext, warengruppe, einkaufspreis, verkaufspreis, mwst, menge, datumT);
+        artInRech.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
 
         
@@ -142,7 +190,7 @@ public class RechnungDetails {
         buttons2.setAlignment(Pos.CENTER);
         
         VBox tableButtons = new VBox();
-        tableButtons.getChildren().addAll(artInAng, buttons2);
+        tableButtons.getChildren().addAll(artInRech, buttons2);
         
         posten.setContent(tableButtons); // TAB POSTEN ENDE
         
