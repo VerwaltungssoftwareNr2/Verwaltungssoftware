@@ -176,7 +176,7 @@ public class GUI_Verwaltungssoftware extends Application {
         artikel.getItems().addAll(addArtikel, addWarengruppe, tableArtikel);
 
         addArtikel.setOnAction(e -> ArtikelAdd.display(sql));
-        //addWarengruppe.setOnAction(e -> ArtikelAdd.display());
+        addWarengruppe.setOnAction(e -> Warengruppen.display());
 
         MenuItem createAngebot = new MenuItem("Erstellen");
         MenuItem tableAngebot = new MenuItem("Übersicht anzeigen");

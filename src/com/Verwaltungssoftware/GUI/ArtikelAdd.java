@@ -37,6 +37,7 @@ public class ArtikelAdd {
         popupStage.setTitle("Artikel hinzufügen");
 
         Label name = new Label("Bezeichnung");
+        name.setPrefWidth(1000);
         Label ztext = new Label("Zusatztext");
         Label artNr = new Label("Artikelnummer");
         Label gruppeL = new Label("Warengruppe");
