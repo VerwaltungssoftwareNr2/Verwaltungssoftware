@@ -99,7 +99,7 @@ public class AngebotDetails {
         Button pdf = new Button("In PDF umwandeln");
         Button delete = new Button("Angebot löschen");
         delete.setOnAction(e -> {
-            boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
+            boolean test = ConfirmBox.display("Angebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
                 try{
                     sql.deleteAngebot(aNummer);
@@ -132,6 +132,7 @@ public class AngebotDetails {
                                 angebot.getSkontoTage(),
                                 angebot.getSkontoProzent(),
                                 angebot.getFakturaText(),
+                                false,
                                 f);
                     } catch (DocumentException | IOException | SQLException exc) {
                         System.out.println(exc.getMessage());
@@ -255,6 +256,7 @@ public class AngebotDetails {
                                 angebot.getSkontoTage(),
                                 angebot.getSkontoProzent(),
                                 angebot.getFakturaText(),
+                                false,
                                 f);
                     } catch (DocumentException | IOException | SQLException exc) {
                         System.out.println(exc.getMessage());

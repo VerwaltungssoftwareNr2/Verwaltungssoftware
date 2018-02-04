@@ -146,18 +146,9 @@ public interface ISql {
      */
     public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
             int zZ, int skontoT) throws SQLException;
-
-    /**
-     * Erstellt neue Rechnung in der Datenbank
-     *
-     * @param k - Kunde
-     * @param d - Datum
-     * @param ak - akzeptiert
-     * @param art - ArrayList mit allen Artikeln
-     * @param m - Menge der Artikel im Rechnung
-     * @throws SQLException
-     */
-    public void safeNewRechnung(String k, String d, String ak, ArrayList<Artikel> art, ArrayList<Integer> m) throws SQLException;
+    
+    public void safeNewRechnung(String rNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+            int zZ, int skontoT) throws SQLException;
 
     /**
      * Speichert einen Artikel in ein Angebot
@@ -172,6 +163,10 @@ public interface ISql {
     public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt, double r) throws SQLException;
 
     public void safeArtikelInAngebot(String angebot, String artikel, int menge, boolean alt) throws SQLException;
+    
+    public void safeArtikelInRechnung(String rechnung, String artikel, int menge, boolean alt, double r) throws SQLException;
+
+    public void safeArtikelInRechnung(String rechnung, String artikel, int menge, boolean alt) throws SQLException;
 
     //public void updateKunde(String attr, String id, String eingabe) throws SQLException;
 

@@ -1,6 +1,5 @@
 package com.verwaltungssoftware.pdf;
 
-import com.verwaltungssoftware.database.SqlConnector;
 import com.verwaltungssoftware.objects.User;
 import com.verwaltungssoftware.objects.Kunde;
 import com.verwaltungssoftware.objects.Artikel;
@@ -42,7 +41,7 @@ public class PdfCreator {
         sql = s;
     }
 
-    public void createDocument(String kunde, String angebot, String hinweis, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura, File f) throws DocumentException, IOException, SQLException {
+    public void createDocument(String kunde, String belegNummer, String hinweis, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura, boolean check, File f) throws DocumentException, IOException, SQLException {
         if (document.isOpen() == false) {
             document = new Document();
         }
@@ -52,8 +51,8 @@ public class PdfCreator {
             //PdfWriter writer = PdfCreator.getInstance(document, new FileOutputStream(System.getProperty("user.home") + "/Desktop/blabla.pdf"));
             document.open();
 
-            loadHeaderData(kunde, angebot, hinweis, file);
-            loadTableData(angebot, zahlungsziel, skontoZeit, skontoBetrag, faktura);
+            loadHeaderData(kunde, belegNummer, hinweis, file, check);
+            loadTableData(belegNummer, zahlungsziel, skontoZeit, skontoBetrag, faktura, check);
 
             document.close();
             writer.close();
@@ -62,7 +61,7 @@ public class PdfCreator {
         }
     }
 
-    public void loadHeaderData(String kundennummer, String angebotsnummer, String hinweis, File file) throws SQLException, DocumentException, FileNotFoundException {
+    public void loadHeaderData(String kundennummer, String belegNummer, String hinweis, File file, boolean check) throws SQLException, DocumentException, FileNotFoundException {
         try {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
 
@@ -130,7 +129,12 @@ public class PdfCreator {
             Font angebotFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
             Font boxInfoFont = FontFactory.getFont(FontFactory.HELVETICA, 8);
             PdfPTable angebotTable = new PdfPTable(1);
-            PdfPCell cA = new PdfPCell(new Paragraph("Angebot", angebotFont));
+            PdfPCell cA = null;
+            if (!check) {
+                cA = new PdfPCell(new Paragraph("Angebot", angebotFont));
+            } else {
+                cA = new PdfPCell(new Paragraph("Rechnung", angebotFont));
+            }
             cA.setHorizontalAlignment(Element.ALIGN_CENTER);
             cA.setUseVariableBorders(true);
             angebotTable.addCell(cA);
@@ -139,9 +143,13 @@ public class PdfCreator {
             Chunk chAnummer = new Chunk(new VerticalPositionMark());
             Phrase pAnummer = new Phrase();
             pAnummer.setFont(boxInfoFont);
-            pAnummer.add("Angebotsnummer:");
+            if (!check) {
+                pAnummer.add("Angebotsnummer:");
+            } else {
+                pAnummer.add("Rechnungsnummer:");
+            }
             pAnummer.add(chAnummer);
-            pAnummer.add(angebotsnummer);
+            pAnummer.add(belegNummer);
             cANummer.setPhrase(pAnummer);
             cANummer.setUseVariableBorders(true);
             cANummer.setBorderColorBottom(BaseColor.WHITE);
@@ -156,10 +164,19 @@ public class PdfCreator {
             //Datum richtig formattieren
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate angebotDatum = null;
-            sql.loadDataAngebot(false);
-            for (Angebot a : sql.getDataAngebot()) {
-                if (a.getAngebotsnummer().equals(angebotsnummer)) {
-                    angebotDatum = LocalDate.parse(a.getDatum(), dtf);
+            if (!check) {
+                sql.loadDataAngebot(false);
+                for (Angebot a : sql.getDataAngebot()) {
+                    if (a.getAngebotsnummer().equals(belegNummer)) {
+                        angebotDatum = LocalDate.parse(a.getDatum(), dtf);
+                    }
+                }
+            } else {
+                sql.loadDataRechnung(false);
+                for (Angebot a : sql.getDataRechnung()) {
+                    if (a.getAngebotsnummer().equals(belegNummer)) {
+                        angebotDatum = LocalDate.parse(a.getDatum(), dtf);
+                    }
                 }
             }
             pDatum.add(angebotDatum.format(dtf)); //Meldung kann ignoriert werden, da definitiv ein Datum in der oberen Schleife zugewiesen wird
@@ -204,7 +221,7 @@ public class PdfCreator {
         }
     }
 
-    public void loadTableData(String angebotsnummer, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura) throws SQLException, DocumentException, IOException {
+    public void loadTableData(String belegNummer, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura, boolean check) throws SQLException, DocumentException, IOException {
         try {
             //Haupttabelle
             float[] est = {1.5f, 3, 5, 3, 4, 2, 4};
@@ -242,7 +259,7 @@ public class PdfCreator {
             tableAlt.getDefaultCell().setPadding(5);
             //
 
-            sql.loadArtikelFromAngebot(angebotsnummer);
+            sql.loadArtikelFromAngebot(belegNummer);
             int count = 1; //Nummerierung/Position des Artikels im Angebot/Rechnung
             double verkaufspreis = 0; //Einzelpreis
             double menge = 0;
@@ -291,7 +308,7 @@ public class PdfCreator {
                     }
                     tableAlt.addCell(String.valueOf(alternativpreis));
                 }
-                mwstEinzeln = gesamtpreis * (Double.parseDouble(a.getMwst())/100);
+                mwstEinzeln = gesamtpreis * (Double.parseDouble(a.getMwst()) / 100);
                 mwstGesamt += mwstEinzeln;
                 endpreisNetto += gesamtpreis;
             }
@@ -358,24 +375,35 @@ public class PdfCreator {
             tableEnd.addCell(cBruttoWert);
 
             document.add(tableEnd);
-            loadFooterData(zahlungsziel, skontoZeit, skontoBetrag, endpreisBrutto, angebotsnummer, faktura);
+            loadFooterData(zahlungsziel, skontoZeit, skontoBetrag, endpreisBrutto, belegNummer, faktura, check);
         } catch (SQLException | DocumentException | IOException exc) {
             throw exc;
         }
     }
 
-    public void loadFooterData(int zahlungsziel, int skontoZeit, double skontoBetrag, double endpreisBrutto, String angebotsnummer, String faktura) throws DocumentException, SQLException, IOException {
+    public void loadFooterData(int zahlungsziel, int skontoZeit, double skontoBetrag, double endpreisBrutto, String belegNummer, String faktura, boolean check) throws DocumentException, SQLException, IOException {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate angebotDatum;
             LocalDate skontoDatum = null;
             LocalDate zielDatum = null;
-            sql.loadDataAngebot(false);
-            for (Angebot a : sql.getDataAngebot()) {
-                if (a.getAngebotsnummer().equals(angebotsnummer)) {
-                    angebotDatum = LocalDate.parse(a.getDatum(), dtf);
-                    skontoDatum = angebotDatum.plusDays(skontoZeit);
-                    zielDatum = angebotDatum.plusDays(zahlungsziel);
+            if (!check) {
+                sql.loadDataAngebot(false);
+                for (Angebot a : sql.getDataAngebot()) {
+                    if (a.getAngebotsnummer().equals(belegNummer)) {
+                        angebotDatum = LocalDate.parse(a.getDatum(), dtf);
+                        skontoDatum = angebotDatum.plusDays(skontoZeit);
+                        zielDatum = angebotDatum.plusDays(zahlungsziel);
+                    }
+                }
+            } else {
+                sql.loadDataRechnung(false);
+                for (Angebot a : sql.getDataRechnung()) {
+                    if (a.getAngebotsnummer().equals(belegNummer)) {
+                        angebotDatum = LocalDate.parse(a.getDatum(), dtf);
+                        skontoDatum = angebotDatum.plusDays(skontoZeit);
+                        zielDatum = angebotDatum.plusDays(zahlungsziel);
+                    }
                 }
             }
             Font payHeadlineFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9);

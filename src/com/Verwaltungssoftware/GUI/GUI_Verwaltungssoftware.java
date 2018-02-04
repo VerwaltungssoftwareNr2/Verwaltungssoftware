@@ -239,7 +239,9 @@ public class GUI_Verwaltungssoftware extends Application {
         rechnungT.setPrefSize(100000, 100000);
         rechnungT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer());
+                RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(), 
+                        rechnungT.getSelectionModel().getSelectedItems().get(0).getKunde(),
+                        rechnungT.getSelectionModel().getSelectedItems().get(0).getDatum());
                 rechnungT.refresh();
             }
         });

@@ -234,7 +234,7 @@ public class SqlConnector implements ISql {
                 PreparedStatement stmtInsert = myConn.prepareStatement(insertString)) {
 
             stmtDelete.executeUpdate("drop table User_config;");
-            
+
             stmtCreate.executeUpdate("CREATE TABLE User_config("
                     + "    BID INTEGER PRIMARY KEY,"
                     + "    bankName VARCHAR(50) NOT NULL,"
@@ -288,6 +288,7 @@ public class SqlConnector implements ISql {
             stmtInsert.executeUpdate();
         }
     }
+
     @Override
     public User loadUser() throws SQLException {
         User user = null;
@@ -439,7 +440,7 @@ public class SqlConnector implements ISql {
             stmtKunde.setString(1, kNummer);
             rsKunde = stmtKunde.executeQuery();
             while (rsKunde.next()) {
-                kunde = new Kunde(kNummer, rsKunde.getString("anrede"), rsKunde.getString("vorname"), rsKunde.getString("name"), 
+                kunde = new Kunde(kNummer, rsKunde.getString("anrede"), rsKunde.getString("vorname"), rsKunde.getString("name"),
                         rsKunde.getString("straße"), rsKunde.getString("hausnummer"), rsKunde.getString("zusatz"),
                         rsKunde.getString("plz"), rsKunde.getString("ort"), rsKunde.getString("land"));
             }
@@ -972,81 +973,9 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewRechnung(String k, String d,
-            String ak, ArrayList<Artikel> art,
-            ArrayList<Integer> m) throws SQLException {
-
-        Statement stmtCheckKunde = null;
-        ResultSet rsCheckKunde = null;
-        Statement stmtCheckRechnung = null;
-        ResultSet rsCheckRechnung = null;
-        PreparedStatement stmtAddRechnung = null;
-
-        String rNumber = null;
-
-        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo)) {
-
-            //Test ob der Kunde überhaupt existiert
-            stmtCheckKunde = myConn.createStatement();
-            rsCheckKunde = stmtCheckKunde.executeQuery("select kundennummer from kunde;");
-            boolean kundeExist = false;
-            while (rsCheckKunde.next()) {
-                String test = rsCheckKunde.getString("kundennummer");
-                kundeExist = test.equals(k);
-            }
-
-            //Test ob Angebot bereits existiert
-            stmtCheckRechnung = myConn.createStatement();
-            rsCheckRechnung = stmtCheckRechnung.executeQuery("select angebotsnummer from angebot;");
-            boolean rechnungExist = false;
-            while (rsCheckRechnung.next()) {
-                String test = rsCheckRechnung.getString("angebotsnummer");
-                rechnungExist = test.equals(k);
-            }
-
-            if (kundeExist == true && rechnungExist == false) {
-
-                rNumber = generateRandomBillNumber(d);
-                String addStringRechnung = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert) values(?, ?, ?, ?);";
-                stmtAddRechnung = myConn.prepareStatement(addStringRechnung);
-                stmtAddRechnung.setString(1, rNumber);
-                stmtAddRechnung.setString(2, k);
-                stmtAddRechnung.setString(3, d);
-                stmtAddRechnung.setString(4, ak);
-                stmtAddRechnung.executeUpdate();
-            }
-
-            int countM = 0;
-            for (Artikel it : art) {
-                safeArtikelInAngebot(rNumber, it.getArtikelnummer(), m.get(countM), Boolean.parseBoolean(it.getAlternative()), Double.parseDouble(it.getRabattmenge()));
-                countM++;
-            }
-        } catch (SQLException exc) {
-            throw exc;
-        } finally {
-            if (rsCheckKunde != null) {
-                rsCheckKunde.close();
-            }
-            if (stmtCheckKunde != null) {
-                stmtCheckKunde.close();
-            }
-            if (rsCheckRechnung != null) {
-                rsCheckRechnung.close();
-            }
-            if (stmtCheckRechnung != null) {
-                stmtCheckRechnung.close();
-            }
-            if (stmtAddRechnung != null) {
-                stmtAddRechnung.close();
-            }
-        }
-    }
-
-    @Override
     public void safeArtikelInAngebot(String angebot, String artikel,
             int menge, boolean alt, double r) throws SQLException {
         String addStringArtikelInAngebot = "insert into artikelinangebot(angebot, artikel, menge, alternativ, rabatt) values(?, ?, ?, ?, ?);";
-        ResultSet rsCheckMenge = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtAddArtikelInAngebot = myConn.prepareStatement(addStringArtikelInAngebot)) {
 
@@ -1067,7 +996,6 @@ public class SqlConnector implements ISql {
     public void safeArtikelInAngebot(String angebot, String artikel,
             int menge, boolean alt) throws SQLException {
         String addStringArtikelInAngebot = "insert into artikelinangebot(angebot, artikel, menge, alternativ) values(?, ?, ?, ?);";
-        ResultSet rsCheckMenge = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtAddArtikelInAngebot = myConn.prepareStatement(addStringArtikelInAngebot)) {
 
@@ -1084,7 +1012,128 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException{
+    public void safeNewRechnung(String rNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+            int zZ, int skontoT) throws SQLException {
+
+        String rechnungString = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert, nettobetrag, bruttobetrag, mehrwertsteuer, zahlungsziel, skontotage, skontoprozent, skontobetrag, fakturatext) "
+                + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtNewRechnung = myConn.prepareStatement(rechnungString)) {
+
+            LocalDate ld = LocalDate.now();
+            stmtNewRechnung.setString(1, rNummer);
+            stmtNewRechnung.setString(2, kNummer);
+            stmtNewRechnung.setString(3, ld.toString());
+            stmtNewRechnung.setString(4, "0");
+            stmtNewRechnung.setDouble(5, nettoBetrag);
+            stmtNewRechnung.setDouble(6, bruttoBetrag);
+            stmtNewRechnung.setDouble(7, mwst);
+            stmtNewRechnung.setInt(8, zZ);
+            stmtNewRechnung.setInt(9, skontoT);
+            stmtNewRechnung.setDouble(10, skontoPr);
+            stmtNewRechnung.setDouble(11, skontoBetrag);
+            stmtNewRechnung.setString(12, faktura);
+
+            stmtNewRechnung.executeUpdate();
+
+            for (Artikel art : artInAng) {
+                if (art.getRabattTemp() != null) {
+                    safeArtikelInRechnung(rNummer, art.getArtikelnummer(),
+                            Integer.valueOf(art.getMengeTemp()),
+                            Boolean.valueOf(art.getAlternative()),
+                            Double.valueOf(art.getRabattTemp()));
+                    System.out.println(Boolean.valueOf(art.getAlternative()));
+                } else {
+                    safeArtikelInRechnung(rNummer, art.getArtikelnummer(),
+                            Integer.valueOf(art.getMengeTemp()),
+                            Boolean.valueOf(art.getAlternative()));
+                    System.out.println(Boolean.valueOf(art.getAlternative()));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void safeArtikelInRechnung(String rechnung, String artikel,
+            int menge, boolean alt, double r) throws SQLException {
+        String addStringArtikelInRechnung = "insert into artikelinangebot(angebot, artikel, menge, alternativ, rabatt) values(?, ?, ?, ?, ?);";
+        String updateString = "update artikel set bestand = ? where artikelnummer = ?;";
+        ResultSet rsCheck = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtCheck = myConn.prepareStatement("select bestand from artikel where artikelnummer = ?;");
+                PreparedStatement stmtAddArtikelInRechnung = myConn.prepareStatement(addStringArtikelInRechnung);
+                PreparedStatement stmtUpdateBestand = myConn.prepareStatement(updateString)) {
+
+            stmtAddArtikelInRechnung.setString(1, rechnung);
+            stmtAddArtikelInRechnung.setString(2, artikel);
+            stmtAddArtikelInRechnung.setInt(3, menge);
+            stmtAddArtikelInRechnung.setBoolean(4, alt);
+            stmtAddArtikelInRechnung.setDouble(5, r);
+
+            stmtAddArtikelInRechnung.executeUpdate();
+
+            int neuerBestand = 0;
+            
+            stmtCheck.setString(1, artikel);
+            rsCheck = stmtCheck.executeQuery();
+            while (rsCheck.next()) {
+                neuerBestand = Integer.parseInt(rsCheck.getString("bestand"));
+            }
+            neuerBestand = neuerBestand - menge;
+
+            stmtUpdateBestand.setInt(1, neuerBestand);
+            stmtUpdateBestand.setString(2, artikel);
+
+            stmtUpdateBestand.executeUpdate();
+
+        } finally {
+            if (rsCheck != null) {
+                rsCheck.close();
+            }
+        }
+    }
+
+    @Override
+    public void safeArtikelInRechnung(String rechnung, String artikel,
+            int menge, boolean alt) throws SQLException {
+        String addStringArtikelInRechnung = "insert into artikelinangebot(angebot, artikel, menge, alternativ) values(?, ?, ?, ?);";
+        String updateString = "update artikel set bestand = ? where artikelnummer = ?;";
+        ResultSet rsCheck = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtCheck = myConn.prepareStatement("select bestand from artikel where artikelnummer = ?;");
+                PreparedStatement stmtAddArtikelInRechnung = myConn.prepareStatement(addStringArtikelInRechnung);
+                PreparedStatement stmtUpdateBestand = myConn.prepareStatement(updateString)) {
+
+            stmtAddArtikelInRechnung.setString(1, rechnung);
+            stmtAddArtikelInRechnung.setString(2, artikel);
+            stmtAddArtikelInRechnung.setInt(3, menge);
+            stmtAddArtikelInRechnung.setBoolean(4, alt);
+
+            stmtAddArtikelInRechnung.executeUpdate();
+
+            int neuerBestand = 0;
+            stmtCheck.setString(1, artikel);
+            rsCheck = stmtCheck.executeQuery();
+            while (rsCheck.next()) {
+                neuerBestand = Integer.parseInt(rsCheck.getString("bestand"));
+            }
+            neuerBestand = neuerBestand - menge;
+
+            stmtUpdateBestand.setInt(1, neuerBestand);
+            stmtUpdateBestand.setString(2, artikel);
+
+            stmtUpdateBestand.executeUpdate();
+
+        } finally {
+            if (rsCheck != null) {
+                rsCheck.close();
+            }
+        }
+    }
+
+    @Override
+    public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException {
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement updateAnrede = myConn.prepareStatement("update kunde set anrede = ? where kundennummer = ?;");
                 PreparedStatement updateVorname = myConn.prepareStatement("update kunde set vorname = ? where kundennummer = ?;");
@@ -1092,35 +1141,35 @@ public class SqlConnector implements ISql {
                 PreparedStatement updateStrasse = myConn.prepareStatement("update kunde set straße = ? where kundennummer = ?;");
                 PreparedStatement updateHausnummer = myConn.prepareStatement("update kunde set hausnummer = ? where kundennummer = ?;");
                 PreparedStatement updateZusatz = myConn.prepareStatement("update kunde set zusatz = ? where kundennummer = ?;")) {
-            
-            
+
             updateAnrede.setString(1, a);
             updateAnrede.setString(2, kNummer);
-            
+
             updateVorname.setString(1, vn);
             updateVorname.setString(2, kNummer);
-            
+
             updateNachname.setString(1, n);
             updateNachname.setString(2, kNummer);
-            
+
             updateStrasse.setString(1, s);
             updateStrasse.setString(2, kNummer);
-            
+
             updateHausnummer.setString(1, h);
             updateHausnummer.setString(2, kNummer);
-            
+
             updateZusatz.setString(1, z);
             updateZusatz.setString(2, kNummer);
-            
+
             updateAnrede.executeUpdate();
             updateVorname.executeUpdate();
             updateNachname.executeUpdate();
             updateStrasse.executeUpdate();
             updateHausnummer.executeUpdate();
             updateZusatz.executeUpdate();
-            
+
         }
     }
+
     /*
     @Override
     public void updateKunde(String attr, String id,

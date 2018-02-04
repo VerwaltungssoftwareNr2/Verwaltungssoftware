@@ -247,7 +247,7 @@ public class AngebotAdd {
                 try {
                     gui.sql.loadArtikelFromAngebot(nummer);
                 } catch (SQLException exc) {
-                    ConfirmBox.display2("Fehler", "Fehler beim Laden des Angebots");
+                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel des Angebots");
                     System.out.println(exc.getMessage());
                 }
 
@@ -759,6 +759,7 @@ public class AngebotAdd {
                                 Integer.valueOf(skontotageT.getText()),
                                 Double.valueOf(skontoT.getText()),
                                 fakturatextT.getText(),
+                                false,
                                 f);
                     } catch (DocumentException | IOException | SQLException exc) {
                         System.out.println(exc.getMessage());
