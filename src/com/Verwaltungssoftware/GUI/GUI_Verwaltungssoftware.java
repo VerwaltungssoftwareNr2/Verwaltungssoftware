@@ -176,7 +176,7 @@ public class GUI_Verwaltungssoftware extends Application {
         artikel.getItems().addAll(addArtikel, addWarengruppe, tableArtikel);
 
         addArtikel.setOnAction(e -> ArtikelAdd.display(sql));
-        addWarengruppe.setOnAction(e -> Warengruppen.display());
+        addWarengruppe.setOnAction(e -> Warengruppen.display(sql));
 
         MenuItem createAngebot = new MenuItem("Erstellen");
         MenuItem tableAngebot = new MenuItem("Übersicht anzeigen");
@@ -217,6 +217,7 @@ public class GUI_Verwaltungssoftware extends Application {
                 sql.loadDataAngebot(false);
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Laden der Angebote");
+                System.out.println(exc.getMessage());
             }
             pane.setCenter(angebotT);
         });
@@ -225,6 +226,7 @@ public class GUI_Verwaltungssoftware extends Application {
                 sql.loadDataRechnung(false);
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Laden der Rechnungen");
+                System.out.println(exc.getMessage());
             }
             pane.setCenter(rechnungT);
         });

@@ -60,7 +60,7 @@ public class KundeDetails {
         if (kunde.getAnrede().equals(h)) {
             anredeChoice.setValue(h);
         } else{
-            anredeChoice.setValue(h);
+            anredeChoice.setValue(f);
         }
         TextField kNRT = new TextField(kNummer);
         kNRT.setMaxWidth(1000);

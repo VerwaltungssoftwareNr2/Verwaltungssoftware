@@ -37,7 +37,7 @@ public class ArtikelAdd {
         popupStage.setTitle("Artikel hinzufügen");
 
         Label name = new Label("Bezeichnung");
-        name.setPrefWidth(1000);
+        //name.setPrefWidth(1000);
         Label ztext = new Label("Zusatztext");
         Label artNr = new Label("Artikelnummer");
         Label gruppeL = new Label("Warengruppe");
@@ -47,8 +47,14 @@ public class ArtikelAdd {
         Label mehrwertSt = new Label("Mehrwertsteuer in %");
 
         ChoiceBox gruppe = new ChoiceBox();
-        gruppe.getItems().addAll("Steine", "Rohre", "Zäune", "Kabel");
-        //gruppe.setValue("Steine");
+        try {
+            sql.loadDataWarengruppe();
+            for (String s : sql.getDataWarengruppe()) {
+                gruppe.getItems().add(s);
+            }
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Warengruppen");
+        }
 
         TextField nameT = new TextField();
         nameT.setMaxWidth(1000);
@@ -70,13 +76,45 @@ public class ArtikelAdd {
         mehrwertC.getItems().addAll(n, s);
         mehrwertC.setValue(n);
 
+        preisET.setOnKeyReleased(e -> {
+           if(!preisET.getText().matches("\\d*(\\.\\d*)?")){
+               if(!preisET.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(preisET.getText());
+                sb.deleteCharAt(preisET.getText().length()-1);
+                preisET.setText(sb.toString());
+                preisET.positionCaret(preisET.getText().length());
+                }
+           } 
+        });
+        preisVT.setOnKeyReleased(e -> {
+           if(!preisVT.getText().matches("\\d*(\\.\\d*)?")){
+               if(!preisVT.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(preisVT.getText());
+                sb.deleteCharAt(preisVT.getText().length()-1);
+                preisVT.setText(sb.toString());
+                preisVT.positionCaret(preisVT.getText().length());
+                }
+           } 
+        });
+        bestandT.setOnKeyReleased(e -> {
+           if(!bestandT.getText().matches("[0-9]*")){
+               if(!bestandT.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(bestandT.getText());
+                sb.deleteCharAt(bestandT.getText().length()-1);
+                bestandT.setText(sb.toString());
+                bestandT.positionCaret(bestandT.getText().length());
+                }
+           } 
+        });
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> {
             try {
                 LocalDate ld = LocalDate.now();
-                sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(), bestandT.getText(), ld.toString(), null);
+                sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), 
+                        preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(), 
+                        bestandT.getText(), ld.toString(), gruppe.getSelectionModel().getSelectedItem().toString());
                 sql.loadDataArtikel();
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Erstellen der Artikel");

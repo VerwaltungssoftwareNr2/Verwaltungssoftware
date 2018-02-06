@@ -73,13 +73,51 @@ public class ArtikelDetails {
         TextField mwstT = new TextField(artikel.getMwst());
         mwstT.setMaxWidth(1000);
 
+        preisET.setOnKeyReleased(e -> {
+           if(!preisET.getText().matches("\\d*(\\.\\d*)?")){
+               if(!preisET.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(preisET.getText());
+                sb.deleteCharAt(preisET.getText().length()-1);
+                preisET.setText(sb.toString());
+                preisET.positionCaret(preisET.getText().length());
+                }
+           } 
+        });
+        preisVT.setOnKeyReleased(e -> {
+           if(!preisVT.getText().matches("\\d*(\\.\\d*)?")){
+               if(!preisVT.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(preisVT.getText());
+                sb.deleteCharAt(preisVT.getText().length()-1);
+                preisVT.setText(sb.toString());
+                preisVT.positionCaret(preisVT.getText().length());
+                }
+           } 
+        });
+        bestandT.setOnKeyReleased(e -> {
+           if(!bestandT.getText().matches("[0-9]*")){
+               if(!bestandT.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(bestandT.getText());
+                sb.deleteCharAt(bestandT.getText().length()-1);
+                bestandT.setText(sb.toString());
+                bestandT.positionCaret(bestandT.getText().length());
+                }
+           } 
+        });
+        
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> {
             try {
-                LocalDate ld = LocalDate.now();
-                sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), preisET.getText(), preisVT.getText(), mwstT.getText(), bestandT.getText(), ld.toString(), null);
+                if (!gruppe.getSelectionModel().isEmpty()) {
+                    sql.updateArtikel(artNummer, artNrT.getText(), nameT.getText(), ztextT.getText(),
+                            preisET.getText(), preisVT.getText(), mwstT.getText(),
+                            bestandT.getText(), gruppe.getSelectionModel().getSelectedItem().toString());
+                } else{
+                    sql.updateArtikel(artNummer, artNrT.getText(), nameT.getText(), ztextT.getText(),
+                            preisET.getText(), preisVT.getText(), mwstT.getText(),
+                            bestandT.getText(), null);
+                }
                 sql.loadDataArtikel();
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Speichern der Artikeldetails");

@@ -102,7 +102,7 @@ public class RechnungsAdd {
         Label plz = new Label("PLZ");
         Label ort = new Label("Ort");
         Label datum = new Label("Datum");
-        Label zusatz = new Label("Zusatztext");
+        Label zusatz = new Label("Hinweis");
 
         TextField anredeT = new TextField();
         Label rNRT = new Label();
@@ -342,34 +342,40 @@ public class RechnungsAdd {
 
         //fügt gesamte Rechnung als Vorlage hinzu
         add.setOnAction((ActionEvent) -> {
-            dataNewRechnung.clear();
-            for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
-                dataNewRechnung.add(a);
+            if (!gui.sql.getDataArtikelInAngebot().isEmpty()) {
+                dataNewRechnung.clear();
+                for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
+                    dataNewRechnung.add(a);
+                }
             }
         });
 
         //fügt einzelne Artikel aus bestehenden Rechnungen hinzu
         add2.setOnAction((ActionEvent) -> {
             boolean test = false;
-            String nummer = aFromAR.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(); //selektiertes Item
-            if (dataNewRechnung.isEmpty()) { //wenn neue Liste leer
-                for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
-                    if (nummer.equals(a.getArtikelnummer())) {
-                        dataNewRechnung.add(a);
-                        break;
-                    }
-                }
-            } else {
-                for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
-                    if (a.getArtikelnummer().equals(nummer)) {
-                        for (Artikel b : dataNewRechnung) {
-                            if (a.getArtikelnummer().equals(b.getArtikelnummer())) {
-                                test = true;
+            if (!aFromAR.getItems().isEmpty()) {
+                if (!aFromAR.getSelectionModel().getSelectedItems().isEmpty()) {
+                    String nummer = aFromAR.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(); //selektiertes Item
+                    if (dataNewRechnung.isEmpty()) { //wenn neue Liste leer
+                        for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
+                            if (nummer.equals(a.getArtikelnummer())) {
+                                dataNewRechnung.add(a);
                                 break;
                             }
                         }
-                        if (test == false) {
-                            dataNewRechnung.add(a);
+                    } else {
+                        for (Artikel a : gui.sql.getDataArtikelInAngebot()) {
+                            if (a.getArtikelnummer().equals(nummer)) {
+                                for (Artikel b : dataNewRechnung) {
+                                    if (a.getArtikelnummer().equals(b.getArtikelnummer())) {
+                                        test = true;
+                                        break;
+                                    }
+                                }
+                                if (test == false) {
+                                    dataNewRechnung.add(a);
+                                }
+                            }
                         }
                     }
                 }
@@ -511,6 +517,7 @@ public class RechnungsAdd {
                 }
                 summeT.setText(String.valueOf(summeTemp));
                 anzahlT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                anzahlT.setPromptText("Aktueller Bestand: " + rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
                 zusatztextT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getZusatztext());
                 for (Artikel art : dataNewRechnung) {
                     if (artNrT.getText().equals(art.getArtikelnummer())) {
@@ -528,11 +535,27 @@ public class RechnungsAdd {
         Button search = new Button("Suchen");
         search.setOnAction(e -> {
             TablePopup.displayArtikel(gui, "Rechnung erstellen: Auswahl des Artikels", gui.artikelT);
-            artNrT.setText(gui.tempArtikel[0]);
-            bezeichnungT.setText(gui.tempArtikel[1]);
-            nettopreisT.setText(gui.tempArtikel[2]);
-            anzahlT.setPromptText("Aktueller Bestand: " + gui.tempArtikel[3]);
-            zusatztextT.setText(gui.tempArtikel[4]);
+
+            boolean test = false;
+            try {
+                gui.sql.loadDataArtikel();
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
+                System.out.println(exc.getMessage());
+            }
+            for (Artikel oldA : gui.sql.getDataArtikel()) {
+                if (oldA.getArtikelnummer().equals(gui.tempArtikel[0])) {
+                    for (Artikel newA : dataNewRechnung) {
+                        if (oldA.getArtikelnummer().equals(newA.getArtikelnummer())) {
+                            test = true;
+                            break;
+                        }
+                    }
+                    if (test == false) {
+                        dataNewRechnung.add(oldA);
+                    }
+                }
+            }
         });
         Button back2 = new Button("Zurück");
         back2.setOnAction(e -> {
@@ -546,7 +569,6 @@ public class RechnungsAdd {
             popupStage.setScene(übernahme);
             popupStage.setTitle(titleÜ);
         });
-        Button add3 = new Button("Hinzufügen");
         Button delete = new Button("Entfernen");
 
         delete.setOnAction(e -> {
@@ -561,29 +583,6 @@ public class RechnungsAdd {
             }
         });
 
-        add3.setOnAction(e -> {
-            boolean test = false;
-            try {
-                gui.sql.loadDataArtikel();
-            } catch (SQLException exc) {
-                ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel");
-                System.out.println(exc.getMessage());
-            }
-            for (Artikel oldA : gui.sql.getDataArtikel()) {
-                if (oldA.getArtikelnummer().equals(artNrT.getText())) {
-                    for (Artikel newA : dataNewRechnung) {
-                        if (oldA.getArtikelnummer().equals(newA.getArtikelnummer())) {
-                            test = true;
-                            break;
-                        }
-                    }
-                    if (test == false) {
-                        dataNewRechnung.add(oldA);
-                    }
-                }
-            }
-        });
-        
         TextField summe4 = new TextField();
         summe4.setEditable(false);
         TextField mwtStrT = new TextField();
@@ -597,10 +596,37 @@ public class RechnungsAdd {
         TextField nettoT = new TextField();
         TextField skontobetragT = new TextField();
         skontobetragT.setEditable(false);
+
+        gültigT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!ke.getText().matches("[0-9]*")) {
+                StringBuilder sb = new StringBuilder(gültigT.getText());
+                sb.deleteCharAt(gültigT.getText().length()-1);
+                gültigT.setText(sb.toString());
+                gültigT.positionCaret(gültigT.getText().length());
+            }
+        });
+        
+        skontotageT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!ke.getText().matches("[0-9]*")) {
+                StringBuilder sb = new StringBuilder(skontotageT.getText());
+                sb.deleteCharAt(skontotageT.getText().length()-1);
+                skontotageT.setText(sb.toString());
+                skontotageT.positionCaret(skontotageT.getText().length());
+            }
+        });
         
         skontoT.setOnKeyReleased((KeyEvent ke) -> {
-            if (skontoT.getText() != null && skontoT.getText().matches("\\d*(\\.\\d*)?")) {
+            if (!skontoT.getText().trim().isEmpty() && skontoT.getText().matches("\\d*(\\.\\d*)?")) {
                 skontobetragT.setText(String.valueOf(endpreisBrutto * (1 - (Double.valueOf(skontoT.getText()) / 100))));
+            } else{
+                if(!skontoT.getText().trim().isEmpty()){
+                StringBuilder sb = new StringBuilder(skontoT.getText());
+                sb.deleteCharAt(skontoT.getText().length()-1);
+                skontoT.setText(sb.toString());
+                skontoT.positionCaret(skontoT.getText().length());
+                } else{
+                    skontobetragT.clear();
+                }
             }
         });
         Button con = new Button("Weiter");
@@ -612,7 +638,7 @@ public class RechnungsAdd {
                     break;
                 }
             }
-            if (test != true) {
+            if (test != true && !rechnungEntwurf.getItems().isEmpty()) {
                 for (Artikel a : dataNewRechnung) {
                     if (a.getAlternative() != null) {
                         if (a.getAlternative().equals("0") || a.getAlternative().equals("false")) {
@@ -676,7 +702,7 @@ public class RechnungsAdd {
         leftRight.getChildren().addAll(labelsLeft, textLeft, labelsRight, textRight);
 
         HBox buttons3 = new HBox();
-        buttons3.getChildren().addAll(back2, add3, delete, con);
+        buttons3.getChildren().addAll(back2, delete, con);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
@@ -718,56 +744,69 @@ public class RechnungsAdd {
         done.setOnAction(e -> {
             boolean test = ConfirmBox.display("Rechnungserstellung abschließen", "Möchten sie die Rechnung wirklich erstellen?", 400, 100);
             if (test == true) {
-                try {
-                    gui.sql.safeNewRechnung(rNRT.getText(), kNRT.getText(), dataNewRechnung, endpreisNetto, endpreisBrutto, mwstGesamt,
-                            Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()), fakturatextT.getText(),
-                            Integer.valueOf(gültigT.getText()), Integer.valueOf(skontoT.getText()));
-                    gui.sql.loadDataRechnung(false);
-                } catch (SQLException exc) {
-                    ConfirmBox.display2("Fehler", "Fehler beim Erzeugen der neuen Rechnung.");
-                    System.out.println(exc.getMessage());
+                if (!skontoT.getText().trim().isEmpty() && !skontobetragT.getText().trim().isEmpty() && !gültigT.getText().trim().isEmpty() && !skontotageT.getText().trim().isEmpty()) {
+                    try {
+                        gui.sql.safeNewRechnung(rNRT.getText(), kNRT.getText(), dataNewRechnung, endpreisNetto, endpreisBrutto, mwstGesamt,
+                                Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()), fakturatextT.getText(), zusatzT.getText(),
+                                Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()));
+                        gui.sql.loadDataRechnung(false);
+                    } catch (SQLException exc) {
+                        ConfirmBox.display2("Fehler", "Fehler beim Erzeugen der neuen Rechnung.");
+                        System.out.println(exc.getMessage());
+                    }
+                    popupStage.close();
+                } else{
+                    ConfirmBox.display2("Fehler", "Daten sind unvollständig. Bitte alle Textfelder ausfüllen");
                 }
-                popupStage.close();
             } else {
                 e.consume();
             }
         });
 
         pdfButton.setOnAction(e -> {
-            try {
-                gui.sql.safeNewRechnung(rNRT.getText(), kNRT.getText(), dataNewRechnung, endpreisNetto, endpreisBrutto, mwstGesamt,
-                        Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()), fakturatextT.getText(),
-                        Integer.valueOf(gültigT.getText()), Integer.valueOf(skontoT.getText()));
-                gui.sql.loadDataRechnung(false);
-                User user = gui.sql.loadUser();
-                PdfCreator pdf = new PdfCreator(user, gui.sql);
-                FileChooser fc = new FileChooser();
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF (*.pdf)", "*pdf"));
-                File f = fc.showSaveDialog(new Stage());
-                System.out.println(f);
-                if (f != null && !f.getName().contains(".")) {
-                    f = new File(f.getAbsolutePath() + ".pdf");
-                }
-                if (f != null) {
+            boolean test = ConfirmBox.display("Rechnungserstellung abschließen", "Möchten sie das Angebot wirklich erstellen?", 400, 100);
+            if (test == true) {
+                if (!skontoT.getText().trim().isEmpty() && !skontobetragT.getText().trim().isEmpty() && !gültigT.getText().trim().isEmpty() && !skontotageT.getText().trim().isEmpty()) {
                     try {
-                        pdf.createDocument(kNRT.getText(),
-                                rNRT.getText(),
-                                zusatzT.getText(),
-                                Integer.valueOf(gültigT.getText()),
-                                Integer.valueOf(skontotageT.getText()),
-                                Double.valueOf(skontoT.getText()),
-                                fakturatextT.getText(),
-                                true,
-                                f);
-                    } catch (DocumentException | IOException | SQLException exc) {
+                        gui.sql.safeNewRechnung(rNRT.getText(), kNRT.getText(), dataNewRechnung, endpreisNetto, endpreisBrutto, mwstGesamt,
+                                Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()), fakturatextT.getText(), zusatzT.getText(),
+                                Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()));
+                        gui.sql.loadDataRechnung(false);
+                        User user = gui.sql.loadUser();
+                        PdfCreator pdf = new PdfCreator(user, gui.sql);
+                        FileChooser fc = new FileChooser();
+                        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF (*.pdf)", "*pdf"));
+                        File f = fc.showSaveDialog(new Stage());
+                        System.out.println(f);
+                        if (f != null && !f.getName().contains(".")) {
+                            f = new File(f.getAbsolutePath() + ".pdf");
+                        }
+                        if (f != null) {
+                            try {
+                                pdf.createDocument(kNRT.getText(),
+                                        rNRT.getText(),
+                                        zusatzT.getText(),
+                                        Integer.valueOf(gültigT.getText()),
+                                        Integer.valueOf(skontotageT.getText()),
+                                        Double.valueOf(skontoT.getText()),
+                                        fakturatextT.getText(),
+                                        true,
+                                        f);
+                            } catch (DocumentException | IOException | SQLException exc) {
+                                System.out.println(exc.getMessage());
+                            }
+                        }
+                    } catch (SQLException exc) {
+                        ConfirmBox.display2("Fehler", "Fehler beim erzeugen der neuen Rechnung.");
                         System.out.println(exc.getMessage());
                     }
+                    popupStage.close();
+                } else {
+                    ConfirmBox.display2("Fehler", "Daten sind unvollständig. Bitte alle Textfelder ausfüllen");
                 }
-            } catch (SQLException exc) {
-                ConfirmBox.display2("Fehler", "Fehler beim erzeugen der neuen Rechnung.");
-                System.out.println(exc.getMessage());
+            } else {
+                e.consume();
             }
-            popupStage.close();
         });
 
         VBox labels = new VBox();

@@ -9,11 +9,11 @@ public class Angebot {
     private final SimpleStringProperty angebotsnummer, kunde, datum, akzeptiert;
     private double nettoBetrag, bruttoBetrag, mwSt, skontoBetrag, skontoProzent;
     private int zahlungsZiel, skontoTage;
-    String fakturaText;
+    String fakturaText, hinweis;
     //private final ArrayList<Artikel> waren;
 
     public Angebot(String aNummer, String k, String date, String a, double netto, double brutto,
-            double mwSt, double skontoB, double skontoPr, int zZ, int skontoT, String fakt) {
+            double mwSt, double skontoB, double skontoPr, int zZ, int skontoT, String fakt, String h) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate aDatum = LocalDate.parse(date);
         angebotsnummer = new SimpleStringProperty(aNummer);
@@ -28,6 +28,7 @@ public class Angebot {
         zahlungsZiel = zZ;
         skontoTage = skontoT;
         fakturaText = fakt;
+        hinweis = h;
         
         //waren = new ArrayList<>();
     }
@@ -128,6 +129,14 @@ public class Angebot {
 
     public void setFakturaText(String fakturaText) {
         this.fakturaText = fakturaText;
+    }
+    
+    public String getHinweis() {
+        return hinweis;
+    }
+
+    public void setHinweis(String h) {
+        this.hinweis = h;
     }
     /*public void addArtikel(Artikel a){
         waren.add(a);

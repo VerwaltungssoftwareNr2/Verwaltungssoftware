@@ -345,7 +345,7 @@ public class SqlConnector implements ISql {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtArtikel = myConn.createStatement();
-                ResultSet rsArtikel = stmtArtikel.executeQuery("select * from artikel")) {
+                ResultSet rsArtikel = stmtArtikel.executeQuery("select * from artikel left join warengruppe on artikel.warengruppe = warengruppe.wgid;")) {
 
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate ld = null;
@@ -354,7 +354,7 @@ public class SqlConnector implements ISql {
                 ld = LocalDate.parse(rsArtikel.getString("Datum"));
                 dataArtikel.add(new Artikel(
                         rsArtikel.getString("Artikelnummer"),
-                        rsArtikel.getString("Bezeichnung"),
+                        rsArtikel.getString("Artikel.Bezeichnung"),
                         rsArtikel.getString("Zusatztext"),
                         rsArtikel.getString("Einkaufspreis"),
                         rsArtikel.getString("Verkaufspreis"),
@@ -363,7 +363,7 @@ public class SqlConnector implements ISql {
                         ld.format(dtf),
                         "0",
                         null,
-                        rsArtikel.getString("Warengruppe")));
+                        rsArtikel.getString("warengruppe.bezeichnung")));
             }
 
         } catch (SQLException exc) {
@@ -374,7 +374,7 @@ public class SqlConnector implements ISql {
     @Override
     public Artikel loadDataArtikel(String artNummer) throws SQLException {
         Artikel artikel = null;
-        String artString = "select * from artikel where artikelnummer = ?;";
+        String artString = "select * from artikel left join warengruppe on artikel.warengruppe = warengruppe.wgid where artikelnummer = ?;";
         ResultSet rsArtikel = null;
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtArtikel = myConn.prepareStatement(artString)) {
@@ -387,7 +387,7 @@ public class SqlConnector implements ISql {
                 ld = LocalDate.parse(rsArtikel.getString("Datum"));
                 artikel = new Artikel(
                         rsArtikel.getString("Artikelnummer"),
-                        rsArtikel.getString("Bezeichnung"),
+                        rsArtikel.getString("Artikel.Bezeichnung"),
                         rsArtikel.getString("Zusatztext"),
                         rsArtikel.getString("Einkaufspreis"),
                         rsArtikel.getString("Verkaufspreis"),
@@ -396,7 +396,7 @@ public class SqlConnector implements ISql {
                         ld.format(dtf),
                         "0",
                         null,
-                        rsArtikel.getString("Warengruppe"));
+                        rsArtikel.getString("warengruppe.bezeichnung"));
             }
         }
         return artikel;
@@ -480,7 +480,8 @@ public class SqlConnector implements ISql {
                             rsAngebot.getDouble("SkontoProzent"),
                             rsAngebot.getInt("Zahlungsziel"),
                             rsAngebot.getInt("Skontotage"),
-                            rsAngebot.getString("Fakturatext")));
+                            rsAngebot.getString("Fakturatext"),
+                            rsAngebot.getString("Hinweis")));
                 } else {
                     dataAngebot.add(new Angebot(
                             rsAngebot.getString("angebotsnummer"),
@@ -494,7 +495,8 @@ public class SqlConnector implements ISql {
                             rsAngebot.getDouble("SkontoProzent"),
                             rsAngebot.getInt("Zahlungsziel"),
                             rsAngebot.getInt("Skontotage"),
-                            rsAngebot.getString("Fakturatext")));
+                            rsAngebot.getString("Fakturatext"),
+                            rsAngebot.getString("Hinweis")));
                 }
             }
         }
@@ -524,7 +526,8 @@ public class SqlConnector implements ISql {
                             rsAngebot.getDouble("SkontoProzent"),
                             rsAngebot.getInt("Zahlungsziel"),
                             rsAngebot.getInt("Skontotage"),
-                            rsAngebot.getString("Fakturatext"));
+                            rsAngebot.getString("Fakturatext"),
+                            rsAngebot.getString("Hinweis"));
                 } else {
                     angebot = new Angebot(
                             rsAngebot.getString("angebotsnummer"),
@@ -538,7 +541,8 @@ public class SqlConnector implements ISql {
                             rsAngebot.getDouble("SkontoProzent"),
                             rsAngebot.getInt("Zahlungsziel"),
                             rsAngebot.getInt("Skontotage"),
-                            rsAngebot.getString("Fakturatext"));
+                            rsAngebot.getString("Fakturatext"),
+                            rsAngebot.getString("Hinweis"));
                 }
             }
         } finally {
@@ -575,7 +579,8 @@ public class SqlConnector implements ISql {
                         rsRechnung.getDouble("SkontoProzent"),
                         rsRechnung.getInt("Zahlungsziel"),
                         rsRechnung.getInt("Skontotage"),
-                        rsRechnung.getString("Fakturatext")));
+                        rsRechnung.getString("Fakturatext"),
+                        rsRechnung.getString("Hinweis")));
             }
         } catch (SQLException exc) {
             throw exc;
@@ -603,7 +608,7 @@ public class SqlConnector implements ISql {
 
     @Override
     public void loadArtikelFromAngebot(String nummer) throws SQLException {
-        String searchArtikelString = "select * from artikel join artikelinangebot as aia on artikel.artikelnummer = aia.artikel where aia.angebot = '" + nummer + "' ;";
+        String searchArtikelString = "select * from artikel left  join warengruppe on artikel.warengruppe = warengruppe.wgid join artikelinangebot as aia on artikel.artikelnummer = aia.artikel where aia.angebot = '" + nummer + "' ;";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtSearchArtikel = myConn.createStatement();
@@ -617,7 +622,7 @@ public class SqlConnector implements ISql {
                 ld = LocalDate.parse(rsSearchArtikel.getString("Datum"));
                 dataArtikelInAngebot.add(new Artikel(
                         rsSearchArtikel.getString("Artikelnummer"),
-                        rsSearchArtikel.getString("Bezeichnung"),
+                        rsSearchArtikel.getString("Artikel.Bezeichnung"),
                         rsSearchArtikel.getString("Zusatztext"),
                         rsSearchArtikel.getString("Einkaufspreis"),
                         rsSearchArtikel.getString("Verkaufspreis"),
@@ -626,7 +631,7 @@ public class SqlConnector implements ISql {
                         ld.format(dtf),
                         rsSearchArtikel.getString("Alternativ"),
                         rsSearchArtikel.getString("aia.rabatt"),
-                        rsSearchArtikel.getString("Warengruppe")));
+                        rsSearchArtikel.getString("warengruppe.bezeichnung")));
             }
 
         } catch (SQLException exc) {
@@ -712,7 +717,8 @@ public class SqlConnector implements ISql {
                             rsSearchAngebot.getDouble("SkontoProzent"),
                             rsSearchAngebot.getInt("Zahlungsziel"),
                             rsSearchAngebot.getInt("Skontotage"),
-                            rsSearchAngebot.getString("Fakturatext")));
+                            rsSearchAngebot.getString("Fakturatext"),
+                            rsSearchAngebot.getString("Hinweis")));
                 } else {
                     dataFilteredAngebot.add(new Angebot(
                             rsSearchAngebot.getString("angebotsnummer"),
@@ -726,7 +732,8 @@ public class SqlConnector implements ISql {
                             rsSearchAngebot.getDouble("SkontoProzent"),
                             rsSearchAngebot.getInt("Zahlungsziel"),
                             rsSearchAngebot.getInt("Skontotage"),
-                            rsSearchAngebot.getString("Fakturatext")));
+                            rsSearchAngebot.getString("Fakturatext"),
+                            rsSearchAngebot.getString("Hinweis")));
                 }
             }
 
@@ -772,7 +779,8 @@ public class SqlConnector implements ISql {
                         rsSearchRechnung.getDouble("SkontoProzent"),
                         rsSearchRechnung.getInt("Zahlungsziel"),
                         rsSearchRechnung.getInt("Skontotage"),
-                        rsSearchRechnung.getString("Fakturatext")));
+                        rsSearchRechnung.getString("Fakturatext"),
+                        rsSearchRechnung.getString("Hinweis")));
             }
 
         } catch (SQLException exc) {
@@ -786,7 +794,7 @@ public class SqlConnector implements ISql {
 
     @Override
     public void loadFilteredArtikel(String filter) throws SQLException {
-        String searchArtikelString = "select * from artikel where artikelnummer like ? or bezeichnung like ? or warengruppe like ?;";
+        String searchArtikelString = "select * from artikel left join warengruppe on artikel.warengruppe = warengruppe.wgid where artikelnummer like ? or artikel.bezeichnung like ? or warengruppe.bezeichnung like ?;";
         ResultSet rsSearchArtikel = null;
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -800,10 +808,10 @@ public class SqlConnector implements ISql {
             rsSearchArtikel = stmtSearchArtikel.executeQuery();
 
             while (rsSearchArtikel.next()) {
-                if (rsSearchArtikel.getString("warengruppe") != null) {
+                if (rsSearchArtikel.getString("warengruppe.bezeichnung") != null) {
                     dataFilteredArtikel.add(new Artikel(
                             rsSearchArtikel.getString("Artikelnummer"),
-                            rsSearchArtikel.getString("Bezeichnung"),
+                            rsSearchArtikel.getString("Artikel.Bezeichnung"),
                             rsSearchArtikel.getString("Zusatztext"),
                             rsSearchArtikel.getString("Einkaufspreis"),
                             rsSearchArtikel.getString("Verkaufspreis"),
@@ -812,11 +820,11 @@ public class SqlConnector implements ISql {
                             rsSearchArtikel.getString("Datum"),
                             null,
                             null,
-                            rsSearchArtikel.getString("Warengruppe")));
+                            rsSearchArtikel.getString("Warengruppe.bezeichnung")));
                 } else {
                     dataFilteredArtikel.add(new Artikel(
                             rsSearchArtikel.getString("Artikelnummer"),
-                            rsSearchArtikel.getString("Bezeichnung"),
+                            rsSearchArtikel.getString("Artikel.Bezeichnung"),
                             rsSearchArtikel.getString("Zusatztext"),
                             rsSearchArtikel.getString("Einkaufspreis"),
                             rsSearchArtikel.getString("Verkaufspreis"),
@@ -860,6 +868,26 @@ public class SqlConnector implements ISql {
         }
     }
 
+    @Override
+    public void safeNewWarengruppe(String w) throws SQLException {
+        String createString = "insert into warengruppe(bezeichnung) values(?);";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtW = myConn.prepareStatement(createString)) {
+
+            stmtW.setString(1, w);
+            stmtW.executeUpdate();
+        }
+    }
+    @Override
+    public void deleteWarengruppe(String w) throws SQLException {
+        String deleteString = "delete from warengruppe where bezeichnung = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtW = myConn.prepareStatement(deleteString)) {
+
+            stmtW.setString(1, w);
+            stmtW.executeUpdate();
+        }
+    }
     @Override
     public void safeNewKunde(String a, String vn,
             String n, String s,
@@ -915,7 +943,8 @@ public class SqlConnector implements ISql {
     @Override
     public void safeNewArtikel(String aN, String bez, String z, String ePreis, String vPreis, String mwst, String m, String d, String w) throws SQLException {
         String[] parameter = {aN, bez, z, ePreis, vPreis, mwst, m, d, w};
-        String addStringArtikel = "insert into artikel(artikelnummer, bezeichnung, zusatztext, einkaufspreis, verkaufspreis, mwst, bestand, datum, warengruppe) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String addStringArtikel = "insert into artikel(artikelnummer, bezeichnung, zusatztext, einkaufspreis, verkaufspreis, mwst, bestand, datum, warengruppe) "
+                + "values(?, ?, ?, ?, ?, ?, ?, ?, (select warengruppe.wgid from warengruppe where warengruppe.bezeichnung = ?));";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement addArtikel = myConn.prepareStatement(addStringArtikel)) {
@@ -930,11 +959,11 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+    public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura, String hinweis,
             int zZ, int skontoT) throws SQLException {
 
-        String angebotString = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert, nettobetrag, bruttobetrag, mehrwertsteuer, zahlungsziel, skontotage, skontoprozent, skontobetrag, fakturatext) "
-                + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String angebotString = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert, nettobetrag, bruttobetrag, mehrwertsteuer, zahlungsziel, skontotage, skontoprozent, skontobetrag, fakturatext, hinweis) "
+                + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtNewAngebot = myConn.prepareStatement(angebotString)) {
@@ -952,6 +981,7 @@ public class SqlConnector implements ISql {
             stmtNewAngebot.setDouble(10, skontoPr);
             stmtNewAngebot.setDouble(11, skontoBetrag);
             stmtNewAngebot.setString(12, faktura);
+            stmtNewAngebot.setString(13, hinweis);
 
             stmtNewAngebot.executeUpdate();
 
@@ -1012,11 +1042,11 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void safeNewRechnung(String rNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+    public void safeNewRechnung(String rNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura, String hinweis,
             int zZ, int skontoT) throws SQLException {
 
-        String rechnungString = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert, nettobetrag, bruttobetrag, mehrwertsteuer, zahlungsziel, skontotage, skontoprozent, skontobetrag, fakturatext) "
-                + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String rechnungString = "insert into angebot(angebotsnummer, kunde, datum, akzeptiert, nettobetrag, bruttobetrag, mehrwertsteuer, zahlungsziel, skontotage, skontoprozent, skontobetrag, fakturatext, hinweis) "
+                + "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtNewRechnung = myConn.prepareStatement(rechnungString)) {
@@ -1034,6 +1064,7 @@ public class SqlConnector implements ISql {
             stmtNewRechnung.setDouble(10, skontoPr);
             stmtNewRechnung.setDouble(11, skontoBetrag);
             stmtNewRechnung.setString(12, faktura);
+            stmtNewRechnung.setString(13, hinweis);
 
             stmtNewRechnung.executeUpdate();
 
@@ -1074,7 +1105,7 @@ public class SqlConnector implements ISql {
             stmtAddArtikelInRechnung.executeUpdate();
 
             int neuerBestand = 0;
-            
+
             stmtCheck.setString(1, artikel);
             rsCheck = stmtCheck.executeQuery();
             while (rsCheck.next()) {
@@ -1210,14 +1241,38 @@ public class SqlConnector implements ISql {
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement stmtUpdateArtikel = myConn.prepareStatement(updateArtikelString)) {
 
-            stmtUpdateArtikel.setString(1, oldId);
-            stmtUpdateArtikel.setString(2, newId);
+            stmtUpdateArtikel.setString(1, newId);
+            stmtUpdateArtikel.setString(2, oldId);
             stmtUpdateArtikel.executeUpdate();
         } catch (SQLException exc) {
             throw exc;
         }
     }
 
+    @Override
+    public void updateArtikel(String oldId, String newId, String bez, String z, String ePreis, String vPreis, String mwst, String m, String w) throws SQLException {
+        String updateArtikelString = "update artikel set artikelnummer = ?, bezeichnung = ?, zusatztext = ?, einkaufspreis = ?, verkaufspreis = ?,"
+                + "mwst = ?, bestand = ?, datum = ?, warengruppe = (select warengruppe.wgid from warengruppe where warengruppe.bezeichnung = ?) where artikelnummer = ?;";
+
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtUpdateArtikel = myConn.prepareStatement(updateArtikelString)) {
+
+            LocalDate ld = LocalDate.now();
+            stmtUpdateArtikel.setString(1, newId);
+            stmtUpdateArtikel.setString(2, bez);
+            stmtUpdateArtikel.setString(3, z);
+            stmtUpdateArtikel.setString(4, ePreis);
+            stmtUpdateArtikel.setString(5, vPreis);
+            stmtUpdateArtikel.setString(6, mwst);
+            stmtUpdateArtikel.setString(7, m);
+            stmtUpdateArtikel.setString(8, ld.toString());
+            stmtUpdateArtikel.setString(9, w);
+            stmtUpdateArtikel.setString(10, oldId);
+            stmtUpdateArtikel.executeUpdate();
+        } catch (SQLException exc) {
+            throw exc;
+        }
+    }
     /**
      * Generiert die chronologisch nächste Rechnungsnummer für einen bestimmten
      * Kunden
@@ -1249,7 +1304,8 @@ public class SqlConnector implements ISql {
                         rsLetzteRechnungen.getDouble("SkontoProzent"),
                         rsLetzteRechnungen.getInt("Zahlungsziel"),
                         rsLetzteRechnungen.getInt("Skontotage"),
-                        rsLetzteRechnungen.getString("Fakturatext")));
+                        rsLetzteRechnungen.getString("Fakturatext"),
+                        rsLetzteRechnungen.getString("Hinweis")));
             }
             for (Angebot aIt : dataRechnung) {
                 letzteRechnung = aIt.getAngebotsnummer();
@@ -1323,7 +1379,8 @@ public class SqlConnector implements ISql {
                         rsLetzteAngebot.getDouble("SkontoProzent"),
                         rsLetzteAngebot.getInt("Zahlungsziel"),
                         rsLetzteAngebot.getInt("Skontotage"),
-                        rsLetzteAngebot.getString("Fakturatext")));
+                        rsLetzteAngebot.getString("Fakturatext"),
+                        rsLetzteAngebot.getString("Hinweis")));
             }
             for (Angebot aIt : dataAngebot) {
                 letztesAngebot = aIt.getAngebotsnummer();

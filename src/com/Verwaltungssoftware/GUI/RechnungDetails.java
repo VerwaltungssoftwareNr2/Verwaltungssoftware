@@ -77,7 +77,7 @@ public class RechnungDetails {
         Label plz = new Label("PLZ");
         Label ort = new Label("Ort");
         Label datum = new Label("Datum");
-        Label zusatz = new Label("Zusatztext");
+        Label zusatz = new Label("Hinweis");
 
         TextField anredeT = new TextField(kunde.getAnrede());
         TextField aNRT = new TextField(rNummer);
@@ -88,9 +88,11 @@ public class RechnungDetails {
         TextField plzT = new TextField(kunde.getPlz());
         TextField ortT = new TextField(kunde.getOrt());
         Label datumL = new Label(aDatum);
-        TextArea zusatzT = new TextArea();
+        TextArea zusatzT = new TextArea(rechnung.getHinweis());
 
+        anredeT.setEditable(false);
         aNRT.setEditable(false);
+        kNRT.setEditable(false);
         vornameT.setEditable(false);
         nameT.setEditable(false);
         straßeT.setEditable(false);

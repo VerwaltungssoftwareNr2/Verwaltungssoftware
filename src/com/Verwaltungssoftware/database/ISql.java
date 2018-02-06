@@ -123,6 +123,10 @@ public interface ISql {
     public void safeNewKunde(String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException;
 
     public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException;
+    
+    public void safeNewWarengruppe(String w) throws SQLException;
+    
+    public void deleteWarengruppe(String w) throws SQLException;
     /**
      * Erstellt neues Artikel in der Datenbank
      *
@@ -144,10 +148,10 @@ public interface ISql {
      *
      * @throws SQLException
      */
-    public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+    public void safeNewAngebot(String aNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura, String hinweis,
             int zZ, int skontoT) throws SQLException;
     
-    public void safeNewRechnung(String rNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura,
+    public void safeNewRechnung(String rNummer, String kNummer, ObservableList<Artikel> artInAng, double nettoBetrag, double bruttoBetrag, double mwst, double skontoPr, double skontoBetrag, String faktura, String hinweis,
             int zZ, int skontoT) throws SQLException;
 
     /**
@@ -173,6 +177,8 @@ public interface ISql {
     public void updateArtikelVerkaufsPreis(String id, String eingabe) throws SQLException;
 
     public void updateArtikelNummer(String oldId, String newId) throws SQLException;
+    
+    public void updateArtikel(String oldId, String newId, String bez, String z, String ePreis, String vPreis, String mwst, String m, String w) throws SQLException;
 
     public User loadUser() throws SQLException;
 
