@@ -153,6 +153,8 @@ public class GUI_Verwaltungssoftware extends Application {
             boolean test = ConfirmBox.display("Anwendung schließen", "Wollen Sie die Anwendung wirklich verlassen?", 300, 100);
             if (test == true) {
                 primaryStage.close();
+            } else {
+                e.consume();
             }
         });
         primaryStage.setOnCloseRequest(e -> {
