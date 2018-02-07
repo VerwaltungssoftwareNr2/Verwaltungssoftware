@@ -165,9 +165,11 @@ public class GUI_Verwaltungssoftware extends Application {
         });
 
         MenuItem addKunde = new MenuItem("Hinzufügen");
+        MenuItem ortsverwaltung = new MenuItem("Ortsverwaltung");
         MenuItem tableKunde = new MenuItem("Übersicht anzeigen");
-        kunde.getItems().addAll(addKunde, tableKunde);
-
+        kunde.getItems().addAll(addKunde, ortsverwaltung, tableKunde);
+        
+        ortsverwaltung.setOnAction(e -> Ortsverwaltung.display());
         addKunde.setOnAction(e -> KundenAdd.display());
 
         MenuItem addArtikel = new MenuItem("Hinzufügen");

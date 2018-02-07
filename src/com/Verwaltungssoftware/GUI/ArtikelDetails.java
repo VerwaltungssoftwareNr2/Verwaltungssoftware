@@ -39,15 +39,24 @@ public class ArtikelDetails {
         popupStage.setTitle("Artikelinformationen");
 
         Label name = new Label("Bezeichnung");
+        name.setPrefWidth(200);
         Label ztext = new Label("Zusatztext");
+        ztext.setPrefWidth(200);
         Label artNr = new Label("Artikelnummer");
+        artNr.setPrefWidth(200);
         Label gruppeL = new Label("Warengruppe");
+        gruppeL.setPrefWidth(200);
         Label preis = new Label("Einkaufspreis");
+        preis.setPrefWidth(200);
         Label preisV = new Label("Verkaufspreis");
+        preisV.setPrefWidth(200);
         Label bestand = new Label("Bestand");
+        bestand.setPrefWidth(200);
         Label mehrwertSt = new Label("Mehrwertsteuer in %");
+        mehrwertSt.setPrefWidth(200);
 
         ChoiceBox gruppe = new ChoiceBox();
+        gruppe.setPrefWidth(300);
         try {
             artikel = sql.loadDataArtikel(artNummer);
             sql.loadDataWarengruppe();
@@ -59,18 +68,25 @@ public class ArtikelDetails {
         }
 
         TextField nameT = new TextField(artikel.getBezeichnung());
+        nameT.setPrefWidth(300);
         nameT.setMaxWidth(1000);
         TextArea ztextT = new TextArea(artikel.getZusatztext());
+        ztextT.setPrefWidth(300);
         ztextT.setMaxWidth(1000);
         TextField artNrT = new TextField(artikel.getArtikelnummer());
+        artNrT.setPrefWidth(300);
         artNrT.setMaxWidth(1000);
         TextField preisET = new TextField(artikel.getEinkaufspreis());
+        preisET.setPrefWidth(300);
         preisET.setMaxWidth(1000);
         TextField preisVT = new TextField(artikel.getVerkaufspreis());
+        preisVT.setPrefWidth(300);
         preisVT.setMaxWidth(1000);
         TextField bestandT = new TextField(artikel.getBestand());
+        bestandT.setPrefWidth(300);
         bestandT.setMaxWidth(1000);
         TextField mwstT = new TextField(artikel.getMwst());
+        mwstT.setPrefWidth(300);
         mwstT.setMaxWidth(1000);
 
         preisET.setOnKeyReleased(e -> {
@@ -135,15 +151,44 @@ public class ArtikelDetails {
             }
         });
 
-        VBox left = new VBox();
-        VBox right = new VBox();
-        left.setPadding(new Insets(10));
-        left.setSpacing(16);
-        right.setPadding(new Insets(10));
-        right.setSpacing(8);
-
-        left.getChildren().addAll(name, artNr, gruppeL, preis, preisV, bestand, mehrwertSt, ztext);
-        right.getChildren().addAll(nameT, artNrT, gruppe, preisET, preisVT, bestandT, mwstT, ztextT);
+     HBox laTe1 = new HBox();
+        laTe1.setPadding(new Insets(10));
+        laTe1.setSpacing(8);
+        HBox laTe2 = new HBox();
+        laTe2.setPadding(new Insets(10));
+        laTe2.setSpacing(8);
+        HBox laTe3 = new HBox();
+        laTe3.setPadding(new Insets(10));
+        laTe3.setSpacing(8);
+        HBox laTe4 = new HBox();
+        laTe4.setPadding(new Insets(10));
+        laTe4.setSpacing(8);
+        HBox laTe5 = new HBox();
+        laTe5.setPadding(new Insets(10));
+        laTe5.setSpacing(8);
+        HBox laTe6 = new HBox();
+        laTe6.setPadding(new Insets(10));
+        laTe6.setSpacing(8);
+        HBox laTe7 = new HBox();
+        laTe7.setPadding(new Insets(10));
+        laTe7.setSpacing(8);
+        HBox laTe8 = new HBox();
+        laTe8.setPadding(new Insets(10));
+        laTe8.setSpacing(8);
+        
+        laTe1.getChildren().addAll(name, nameT);
+        laTe2.getChildren().addAll(mehrwertSt, mwstT);
+        laTe3.getChildren().addAll(artNr, artNrT);
+        laTe4.getChildren().addAll(gruppeL, gruppe);
+        laTe5.getChildren().addAll(preis, preisET);
+        laTe6.getChildren().addAll(preisV, preisVT);
+        laTe7.getChildren().addAll(bestand, bestandT);
+        laTe8.getChildren().addAll(ztext, ztextT);
+        
+        
+        VBox sum = new VBox();
+        
+        sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8);
 
         HBox bottom = new HBox();
         bottom.getChildren().addAll(cancel, delete, confirm);
@@ -152,11 +197,10 @@ public class ArtikelDetails {
         bottom.setAlignment(Pos.CENTER);
 
         BorderPane pane = new BorderPane();
-        pane.setLeft(left);
-        pane.setCenter(right);
+        pane.setCenter(sum);
         pane.setBottom(bottom);
 
-        details = new Scene(pane, 450, 450);
+        details = new Scene(pane, 500, 600);
         popupStage.setScene(details);
         popupStage.show();
     }

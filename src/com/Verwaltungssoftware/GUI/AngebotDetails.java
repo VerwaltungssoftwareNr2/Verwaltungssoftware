@@ -65,27 +65,47 @@ public class AngebotDetails {
             ConfirmBox.display2("Fehler", "Fehler beim Laden der Daten");
             System.out.println(exc.getMessage());
         }
-        Label aNr = new Label("Angebotsnummer");
+       Label aNr = new Label("Angebotsnummer");
+        aNr.setPrefWidth(200);
         Label kNr = new Label("Kundennummer");
+        kNr.setPrefWidth(200);
         Label anredeL = new Label("Anrede");
+        anredeL.setPrefWidth(200);
         Label vorname = new Label("Vorname");
+        vorname.setPrefWidth(200);
         Label name = new Label("Nachname");
+        name.setPrefWidth(200);
         Label straße = new Label("Straße");
+        straße.setPrefWidth(200);
         Label plz = new Label("PLZ");
+        plz.setPrefWidth(200);
         Label ort = new Label("Ort");
+        ort.setPrefWidth(200);
         Label datum = new Label("Datum");
+        datum.setPrefWidth(200);
         Label zusatz = new Label("Hinweis");
+        zusatz.setPrefWidth(200);
 
         TextField anredeT = new TextField(kunde.getAnrede());
+        anredeT.setPrefWidth(300);
         TextField aNRT = new TextField(aNummer);
+        aNRT.setPrefWidth(300);
         TextField kNRT = new TextField(kNummer);
+        kNRT.setPrefWidth(300);
         TextField vornameT = new TextField(kunde.getVorname());
+        vornameT.setPrefWidth(300);
         TextField nameT = new TextField(kunde.getName());
+        nameT.setPrefWidth(300);
         TextField straßeT = new TextField(kunde.getStraße());
+        straßeT.setPrefWidth(300);
         TextField plzT = new TextField(kunde.getPlz());
+        plzT.setPrefWidth(300);
         TextField ortT = new TextField(kunde.getOrt());
+        ortT.setPrefWidth(300);
         Label datumL = new Label(aDatum);
         TextArea zusatzT = new TextArea(angebot.getHinweis());
+        zusatzT.setPrefWidth(300);
+        
 
         anredeT.setEditable(false);
         aNRT.setEditable(false);
@@ -148,16 +168,51 @@ public class AngebotDetails {
 
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> popupStage.close());
-
-        VBox sumL = new VBox();
-        sumL.getChildren().addAll(aNr, datum, kNr, anredeL, vorname, name, straße, plz, ort, zusatz);
-        sumL.setPadding(new Insets(10));
-        sumL.setSpacing(16);
-
-        VBox sumT = new VBox();
-        sumT.getChildren().addAll(aNRT, datumL, kNRT, anredeT, vornameT, nameT, straßeT, plzT, ortT, zusatzT);
-        sumT.setPadding(new Insets(10));
-        sumT.setSpacing(8);
+        
+        HBox laTe1 = new HBox();
+        laTe1.setPadding(new Insets(10));
+        laTe1.setSpacing(8);
+        HBox laTe2 = new HBox();
+        laTe2.setPadding(new Insets(10));
+        laTe2.setSpacing(8);
+        HBox laTe3 = new HBox();
+        laTe3.setPadding(new Insets(10));
+        laTe3.setSpacing(8);
+        HBox laTe4 = new HBox();
+        laTe4.setPadding(new Insets(10));
+        laTe4.setSpacing(8);
+        HBox laTe5 = new HBox();
+        laTe5.setPadding(new Insets(10));
+        laTe5.setSpacing(8);
+        HBox laTe6 = new HBox();
+        laTe6.setPadding(new Insets(10));
+        laTe6.setSpacing(8);
+        HBox laTe7 = new HBox();
+        laTe7.setPadding(new Insets(10));
+        laTe7.setSpacing(8);
+        HBox laTe8 = new HBox();
+        laTe8.setPadding(new Insets(10));
+        laTe8.setSpacing(8);
+        HBox laTe9 = new HBox();
+        laTe9.setPadding(new Insets(10));
+        laTe9.setSpacing(8);
+        HBox laTe10 = new HBox();
+        laTe10.setPadding(new Insets(10));
+        laTe10.setSpacing(8);
+        
+        laTe1.getChildren().addAll(aNr, aNRT);
+        laTe2.getChildren().addAll(datum, datumL);
+        laTe3.getChildren().addAll(kNr, kNRT);
+        laTe4.getChildren().addAll(anredeL, anredeT);
+        laTe5.getChildren().addAll(vorname, vornameT);
+        laTe6.getChildren().addAll(name, nameT);
+        laTe7.getChildren().addAll(straße, straßeT);
+        laTe8.getChildren().addAll(plz, plzT);
+        laTe9.getChildren().addAll(ort, ortT);
+        laTe10.getChildren().addAll(zusatz, zusatzT);
+        
+        VBox sum = new VBox();
+        sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8, laTe9, laTe10);
 
         HBox buttons = new HBox();
         buttons.getChildren().addAll(cancel, pdf, delete, confirm);
@@ -165,10 +220,8 @@ public class AngebotDetails {
         buttons.setSpacing(8);
         buttons.setAlignment(Pos.CENTER);
 
-        HBox sumsum = new HBox();
-        sumsum.getChildren().addAll(sumL, sumT);
         VBox sumsumButtons = new VBox();
-        sumsumButtons.getChildren().addAll(sumsum, buttons);
+        sumsumButtons.getChildren().addAll(sum, buttons);
 
         info.setContent(sumsumButtons); // TAB KUNDENINFORMATIONEN
 
@@ -284,13 +337,23 @@ public class AngebotDetails {
         posten.setContent(tableButtons); // TAB POSTEN ENDE
 
         Label summe3 = new Label("Nettobetrag");
+        summe3.setPrefWidth(100);
         Label mwtStr = new Label("Mehrwertsteuer");
+        mwtStr.setPrefWidth(100);
         Label bruttopreis = new Label("Bruttobetrag");
+        bruttopreis.setPrefWidth(100);
         Label gültig = new Label("Zahlungsziel");
+        gültig.setPrefWidth(100);
         Label fakturatext = new Label("Fakturatext");
+        fakturatext.setPrefWidth(100);
         Label skontotage = new Label("Skontotage");
+        skontotage.setPrefWidth(100);
         Label skonto = new Label("Skonto in Prozent");
+        skonto.setPrefWidth(100);
+        Label netto = new Label("Netto");
+        netto.setPrefWidth(100);
         Label skontobetrag = new Label("Skontobetrag");
+        skontobetrag.setPrefWidth(100);
 
         TextField summe4 = new TextField(String.valueOf(angebot.getNettoBetrag()));
         summe4.setEditable(false);
@@ -299,7 +362,7 @@ public class AngebotDetails {
         TextField bruttopreisT = new TextField(String.valueOf(angebot.getBruttoBetrag()));
         bruttopreisT.setEditable(false);
         TextField gültigT = new TextField(String.valueOf(angebot.getZahlungsZiel()));
-        TextField fakturatextT = new TextField(angebot.getFakturaText());
+        TextArea fakturatextT = new TextArea(angebot.getFakturaText());
         TextField skontotageT = new TextField(String.valueOf(angebot.getSkontoTage()));
         TextField skontoT = new TextField(String.valueOf(angebot.getSkontoProzent()));
         TextField skontobetragT = new TextField(String.valueOf(angebot.getSkontoBetrag()));
@@ -330,25 +393,38 @@ public class AngebotDetails {
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
+        
+        HBox laTe15 = new HBox();
+        laTe15.setPadding(new Insets(10));
+        laTe15.setSpacing(8);
+        HBox laTe16 = new HBox();
+        laTe16.setPadding(new Insets(10));
+        laTe16.setSpacing(8);
+        HBox laTe17 = new HBox();
+        laTe17.setPadding(new Insets(10));
+        laTe17.setSpacing(8);
+        HBox laTe18 = new HBox();
+        laTe18.setPadding(new Insets(10));
+        laTe18.setSpacing(8);
+        HBox laTe19 = new HBox();
+        laTe19.setPadding(new Insets(10));
+        laTe19.setSpacing(8);
+        
+        laTe15.getChildren().addAll(summe3, summe4, skontotage, skontotageT);
+        laTe16.getChildren().addAll(mwtStr, mwtStrT, skonto, skontoT);
+        laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT);
+        laTe18.getChildren().addAll(gültig, gültigT);
+        laTe19.getChildren().addAll(fakturatext, fakturatextT);
+        
+        VBox sum3 = new VBox();
+        sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19);
 
-        VBox labels = new VBox();
-        labels.setPadding(new Insets(10));
-        labels.setSpacing(16);
-        labels.getChildren().addAll(summe3, mwtStr, bruttopreis, gültig, fakturatext, skontotage, skonto, skontobetrag);
-
-        VBox text = new VBox();
-        text.getChildren().addAll(summe4, mwtStrT, bruttopreisT, gültigT, fakturatextT, skontotageT, skontoT, skontobetragT);
-        text.setPadding(new Insets(10));
-        text.setSpacing(8);
-
-        HBox labelsText = new HBox();
-        labelsText.getChildren().addAll(labels, text);
         VBox all = new VBox();
-        all.getChildren().addAll(labelsText, buttons3);
+        all.getChildren().addAll(sum3, buttons3);
 
         summen.setContent(all);
 
-        details = new Scene(tabs, 800, 450);
+        details = new Scene(tabs, 800, 600);
         popupStage.setScene(details);
         popupStage.show();
     }

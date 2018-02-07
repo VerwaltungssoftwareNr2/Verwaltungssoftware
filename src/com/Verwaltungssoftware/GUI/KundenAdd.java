@@ -47,40 +47,99 @@ public class KundenAdd {
         box.setAlignment(Pos.CENTER);
         box.getChildren().addAll(privatkunde, geschKunde);
         
-        kundenauswahl = new Scene(box, 200, 150);
+        kundenauswahl = new Scene(box, 300, 150);
         
         Label anrede = new Label("Anrede");
+        anrede.setPrefWidth(200);
         Label vorname = new Label("Vorname");
+        vorname.setPrefWidth(200);
         Label nachname = new Label("Nachname");
+        nachname.setPrefWidth(200);
         Label strasse = new Label("Straße");
+        strasse.setPrefWidth(200);
         Label hausnummer = new Label("Hausnummer");
+        hausnummer.setPrefWidth(200);
         Label plz = new Label("Postleitzahl");
+        plz.setPrefWidth(200);
         Label ort = new Label("Ort");
+        ort.setPrefWidth(200);
         Label land = new Label("Land");
+        land.setPrefWidth(200);
         Label zusatz = new Label("Zusatz");
+        zusatz.setPrefWidth(200);
         
         String h = "Herr";
         String f = "Frau";
         ChoiceBox anredeChoice = new ChoiceBox();
+        anredeChoice.setPrefWidth(300);
         anredeChoice.getItems().addAll(h, f);
         anredeChoice.setValue(h);
         
         TextField vornameT = new TextField();
+        vornameT.setPrefWidth(300);
         vornameT.setMaxWidth(1000);
         TextField nachnameT = new TextField();
+        nachnameT.setPrefWidth(300);
         nachnameT.setMaxWidth(1000);
         TextField strasseT = new TextField();
+        strasseT.setPrefWidth(300);
         strasseT.setMaxWidth(1000);
         TextField hausnummerT = new TextField();
+        hausnummerT.setPrefWidth(300);
         hausnummerT.setMaxWidth(1000);
         TextField plzT = new TextField();
+        plzT.setPrefWidth(300);
         plzT.setMaxWidth(1000);
         TextField ortT = new TextField();
+        ortT.setPrefWidth(300);
         ortT.setMaxWidth(1000);
         TextField landT = new TextField();
+        landT.setPrefWidth(300);
         landT.setMaxWidth(1000);
         TextArea zusatzT = new TextArea();
+        zusatzT.setPrefWidth(300);
         zusatzT.setMaxWidth(1000);
+        
+        HBox laTe1 = new HBox();
+        laTe1.setPadding(new Insets(10));
+        laTe1.setSpacing(8);
+        HBox laTe2 = new HBox();
+        laTe2.setPadding(new Insets(10));
+        laTe2.setSpacing(8);
+        HBox laTe3 = new HBox();
+        laTe3.setPadding(new Insets(10));
+        laTe3.setSpacing(8);
+        HBox laTe4 = new HBox();
+        laTe4.setPadding(new Insets(10));
+        laTe4.setSpacing(8);
+        HBox laTe5 = new HBox();
+        laTe5.setPadding(new Insets(10));
+        laTe5.setSpacing(8);
+        HBox laTe6 = new HBox();
+        laTe6.setPadding(new Insets(10));
+        laTe6.setSpacing(8);
+        HBox laTe7 = new HBox();
+        laTe7.setPadding(new Insets(10));
+        laTe7.setSpacing(8);
+        HBox laTe8 = new HBox();
+        laTe8.setPadding(new Insets(10));
+        laTe8.setSpacing(8);
+        HBox laTe9 = new HBox();
+        laTe9.setPadding(new Insets(10));
+        laTe9.setSpacing(8);
+        
+        laTe1.getChildren().addAll(anrede, anredeChoice);
+        laTe2.getChildren().addAll(vorname, vornameT);
+        laTe3.getChildren().addAll(nachname, nachnameT);
+        laTe4.getChildren().addAll(strasse, strasseT);
+        laTe5.getChildren().addAll(hausnummer, hausnummerT);
+        laTe6.getChildren().addAll(plz, plzT);
+        laTe7.getChildren().addAll(ort, ortT);
+        laTe8.getChildren().addAll(land, landT);
+        laTe9.getChildren().addAll(zusatz, zusatzT);
+        
+        VBox sum = new VBox();
+        sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8 ,laTe9);
         
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> popupStage.close());
@@ -88,59 +147,115 @@ public class KundenAdd {
         back.setOnAction(e -> popupStage.setScene(kundenauswahl));
         
         BorderPane border = new BorderPane();
-        VBox left = new VBox();
-        left.setPadding(new Insets(10));
-        left.setSpacing(16);
-        VBox right = new VBox();
-        right.setPadding(new Insets(10));
-        right.setSpacing(8);
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(10, 10, 10, 10));
         hbox.setSpacing(8);
         hbox.setAlignment(Pos.CENTER);
         
         hbox.getChildren().addAll(back, confirm);
-        left.getChildren().addAll(anrede, vorname, nachname, strasse, hausnummer, plz, ort, land, zusatz);
-        right.getChildren().addAll(anredeChoice, vornameT, nachnameT, strasseT, hausnummerT, plzT, ortT, landT, zusatzT);
-        border.setLeft(left);
-        border.setCenter(right);
+        border.setCenter(sum);
         border.setBottom(hbox);
         
         kundeninfoP = new Scene(border, 450, 500);
         
         Label unternehmen = new Label("Name des Unternehmen");
+        unternehmen.setPrefWidth(200);
         Label anrede2 = new Label("Anrede");
+        anrede2.setPrefWidth(200);
         Label personV = new Label("Ansprechpartner - Vorname");
+        personV.setPrefWidth(200);
         Label personN = new Label("Ansprechpartner - Nachname");
+        personN.setPrefWidth(200);
         Label strasseHaupt = new Label("Straße des Hauptsitz");
+        strasseHaupt.setPrefWidth(200);
         Label hausnummer2 = new Label("Hausnummer");
+        hausnummer2.setPrefWidth(200);
         Label plz2 = new Label("Postleitzahl");
+        plz2.setPrefWidth(200);
         Label ort2 = new Label("Ort");
+        ort2.setPrefWidth(200);
         Label land2 = new Label("Land");
+        land2.setPrefWidth(200);
         Label zusatz2 = new Label("Zusatz");
+        zusatz2.setPrefWidth(200);
         
         ChoiceBox anrede2C = new ChoiceBox();
+        anrede2C.setPrefWidth(300);
         anrede2C.getItems().addAll(h, f);
         anrede2C.setValue(h);
         
         TextField unternehmenT = new TextField();
+        unternehmenT.setPrefWidth(300);
         unternehmenT.setMaxWidth(1000);
         TextField strasseHauptT = new TextField();
+        strasseHauptT.setPrefWidth(300);
         strasseHauptT.setMaxWidth(1000);
         TextField personVT = new TextField();
+        personVT.setPrefWidth(300);
         personVT.setMaxWidth(1000);
         TextField personNT = new TextField();
+        personNT.setPrefWidth(300);
         personNT.setMaxWidth(1000);
         TextField hausnummer2T = new TextField();
+        hausnummer2T.setPrefWidth(300);
         hausnummer2T.setMaxWidth(1000);
         TextField plz2T = new TextField();
+        plz2T.setPrefWidth(300);
         plz2T.setMaxWidth(1000);
         TextField ort2T = new TextField();
+        ort2T.setPrefWidth(300);
         ort2T.setMaxWidth(1000);
         TextField land2T = new TextField();
+        land2T.setPrefWidth(300);
         land2T.setMaxWidth(1000);
         TextArea zusatz2T = new TextArea();
+        zusatz2T.setPrefWidth(300);
         zusatz2T.setMaxWidth(1000);
+        
+        HBox laTe10 = new HBox();
+        laTe10.setPadding(new Insets(10));
+        laTe10.setSpacing(8);
+        HBox laTe11 = new HBox();
+        laTe11.setPadding(new Insets(10));
+        laTe11.setSpacing(8);
+        HBox laTe12 = new HBox();
+        laTe12.setPadding(new Insets(10));
+        laTe12.setSpacing(8);
+        HBox laTe13 = new HBox();
+        laTe13.setPadding(new Insets(10));
+        laTe13.setSpacing(8);
+        HBox laTe14 = new HBox();
+        laTe14.setPadding(new Insets(10));
+        laTe14.setSpacing(8);
+        HBox laTe15 = new HBox();
+        laTe15.setPadding(new Insets(10));
+        laTe15.setSpacing(8);
+        HBox laTe16 = new HBox();
+        laTe16.setPadding(new Insets(10));
+        laTe16.setSpacing(8);
+        HBox laTe17 = new HBox();
+        laTe17.setPadding(new Insets(10));
+        laTe17.setSpacing(8);
+        HBox laTe18 = new HBox();
+        laTe18.setPadding(new Insets(10));
+        laTe18.setSpacing(8);
+        HBox laTe19 = new HBox();
+        laTe19.setPadding(new Insets(10));
+        laTe19.setSpacing(8);
+        
+        laTe10.getChildren().addAll(unternehmen, unternehmenT);
+        laTe11.getChildren().addAll(anrede2, anrede2C);
+        laTe12.getChildren().addAll(personV, personVT);
+        laTe13.getChildren().addAll(personN, personNT);
+        laTe14.getChildren().addAll(strasseHaupt, strasseHauptT);
+        laTe15.getChildren().addAll(hausnummer2, hausnummer2T);
+        laTe16.getChildren().addAll(plz2, plz2T);
+        laTe17.getChildren().addAll(ort2, ort2T);
+        laTe18.getChildren().addAll(land2, land2T);
+        laTe19.getChildren().addAll(zusatz2, zusatz2T);
+        
+        VBox sum2 = new VBox();
+        sum2.getChildren().addAll(laTe10, laTe11, laTe12, laTe13, laTe14, laTe15, laTe16, laTe17 ,laTe18, laTe19);
         
         Button confirm2 = new Button("Bestätigen");
         confirm2.setOnAction(e -> popupStage.close());
@@ -148,25 +263,16 @@ public class KundenAdd {
         back2.setOnAction(e -> popupStage.setScene(kundenauswahl));
         
         BorderPane border2 = new BorderPane();
-        VBox left2 = new VBox();
-        left2.setPadding(new Insets(10));
-        left2.setSpacing(16);
-        VBox right2 = new VBox();
-        right2.setPadding(new Insets(10));
-        right2.setSpacing(8);
         HBox hbox2 = new HBox();
         hbox2.setPadding(new Insets(10, 10, 10, 10));
         hbox2.setSpacing(8);
         hbox2.setAlignment(Pos.CENTER);
         
         hbox2.getChildren().addAll(back2, confirm2);
-        left2.getChildren().addAll(unternehmen, anrede2,personV, personN, strasseHaupt, hausnummer2, plz2, ort2, land2, zusatz2);
-        right2.getChildren().addAll(unternehmenT, anrede2C,personVT, personNT, strasseHauptT, hausnummer2T, plz2T, ort2T, land2T, zusatz2T);
-        border2.setLeft(left2);
-        border2.setCenter(right2);
+        border2.setCenter(sum2);
         border2.setBottom(hbox2);
         
-        kundeninfoG = new Scene(border2, 500, 500);
+        kundeninfoG = new Scene(border2, 500, 600);
         
         popupStage.setScene(kundenauswahl);
         popupStage.show();
