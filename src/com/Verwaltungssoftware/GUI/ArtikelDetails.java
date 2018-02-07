@@ -8,7 +8,6 @@ package com.verwaltungssoftware.GUI;
 import com.verwaltungssoftware.database.ISql;
 import com.verwaltungssoftware.objects.Artikel;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;

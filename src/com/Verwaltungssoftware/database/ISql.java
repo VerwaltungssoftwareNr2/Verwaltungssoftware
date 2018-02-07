@@ -57,6 +57,8 @@ public interface ISql {
     public String generateRandomBillNumber(String datum) throws SQLException;
 
     public void loadDataWarengruppe() throws SQLException;
+    
+    public ArrayList<ArrayList<String>> loadDataPlz() throws SQLException;
 
     /**
      * Lädt alle vorhandenen Artikel der Datenbank
@@ -106,6 +108,7 @@ public interface ISql {
 
     public void deleteAngebot(String aNummer) throws SQLException;
 
+    public void safeNewPlz(String p, String o, String l) throws SQLException;
     /**
      * Erstellt neuen Kunden in der Datenbank
      *
@@ -120,13 +123,15 @@ public interface ISql {
      * @param l - Land
      * @throws SQLException
      */
-    public void safeNewKunde(String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException;
+    public void safeNewKunde(String uName, String a, String vn, String n, String s, String h, String z, String p) throws SQLException;
 
-    public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException;
+    public void updateKunde(String kNummer, String uName, String a, String vn, String n, String s, String h, String z, String p) throws SQLException;
     
     public void safeNewWarengruppe(String w) throws SQLException;
     
     public void deleteWarengruppe(String w) throws SQLException;
+    
+    public void updatePlz(String plzAlt, String plzNeu, String ort, String land) throws SQLException;
     /**
      * Erstellt neues Artikel in der Datenbank
      *

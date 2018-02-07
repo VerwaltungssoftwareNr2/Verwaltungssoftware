@@ -168,9 +168,12 @@ public class GUI_Verwaltungssoftware extends Application {
         MenuItem ortsverwaltung = new MenuItem("Ortsverwaltung");
         MenuItem tableKunde = new MenuItem("Übersicht anzeigen");
         kunde.getItems().addAll(addKunde, ortsverwaltung, tableKunde);
-        
-        ortsverwaltung.setOnAction(e -> Ortsverwaltung.display());
-        addKunde.setOnAction(e -> KundenAdd.display());
+
+        ortsverwaltung.setOnAction(e -> Ortsverwaltung.display(sql));
+        addKunde.setOnAction(e -> {
+            KundenAdd.display(sql);
+            kundenT.refresh();
+        });
 
         MenuItem addArtikel = new MenuItem("Hinzufügen");
         MenuItem addWarengruppe = new MenuItem("Warengruppen verwalten");
@@ -243,7 +246,7 @@ public class GUI_Verwaltungssoftware extends Application {
         rechnungT.setPrefSize(100000, 100000);
         rechnungT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(), 
+                RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(),
                         rechnungT.getSelectionModel().getSelectedItems().get(0).getKunde(),
                         rechnungT.getSelectionModel().getSelectedItems().get(0).getDatum());
                 rechnungT.refresh();
@@ -297,7 +300,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
         angebotT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(), 
+                AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(),
                         angebotT.getSelectionModel().getSelectedItems().get(0).getKunde(),
                         angebotT.getSelectionModel().getSelectedItems().get(0).getDatum());
                 angebotT.refresh();
@@ -376,9 +379,9 @@ public class GUI_Verwaltungssoftware extends Application {
                 new PropertyValueFactory<>("kundennummer"));
         //kundennummer.setMaxWidth( 1f * Integer.MAX_VALUE * 12 );
 
-        TableColumn anrede = new TableColumn("Anrede");
-        anrede.setCellValueFactory(
-                new PropertyValueFactory<>("anrede"));
+        TableColumn uName = new TableColumn("Name des Unternehmens");
+        uName.setCellValueFactory(
+                new PropertyValueFactory<>("unternehmensname"));
 
         TableColumn vorname = new TableColumn("Vorname");
         vorname.setCellValueFactory(
@@ -396,6 +399,10 @@ public class GUI_Verwaltungssoftware extends Application {
         hausnummer.setCellValueFactory(
                 new PropertyValueFactory<>("hausnummer"));
 
+        TableColumn zusatz = new TableColumn("Adresszusatz");
+        zusatz.setCellValueFactory(
+                new PropertyValueFactory<>("zusatz"));
+
         TableColumn plz = new TableColumn("Postleitzahl");
         plz.setCellValueFactory(
                 new PropertyValueFactory<>("plz"));
@@ -410,7 +417,7 @@ public class GUI_Verwaltungssoftware extends Application {
 
         kundenT.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         kundenT.setItems(sql.getDataKunde());
-        kundenT.getColumns().addAll(kundennummer, vorname, name, straße, hausnummer, plz, ort, land);
+        kundenT.getColumns().addAll(kundennummer, uName, vorname, name, straße, hausnummer, zusatz, plz, ort, land);
 
         VBox fAndT = createFilter(kundenT, "Kunde", false);
 

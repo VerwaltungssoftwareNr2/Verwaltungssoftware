@@ -327,6 +327,26 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public ArrayList<ArrayList<String>> loadDataPlz() throws SQLException {
+        ArrayList<ArrayList<String>> dataPlz = new ArrayList<>();
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                Statement stmtPlz = myConn.createStatement();
+                ResultSet rsPlz = stmtPlz.executeQuery("select * from postleitzahl")) {
+
+            while (rsPlz.next()) {
+                ArrayList<String> innerList = new ArrayList<>();
+                innerList.add(rsPlz.getString("plz"));
+                innerList.add(rsPlz.getString("ort"));
+                innerList.add(rsPlz.getString("land"));
+                dataPlz.add(innerList);
+            }
+
+        }
+
+        return dataPlz;
+    }
+
+    @Override
     public void loadDataWarengruppe() throws SQLException {
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtWarengruppe = myConn.createStatement();
@@ -414,6 +434,7 @@ public class SqlConnector implements ISql {
             while (rsKunde.next()) {
                 dataKunde.add(new Kunde(
                         rsKunde.getString("kundennummer"),
+                        rsKunde.getString("unternehmensname"),
                         rsKunde.getString("anrede"),
                         rsKunde.getString("vorname"),
                         rsKunde.getString("name"),
@@ -439,8 +460,9 @@ public class SqlConnector implements ISql {
 
             stmtKunde.setString(1, kNummer);
             rsKunde = stmtKunde.executeQuery();
+
             while (rsKunde.next()) {
-                kunde = new Kunde(kNummer, rsKunde.getString("anrede"), rsKunde.getString("vorname"), rsKunde.getString("name"),
+                kunde = new Kunde(kNummer, rsKunde.getString("unternehmensname"), rsKunde.getString("anrede"), rsKunde.getString("vorname"), rsKunde.getString("name"),
                         rsKunde.getString("straße"), rsKunde.getString("hausnummer"), rsKunde.getString("zusatz"),
                         rsKunde.getString("plz"), rsKunde.getString("ort"), rsKunde.getString("land"));
             }
@@ -659,9 +681,16 @@ public class SqlConnector implements ISql {
             stmtSearchKunde.setString(7, "%" + filter + "%");
             rsSearchKunde = stmtSearchKunde.executeQuery();
 
+            String temp = null;
             while (rsSearchKunde.next()) {
+                if (rsSearchKunde.getString("unternehmensname") != null) {
+                    temp = rsSearchKunde.getString("unternehmensname");
+                } else {
+                    temp = "privat";
+                }
                 dataFilteredKunde.add(new Kunde(
                         rsSearchKunde.getString("Kundennummer"),
+                        temp,
                         rsSearchKunde.getString("Anrede"),
                         rsSearchKunde.getString("Vorname"),
                         rsSearchKunde.getString("Name"),
@@ -878,6 +907,7 @@ public class SqlConnector implements ISql {
             stmtW.executeUpdate();
         }
     }
+
     @Override
     public void deleteWarengruppe(String w) throws SQLException {
         String deleteString = "delete from warengruppe where bezeichnung = ?;";
@@ -888,34 +918,33 @@ public class SqlConnector implements ISql {
             stmtW.executeUpdate();
         }
     }
+
     @Override
-    public void safeNewKunde(String a, String vn,
+    public void safeNewKunde(String uName, String a, String vn,
             String n, String s,
             String h, String z,
-            String p, String o,
-            String l) throws SQLException {
-        String addStringKunde = "insert into kunde(kundennummer, anrede, vorname, name, straße, hausnummer, zusatz, postleitzahl) values(?, ?, ?, ?, ?, ?, ?, ?);";
+            String p) throws SQLException {
+        String addStringKunde = "insert into kunde(kundennummer, unternehmensname, anrede, vorname, name, straße, hausnummer, zusatz, postleitzahl) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement addKunde = myConn.prepareStatement(addStringKunde)) {
 
-            //gewährleistet, dass Postleitzahl vorhanden ist
-            safeNewPlz(p, o, l);
             String kNumber = null;
             loadDataKunde();
             for (Kunde k : dataKunde) {
                 kNumber = k.getKundennummer();
             }
             kNumber = generateRandomClientNumber(kNumber);
-            String[] parameter = {kNumber, a, vn, n, s, h, z, p, o, l};
-            for (int i = 0; i < 8; i++) {
+            String[] parameter = {kNumber, uName, a, vn, n, s, h, z, p};
+            for (int i = 0; i < 9; i++) {
                 addKunde.setString(i + 1, parameter[i]);
             }
             addKunde.executeUpdate();
         }
     }
 
-    private void safeNewPlz(String p, String o, String l) throws SQLException {
+    @Override
+    public void safeNewPlz(String p, String o, String l) throws SQLException {
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtExistPlz = myConn.createStatement();
@@ -937,6 +966,22 @@ public class SqlConnector implements ISql {
             }
         } catch (SQLException exc) {
             throw exc;
+        }
+    }
+
+    @Override
+    public void updatePlz(String plzAlt, String plzNeu, String ort, String land) throws SQLException {
+        String updateString = "update postleitzahl set plz = ?, ort = ?, land = ? where plz = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtUpdatePlz = myConn.prepareStatement(updateString)) {
+
+            stmtUpdatePlz.setString(1, plzNeu);
+            stmtUpdatePlz.setString(2, ort);
+            stmtUpdatePlz.setString(3, land);
+            stmtUpdatePlz.setString(4, plzAlt);
+
+            stmtUpdatePlz.executeUpdate();
+
         }
     }
 
@@ -1164,40 +1209,22 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void updateKunde(String kNummer, String a, String vn, String n, String s, String h, String z, String p, String o, String l) throws SQLException {
+    public void updateKunde(String kNummer, String uName, String a, String vn, String n, String s, String h, String z, String p) throws SQLException {
+        String updateString = "update kunde set unternehmensname = ?, anrede = ?, vorname = ?, name = ?, straße = ?, hausnummer = ?, zusatz = ?, postleitzahl = ? where kundennummer = ?";
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
-                PreparedStatement updateAnrede = myConn.prepareStatement("update kunde set anrede = ? where kundennummer = ?;");
-                PreparedStatement updateVorname = myConn.prepareStatement("update kunde set vorname = ? where kundennummer = ?;");
-                PreparedStatement updateNachname = myConn.prepareStatement("update kunde set name = ? where kundennummer = ?;");
-                PreparedStatement updateStrasse = myConn.prepareStatement("update kunde set straße = ? where kundennummer = ?;");
-                PreparedStatement updateHausnummer = myConn.prepareStatement("update kunde set hausnummer = ? where kundennummer = ?;");
-                PreparedStatement updateZusatz = myConn.prepareStatement("update kunde set zusatz = ? where kundennummer = ?;")) {
+                PreparedStatement updateKunde = myConn.prepareStatement(updateString)) {
 
-            updateAnrede.setString(1, a);
-            updateAnrede.setString(2, kNummer);
+            updateKunde.setString(1, uName);
+            updateKunde.setString(2, a);
+            updateKunde.setString(3, vn);
+            updateKunde.setString(4, n);
+            updateKunde.setString(5, s);
+            updateKunde.setString(6, h);
+            updateKunde.setString(7, z);
+            updateKunde.setString(8, p);
+            updateKunde.setString(9, kNummer);
 
-            updateVorname.setString(1, vn);
-            updateVorname.setString(2, kNummer);
-
-            updateNachname.setString(1, n);
-            updateNachname.setString(2, kNummer);
-
-            updateStrasse.setString(1, s);
-            updateStrasse.setString(2, kNummer);
-
-            updateHausnummer.setString(1, h);
-            updateHausnummer.setString(2, kNummer);
-
-            updateZusatz.setString(1, z);
-            updateZusatz.setString(2, kNummer);
-
-            updateAnrede.executeUpdate();
-            updateVorname.executeUpdate();
-            updateNachname.executeUpdate();
-            updateStrasse.executeUpdate();
-            updateHausnummer.executeUpdate();
-            updateZusatz.executeUpdate();
-
+            updateKunde.executeUpdate();
         }
     }
 
@@ -1273,6 +1300,7 @@ public class SqlConnector implements ISql {
             throw exc;
         }
     }
+
     /**
      * Generiert die chronologisch nächste Rechnungsnummer für einen bestimmten
      * Kunden
@@ -1433,25 +1461,29 @@ public class SqlConnector implements ISql {
     }
 
     private String generateRandomClientNumber(String kunde) {
-
-        String newKunde = kunde.substring(1, 6);
-        newKunde = newKunde.replace("o", "");
-        int plusKunde = Integer.parseInt(newKunde);
-        plusKunde++;
-        String newKundeTemp = String.valueOf(plusKunde);
-        String zeroTemp = "";
-        if (newKundeTemp.length() == 5) {
-            newKunde = newKundeTemp;
-        } else {
-            for (int i = 0; i < 5; i++) {
-                zeroTemp += "o";
-                newKunde = zeroTemp + newKundeTemp;
-                if (newKunde.length() == 5) {
-                    break;
+        String fullKunde = null;
+        if (kunde != null) {
+            String newKunde = kunde.substring(2, 7);
+            newKunde = newKunde.replace("o", "");
+            int plusKunde = Integer.valueOf(newKunde);
+            plusKunde++;
+            String newKundeTemp = String.valueOf(plusKunde);
+            String zeroTemp = "";
+            if (newKundeTemp.length() == 5) {
+                newKunde = newKundeTemp;
+            } else {
+                for (int i = 0; i < 5; i++) {
+                    zeroTemp += "o";
+                    newKunde = zeroTemp + newKundeTemp;
+                    if (newKunde.length() == 5) {
+                        break;
+                    }
                 }
             }
+            fullKunde = "K-" + newKunde;
+        } else {
+            fullKunde = "K-oooo1";
         }
-        String fullKunde = "K" + newKunde;
         return fullKunde;
     }
 }
