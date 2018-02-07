@@ -8,13 +8,13 @@ package com.verwaltungssoftware.GUI;
 import com.verwaltungssoftware.database.ISql;
 import com.verwaltungssoftware.objects.Kunde;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -30,23 +30,41 @@ public class KundeDetails {
 
     static Scene details;
     static Kunde kunde = null;
+    static ArrayList<ArrayList<String>> dataPlz = null;
 
     public static void display(String kNummer, ISql sql) {
         Stage popupStage = new Stage();
 
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Kundeninformationen");
-        
-        
+
+        try {
+            kunde = sql.loadDataKunde(kNummer);
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Daten");
+            System.out.println(exc.getMessage());
+        }
+
+        Label unternehmensname = new Label("Name des Unternehmens");
+        unternehmensname.setPrefWidth(200);
         Label kundennummer = new Label("Kundennummer");
         kundennummer.setPrefWidth(200);
         Label anrede = new Label("Anrede");
         anrede.setPrefWidth(200);
         Label vorname = new Label("Vorname");
+        if (!kunde.getUnternehmensname().equals("privat")) {
+            vorname.setText("Ansprechpartner - Vorname");
+        }
         vorname.setPrefWidth(200);
         Label nachname = new Label("Nachname");
+        if (!kunde.getUnternehmensname().equals("privat")) {
+            nachname.setText("Ansprechpartner - Nachname");
+        }
         nachname.setPrefWidth(200);
         Label strasse = new Label("Straße");
+        if (!kunde.getUnternehmensname().equals("privat")) {
+            strasse.setText("Hauptsitz - Straße");
+        }
         strasse.setPrefWidth(200);
         Label hausnummer = new Label("Hausnummer");
         hausnummer.setPrefWidth(200);
@@ -59,12 +77,6 @@ public class KundeDetails {
         Label zusatz = new Label("Zusatz");
         zusatz.setPrefWidth(200);
 
-        try {
-            kunde = sql.loadDataKunde(kNummer);
-        } catch (SQLException exc) {
-            ConfirmBox.display2("Fehler", "Fehler beim Laden der Daten");
-            System.out.println(exc.getMessage());
-        }
         String h = "Herr";
         String f = "Frau";
         ChoiceBox anredeChoice = new ChoiceBox();
@@ -72,38 +84,68 @@ public class KundeDetails {
         anredeChoice.getItems().addAll(h, f);
         if (kunde.getAnrede().equals(h)) {
             anredeChoice.setValue(h);
-        } else{
+        } else {
             anredeChoice.setValue(f);
         }
         TextField kNRT = new TextField(kNummer);
         kNRT.setPrefWidth(300);
         kNRT.setMaxWidth(1000);
         kNRT.setEditable(false);
-       TextField vornameT = new TextField();
+        TextField uNameT = new TextField(kunde.getUnternehmensname());
+        uNameT.setPrefWidth(300);
+        uNameT.setMaxWidth(1000);
+        TextField vornameT = new TextField(kunde.getVorname());
         vornameT.setPrefWidth(300);
         vornameT.setMaxWidth(1000);
-        TextField nachnameT = new TextField();
+        TextField nachnameT = new TextField(kunde.getName());
         nachnameT.setPrefWidth(300);
         nachnameT.setMaxWidth(1000);
-        TextField strasseT = new TextField();
+        TextField strasseT = new TextField(kunde.getStraße());
         strasseT.setPrefWidth(300);
         strasseT.setMaxWidth(1000);
-        TextField hausnummerT = new TextField();
+        TextField hausnummerT = new TextField(kunde.getHausnummer());
         hausnummerT.setPrefWidth(300);
         hausnummerT.setMaxWidth(1000);
-        TextField plzT = new TextField();
+        TextField zusatzT = new TextField(kunde.getZusatz());
+        zusatzT.setPrefWidth(300);
+        zusatzT.setMaxWidth(1000);
+        ChoiceBox plzT = new ChoiceBox();
         plzT.setPrefWidth(300);
         plzT.setMaxWidth(1000);
         TextField ortT = new TextField();
         ortT.setPrefWidth(300);
         ortT.setMaxWidth(1000);
+        ortT.setEditable(false);
         TextField landT = new TextField();
         landT.setPrefWidth(300);
         landT.setMaxWidth(1000);
-        TextArea zusatzT = new TextArea();
-        zusatzT.setPrefWidth(300);
-        zusatzT.setMaxWidth(1000);
+        landT.setEditable(false);
 
+        try {
+            dataPlz = sql.loadDataPlz();
+            for (ArrayList<String> it : dataPlz) {
+                for (String s : it) {
+                    plzT.getItems().add(s);
+                    break;
+                }
+            }
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Laden der Postleitzahlen");
+        }
+        plzT.getSelectionModel().select(kunde.getPlz());
+        ortT.setText(kunde.getOrt());
+        landT.setText(kunde.getLand());
+
+        plzT.setOnAction(e -> {
+            for (int i = 0; i < dataPlz.size(); i++) {
+                for (int j = 0; j < dataPlz.get(i).size(); j++) {
+                    if (plzT.getSelectionModel().getSelectedItem().toString().equals(dataPlz.get(i).get(j))) {
+                        ortT.setText(dataPlz.get(i).get(j + 1));
+                        landT.setText(dataPlz.get(i).get(j + 2));
+                    }
+                }
+            }
+        });
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> popupStage.close());
         Button back = new Button("Abbrechen");
@@ -112,9 +154,10 @@ public class KundeDetails {
         delete.setOnAction(e -> {
             boolean test = ConfirmBox.display("Kunden löschen", "Möchten sie den Kunden wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
-                try{
+                try {
                     sql.deleteKunde(kNummer);
-                } catch(SQLException exc){
+                    sql.loadDataKunde();
+                } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Löschen des Kunden");
                 }
                 popupStage.close();
@@ -125,10 +168,11 @@ public class KundeDetails {
         confirm.setOnAction(e -> {
             boolean test = ConfirmBox.display("Kunden ändern", "Möchten sie die Kundendaten wirklich abändern? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
-                try{
-                    sql.updateKunde(kNummer, anredeChoice.getSelectionModel().getSelectedItem().toString(), vornameT.getText(), nachnameT.getText(),
-                            strasseT.getText(), hausnummerT.getText(), zusatzT.getText(), plzT.getText(), ortT.getText(), landT.getText());
-                } catch(SQLException exc){
+                try {
+                    sql.updateKunde(kNummer, uNameT.getText(), anredeChoice.getSelectionModel().getSelectedItem().toString(), vornameT.getText(), nachnameT.getText(),
+                            strasseT.getText(), hausnummerT.getText(), zusatzT.getText(), plzT.getSelectionModel().getSelectedItem().toString());
+                    sql.loadDataKunde();
+                } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Ändern des Kundenstammsatzes");
                     System.out.println(exc.getMessage());
                 }
@@ -137,7 +181,7 @@ public class KundeDetails {
                 e.consume();
             }
         });
-        
+
         HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
         laTe1.setSpacing(8);
@@ -168,20 +212,28 @@ public class KundeDetails {
         HBox laTe10 = new HBox();
         laTe10.setPadding(new Insets(10));
         laTe10.setSpacing(8);
-        
+        HBox laTe11 = new HBox();
+        laTe11.setPadding(new Insets(10));
+        laTe11.setSpacing(8);
+
         laTe1.getChildren().addAll(anrede, anredeChoice);
         laTe2.getChildren().addAll(vorname, vornameT);
         laTe3.getChildren().addAll(nachname, nachnameT);
         laTe4.getChildren().addAll(strasse, strasseT);
         laTe5.getChildren().addAll(hausnummer, hausnummerT);
-        laTe6.getChildren().addAll(plz, plzT);
-        laTe7.getChildren().addAll(ort, ortT);
-        laTe8.getChildren().addAll(land, landT);
-        laTe9.getChildren().addAll(zusatz, zusatzT);
+        laTe6.getChildren().addAll(zusatz, zusatzT);
+        laTe7.getChildren().addAll(plz, plzT);
+        laTe8.getChildren().addAll(ort, ortT);
+        laTe9.getChildren().addAll(land, landT);
         laTe10.getChildren().addAll(kundennummer, kNRT);
-        
+        laTe11.getChildren().addAll(unternehmensname, uNameT);
+
         VBox sum = new VBox();
-        sum.getChildren().addAll(laTe10, laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8 ,laTe9);
+        sum.getChildren().add(laTe10);
+        if (!kunde.getUnternehmensname().equals("privat")) {
+            sum.getChildren().add(laTe11);
+        }
+        sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8, laTe9);
 
         BorderPane border = new BorderPane();
         HBox hbox = new HBox();
