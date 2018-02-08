@@ -315,8 +315,8 @@ public class KundenAdd {
         laTe14.getChildren().addAll(strasseHaupt, strasseHauptT);
         laTe15.getChildren().addAll(hausnummer2, hausnummer2T);
         laTe16.getChildren().addAll(zusatz2, zusatz2T);
-        laTe18.getChildren().addAll(plz2, plz2T);
-        laTe19.getChildren().addAll(ort2, ort2T);
+        laTe17.getChildren().addAll(plz2, plz2T);
+        laTe18.getChildren().addAll(ort2, ort2T);
         laTe19.getChildren().addAll(land2, land2T);
 
         VBox sum2 = new VBox();
