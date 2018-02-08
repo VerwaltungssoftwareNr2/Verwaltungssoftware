@@ -41,7 +41,9 @@ public class PdfCreator {
         sql = s;
     }
 
-    public void createDocument(String kunde, String belegNummer, String hinweis, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura, boolean check, File f) throws DocumentException, IOException, SQLException {
+    public void createDocument(String kunde, String belegNummer, String hinweis, 
+            int zahlungsziel, int skontoZeit, double skontoBetrag, 
+            String faktura, boolean check, File f) throws DocumentException, IOException, SQLException {
         if (document.isOpen() == false) {
             document = new Document();
         }
@@ -270,10 +272,6 @@ public class PdfCreator {
             double endpreisNetto = 0;
             double endpreisBrutto = 0;
             for (Artikel a : sql.getDataArtikelInAngebot()) {
-                /*TODO: Rabatt nicht als Dezimalstelle darstellen sondern als ganze
-                Zahl (20% etc.) darstellen und auch in der Datenbank so speichern, dann einfach nicht mal Rabattmenge
-                sondern durch 100 mal Rabattmenge || genauso bei der Mehrwertsteuer auch noch
-                 */
                 if (a.getAlternative().equals("0")) {
                     table.addCell("#" + count);
                     table.addCell(a.getArtikelnummer());

@@ -90,7 +90,7 @@ public class ArtikelAdd {
         mehrwertC.getItems().addAll(n, s);
         mehrwertC.setValue(n);
         mehrwertC.setPrefWidth(300);
-        
+
         HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
         laTe1.setSpacing(8);
@@ -115,7 +115,7 @@ public class ArtikelAdd {
         HBox laTe8 = new HBox();
         laTe8.setPadding(new Insets(10));
         laTe8.setSpacing(8);
-        
+
         laTe1.getChildren().addAll(name, nameT);
         laTe2.getChildren().addAll(mehrwertSt, mehrwertC);
         laTe3.getChildren().addAll(artNr, artNrT);
@@ -124,51 +124,57 @@ public class ArtikelAdd {
         laTe6.getChildren().addAll(preisV, preisVT);
         laTe7.getChildren().addAll(bestand, bestandT);
         laTe8.getChildren().addAll(ztext, ztextT);
-        
-        
+
         VBox sum = new VBox();
-        
+
         sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8);
-        
+
         preisET.setOnKeyReleased(e -> {
-           if(!preisET.getText().matches("\\d*(\\.\\d*)?")){
-               if(!preisET.getText().trim().isEmpty()){
-                StringBuilder sb = new StringBuilder(preisET.getText());
-                sb.deleteCharAt(preisET.getText().length()-1);
-                preisET.setText(sb.toString());
-                preisET.positionCaret(preisET.getText().length());
+            if (!preisET.getText().matches("\\d*(\\.\\d*)?")) {
+                if (!preisET.getText().trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder(preisET.getText());
+                    sb.deleteCharAt(preisET.getText().length() - 1);
+                    preisET.setText(sb.toString());
+                    preisET.positionCaret(preisET.getText().length());
                 }
-           } 
+            }
         });
         preisVT.setOnKeyReleased(e -> {
-           if(!preisVT.getText().matches("\\d*(\\.\\d*)?")){
-               if(!preisVT.getText().trim().isEmpty()){
-                StringBuilder sb = new StringBuilder(preisVT.getText());
-                sb.deleteCharAt(preisVT.getText().length()-1);
-                preisVT.setText(sb.toString());
-                preisVT.positionCaret(preisVT.getText().length());
+            if (!preisVT.getText().matches("\\d*(\\.\\d*)?")) {
+                if (!preisVT.getText().trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder(preisVT.getText());
+                    sb.deleteCharAt(preisVT.getText().length() - 1);
+                    preisVT.setText(sb.toString());
+                    preisVT.positionCaret(preisVT.getText().length());
                 }
-           } 
+            }
         });
         bestandT.setOnKeyReleased(e -> {
-           if(!bestandT.getText().matches("[0-9]*")){
-               if(!bestandT.getText().trim().isEmpty()){
-                StringBuilder sb = new StringBuilder(bestandT.getText());
-                sb.deleteCharAt(bestandT.getText().length()-1);
-                bestandT.setText(sb.toString());
-                bestandT.positionCaret(bestandT.getText().length());
+            if (!bestandT.getText().matches("[0-9]*")) {
+                if (!bestandT.getText().trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder(bestandT.getText());
+                    sb.deleteCharAt(bestandT.getText().length() - 1);
+                    bestandT.setText(sb.toString());
+                    bestandT.positionCaret(bestandT.getText().length());
                 }
-           } 
+            }
         });
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> {
             try {
-                LocalDate ld = LocalDate.now();
-                sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(), 
-                        preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(), 
-                        bestandT.getText(), ld.toString(), gruppe.getSelectionModel().getSelectedItem().toString());
+                if (!gruppe.getSelectionModel().isEmpty()) {
+                    LocalDate ld = LocalDate.now();
+                    sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(),
+                            preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(),
+                            bestandT.getText(), ld.toString(), gruppe.getSelectionModel().getSelectedItem().toString());
+                } else{
+                    LocalDate ld = LocalDate.now();
+                    sql.safeNewArtikel(artNrT.getText(), nameT.getText(), ztextT.getText(),
+                            preisET.getText(), preisVT.getText(), mehrwertC.getValue().toString(),
+                            bestandT.getText(), ld.toString(), null);
+                }
                 sql.loadDataArtikel();
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Erstellen der Artikel");
