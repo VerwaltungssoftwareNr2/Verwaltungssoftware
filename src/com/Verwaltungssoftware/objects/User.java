@@ -5,11 +5,11 @@ public class User {
     //Banner Unterseite
     private String bankName, kontoNr, blz, steuerNummer, ustId, company, street, town, country, companyNo;
     //Adressbanner
-    private String preName, lastName, aStreet, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb;
+    private String preName, lastName, aStreet, aHausnummer, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb;
 
     public User(String bankName, String kontoNr, String blz, String steuerNummer, String ustId,
             String company, String street, String town, String country, String companyNo, 
-            String preName, String lastName, String aStreet, String aPlz, String aLand, 
+            String preName, String lastName, String aStreet, String aHausnummer, String aPlz, String aLand, 
             String aOrt, String aTel, String aFax, String aBankName, String aBic, 
             String aIban, String aAmt, String aHrb) {
         this.bankName = bankName;
@@ -25,6 +25,7 @@ public class User {
         this.preName = preName;
         this.lastName = lastName;
         this.aStreet = aStreet;
+        this.aHausnummer = aHausnummer;
         this.aPlz = aPlz;
         this.aLand = aLand;
         this.aOrt = aOrt;
@@ -139,6 +140,14 @@ public class User {
 
     public void setaStreet(String aStreet) {
         this.aStreet = aStreet;
+    }
+    
+     public String getaHausnummer() {
+        return aHausnummer;
+    }
+
+    public void setaHausnummer(String aHausnummer) {
+        this.aHausnummer = aHausnummer;
     }
 
     public String getaPlz() {

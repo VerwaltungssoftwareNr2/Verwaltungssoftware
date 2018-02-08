@@ -132,6 +132,8 @@ public interface ISql {
 
     public void deleteWarengruppe(String w) throws SQLException;
     
+    public void deleteArtikel(String artNummer) throws SQLException;
+    
     //---------------------------------------------------------------------------------------------------------------
 
     public void safeNewPlz(String p, String o, String l) throws SQLException;
@@ -210,6 +212,9 @@ public interface ISql {
     public void updateArtikelNummer(String oldId, String newId) throws SQLException;
 
     public void updateArtikel(String oldId, String newId, String bez, String z, String ePreis, String vPreis, String mwst, String m, String w) throws SQLException;
+    
+    public void updateAngebot(String aNummer, String hinweis, String faktura, Double nettoBetrag, double mwst, double bruttoBetrag,
+            int zZ, int skontoTage, double skontoPr, double skontoBetrag) throws SQLException;
 
     //----------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -218,6 +223,10 @@ public interface ISql {
     public void checkUserConfig() throws SQLException;
 
     public void createUserConfig(User user) throws SQLException;
+    
+    public boolean checkKundeHatRechnung(String kNummer) throws SQLException;
+    
+    public boolean checkArtikelInAngebot(String artNummer) throws SQLException;
     
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     

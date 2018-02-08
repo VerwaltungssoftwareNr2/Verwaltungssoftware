@@ -527,18 +527,20 @@ public class RechnungsAdd {
             }
         });
         anzahlT.setOnKeyReleased((KeyEvent ke) -> {
-            if (!artNrT.getText().isEmpty() && anzahlT.getText().matches("[0-9]")) {
+            if (!artNrT.getText().isEmpty() && anzahlT.getText().matches("[0-9]*")) {
                 for (Artikel art : dataNewRechnung) {
                     if (art.getArtikelnummer().equals(artNrT.getText())) {
-                        if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) {
-                            art.setMengeTemp(anzahlT.getText());
-                            if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
-                            } else {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                        if (!anzahlT.getText().trim().isEmpty()) {
+                            if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) {
+                                art.setMengeTemp(anzahlT.getText());
+                                if (art.getRabattTemp() != null) {
+                                    summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
+                                } else {
+                                    summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                                }
+                                rechnungEntwurf.refresh();
+                                break;
                             }
-                            rechnungEntwurf.refresh();
-                            break;
                         }
                     }
                 }
@@ -547,21 +549,25 @@ public class RechnungsAdd {
             }
         });
         rabattT.setOnKeyReleased((KeyEvent ke) -> {
-            if (!artNrT.getText().isEmpty() && !rabattT.getText().isEmpty() && rabattT.getText().matches("\\d*(\\.\\d*)?")) {
+            if (!artNrT.getText().isEmpty() && rabattT.getText().matches("\\d*(\\.\\d*)?")) {
                 for (Artikel art : dataNewRechnung) {
                     if (art.getArtikelnummer().equals(artNrT.getText())) {
-                        art.setRabattTemp(rabattT.getText());
-                        if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                        if (!rabattT.getText().trim().isEmpty()) {
+                            art.setRabattTemp(rabattT.getText());
+                            if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                            }
                         } else {
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                            art.setRabattTemp(null);
+                            if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                            }
                         }
-                    }
-                }
-            } else {
-                for (Artikel art : dataNewRechnung) {
-                    if (art.getArtikelnummer().equals(artNrT.getText())) {
-                        summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
+
                     }
                 }
             }

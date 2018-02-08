@@ -541,18 +541,20 @@ public class AngebotAdd {
             }
         });
         anzahlT.setOnKeyReleased((KeyEvent ke) -> {
-            if (!artNrT.getText().isEmpty() && anzahlT.getText().matches("[0-9]")) {
+            if (!artNrT.getText().isEmpty() && anzahlT.getText().matches("[0-9]*")) { //nur ganze Zahlen
                 for (Artikel art : dataNewAngebot) {
                     if (art.getArtikelnummer().equals(artNrT.getText())) {
-                        if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) {
-                            art.setMengeTemp(anzahlT.getText());
-                            if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
-                            } else {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                        if (!anzahlT.getText().trim().isEmpty()) {
+                            if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) { //wenn aktuelle Menge kleiner als Bestand
+                                art.setMengeTemp(anzahlT.getText()); //Menge zuweisen
+                                if (art.getRabattTemp() != null) {
+                                    summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
+                                } else {
+                                    summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                                }
+                                angebotEntwurf.refresh();
+                                break;
                             }
-                            angebotEntwurf.refresh();
-                            break;
                         }
                     }
                 }
@@ -561,21 +563,25 @@ public class AngebotAdd {
             }
         });
         rabattT.setOnKeyReleased((KeyEvent ke) -> {
-            if (!artNrT.getText().isEmpty() && !rabattT.getText().isEmpty() && rabattT.getText().matches("\\d*(\\.\\d*)?")) {
+            if (!artNrT.getText().isEmpty() && rabattT.getText().matches("\\d*(\\.\\d*)?")) {
                 for (Artikel art : dataNewAngebot) {
                     if (art.getArtikelnummer().equals(artNrT.getText())) {
-                        art.setRabattTemp(rabattT.getText());
-                        if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                        if (!rabattT.getText().trim().isEmpty()) {
+                            art.setRabattTemp(rabattT.getText());
+                            if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                            }
                         } else {
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
+                            art.setRabattTemp(null);
+                            if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
+                            } else {
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
+                            }
                         }
-                    }
-                }
-            } else {
-                for (Artikel art : dataNewAngebot) {
-                    if (art.getArtikelnummer().equals(artNrT.getText())) {
-                        summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
+
                     }
                 }
             }
@@ -598,7 +604,7 @@ public class AngebotAdd {
                     if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
                         summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
                         summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
-                    } else{
+                    } else {
                         summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
                         summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
                     }

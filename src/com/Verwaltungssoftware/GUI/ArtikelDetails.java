@@ -62,6 +62,14 @@ public class ArtikelDetails {
         } catch (SQLException exc) {
             ConfirmBox.display2("Fehler", "Fehler beim Laden der Warengruppen");
         }
+        boolean testArtikel = false;
+        try {
+            testArtikel = sql.checkArtikelInAngebot(artNummer);
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Überprüfen der Daten");
+            System.out.println(exc.getMessage());
+        }
+        
         for (String s : sql.getDataWarengruppe()) {
             gruppe.getItems().add(s);
         }
@@ -141,9 +149,18 @@ public class ArtikelDetails {
             popupStage.close();
         });
         Button delete = new Button("Artikel löschen");
+        if(testArtikel){
+            delete.setDisable(true);
+        }
         delete.setOnAction(e -> {
             boolean test = ConfirmBox.display("Artikel löschen", "Möchten sie den Artikel wirklich löschen? Dieser Vorgang kann nicht rückgängg gemacht werden!", 600, 100);
             if (test == true) {
+                try {
+                    sql.deleteArtikel(artNummer);
+                    sql.loadDataArtikel();
+                } catch (SQLException exc) {
+                    ConfirmBox.display2("Fehler", "Fehler beim Löschen des Artikels");
+                }
                 popupStage.close();
             } else {
                 e.consume();

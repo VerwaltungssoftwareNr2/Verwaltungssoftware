@@ -44,6 +44,13 @@ public class KundeDetails {
             ConfirmBox.display2("Fehler", "Fehler beim Laden der Daten");
             System.out.println(exc.getMessage());
         }
+        boolean testKunde = false;
+        try {
+            testKunde = sql.checkKundeHatRechnung(kNummer);
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler beim Überprüfen der Daten");
+            System.out.println(exc.getMessage());
+        }
 
         Label unternehmensname = new Label("Name des Unternehmens");
         unternehmensname.setPrefWidth(200);
@@ -151,6 +158,9 @@ public class KundeDetails {
         Button back = new Button("Abbrechen");
         back.setOnAction(e -> popupStage.close());
         Button delete = new Button("Kunden löschen");
+        if(testKunde){
+            delete.setDisable(true);
+        }
         delete.setOnAction(e -> {
             boolean test = ConfirmBox.display("Kunden löschen", "Möchten sie den Kunden wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {

@@ -139,6 +139,58 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public boolean checkArtikelInAngebot(String artNummer) throws SQLException {
+        boolean test = false;
+        String searchString = "select * from artikelinangebot where artikel = ?;";
+        ResultSet rsCheck = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtCheck = myConn.prepareStatement(searchString)) {
+
+            stmtCheck.setString(1, artNummer);
+            rsCheck = stmtCheck.executeQuery();
+
+            while (rsCheck.next()) {
+                if (rsCheck.getString("artikel") != null) {
+                    test = true;
+                    break;
+                }
+            }
+        } finally {
+            if (rsCheck != null) {
+                rsCheck.close();
+            }
+        }
+
+        return test;
+    }
+
+    @Override
+    public boolean checkKundeHatRechnung(String kNummer) throws SQLException {
+        boolean test = false;
+        String searchString = "select * from angebot where kunde = ?;";
+        ResultSet rsCheck = null;
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement stmtCheck = myConn.prepareStatement(searchString)) {
+
+            stmtCheck.setString(1, kNummer);
+            rsCheck = stmtCheck.executeQuery();
+
+            while (rsCheck.next()) {
+                if (rsCheck.getString("kunde") != null) {
+                    test = true;
+                    break;
+                }
+            }
+        } finally {
+            if (rsCheck != null) {
+                rsCheck.close();
+            }
+        }
+
+        return test;
+    }
+
+    @Override
     public void checkUserConfig() throws SQLException {
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtCheck = myConn.createStatement();
@@ -161,13 +213,12 @@ public class SqlConnector implements ISql {
     @Override
     public void createUserConfig(User user) throws SQLException {
         String insertString = "insert into User_config(BID, bankName, kontoNr, blz, steuerNummer, ustId, company, street, town, country, companyNo,"
-                + "preName, lastName, aStreet, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "preName, lastName, aStreet, aHausnummer, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtCreate = myConn.createStatement();
                 PreparedStatement stmtInsert = myConn.prepareStatement(insertString)) {
 
-            System.out.println("vorher");
             stmtCreate.executeUpdate("CREATE TABLE User_config("
                     + "    BID INTEGER PRIMARY KEY,"
                     + "    bankName VARCHAR(50) NOT NULL,"
@@ -183,6 +234,7 @@ public class SqlConnector implements ISql {
                     + "    preName VARCHAR(50) NOT NULL,"
                     + "    lastName VARCHAR(50) NOT NULL,"
                     + "    aStreet VARCHAR(50) NOT NULL,"
+                    + "    aHausnummer VARCHAR(50) NOT NULL,"
                     + "    aPlz VARCHAR(50) NOT NULL,"
                     + "    aLand VARCHAR(50) NOT NULL,"
                     + "    aOrt VARCHAR(50) NOT NULL,"
@@ -193,7 +245,6 @@ public class SqlConnector implements ISql {
                     + "    aIban VARCHAR(50) NOT NULL,"
                     + "    aAmt VARCHAR(50) NOT NULL,"
                     + "    aHrb VARCHAR(50) NOT NULL);");
-            System.out.println("nachher");
             stmtInsert.setInt(1, 1);
             stmtInsert.setString(2, user.getBankName());
             stmtInsert.setString(3, user.getKontoNr());
@@ -208,16 +259,17 @@ public class SqlConnector implements ISql {
             stmtInsert.setString(12, user.getPreName());
             stmtInsert.setString(13, user.getLastName());
             stmtInsert.setString(14, user.getaStreet());
-            stmtInsert.setString(15, user.getaPlz());
-            stmtInsert.setString(16, user.getaLand());
-            stmtInsert.setString(17, user.getaOrt());
-            stmtInsert.setString(18, user.getaTel());
-            stmtInsert.setString(19, user.getaFax());
-            stmtInsert.setString(20, user.getaBankName());
-            stmtInsert.setString(21, user.getaBic());
-            stmtInsert.setString(22, user.getaIban());
-            stmtInsert.setString(23, user.getaAmt());
-            stmtInsert.setString(24, user.getaHrb());
+            stmtInsert.setString(15, user.getaHausnummer());
+            stmtInsert.setString(16, user.getaPlz());
+            stmtInsert.setString(17, user.getaLand());
+            stmtInsert.setString(18, user.getaOrt());
+            stmtInsert.setString(19, user.getaTel());
+            stmtInsert.setString(20, user.getaFax());
+            stmtInsert.setString(21, user.getaBankName());
+            stmtInsert.setString(22, user.getaBic());
+            stmtInsert.setString(23, user.getaIban());
+            stmtInsert.setString(24, user.getaAmt());
+            stmtInsert.setString(25, user.getaHrb());
 
             stmtInsert.executeUpdate();
         }
@@ -250,6 +302,7 @@ public class SqlConnector implements ISql {
                     + "    preName VARCHAR(50) NOT NULL,"
                     + "    lastName VARCHAR(50) NOT NULL,"
                     + "    aStreet VARCHAR(50) NOT NULL,"
+                    + "    aHausnummer VARCHAR(50) NOT NULL,"
                     + "    aPlz VARCHAR(50) NOT NULL,"
                     + "    aLand VARCHAR(50) NOT NULL,"
                     + "    aOrt VARCHAR(50) NOT NULL,"
@@ -274,6 +327,7 @@ public class SqlConnector implements ISql {
             stmtInsert.setString(12, user.getPreName());
             stmtInsert.setString(13, user.getLastName());
             stmtInsert.setString(14, user.getaStreet());
+            stmtInsert.setString(15, user.getaHausnummer());
             stmtInsert.setString(15, user.getaPlz());
             stmtInsert.setString(16, user.getaLand());
             stmtInsert.setString(17, user.getaOrt());
@@ -310,6 +364,7 @@ public class SqlConnector implements ISql {
                         rsUser.getString("prename"),
                         rsUser.getString("lastname"),
                         rsUser.getString("astreet"),
+                        rsUser.getString("ahausnummer"),
                         rsUser.getString("aplz"),
                         rsUser.getString("aland"),
                         rsUser.getString("aort"),
@@ -874,6 +929,17 @@ public class SqlConnector implements ISql {
     }
 
     @Override
+    public void deleteArtikel(String artNummer) throws SQLException {
+        String deleteString = "delete from artikel where artikelnummer = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement deleteArtikel = myConn.prepareStatement(deleteString)) {
+
+            deleteArtikel.setString(1, artNummer);
+            deleteArtikel.executeUpdate();
+        }
+    }
+    
+    @Override
     public void deleteKunde(String kNummer) throws SQLException {
         String deleteString = "delete from kunde where kundennummer = ?;";
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -1227,6 +1293,28 @@ public class SqlConnector implements ISql {
         }
     }
 
+    @Override
+    public void updateAngebot(String aNummer, String hinweis, String faktura, Double nettoBetrag, double mwst, double bruttoBetrag,
+            int zZ, int skontoTage, double skontoPr, double skontoBetrag) throws SQLException {
+        String updateString = "update angebot set hinweis = ?, fakturatext = ?, nettobetrag = ?, bruttobetrag = ?, mehrwertsteuer = ?,"
+                + " zahlungsziel = ?, skontotage = ?, skontoprozent = ?, skontobetrag = ? where angebotsnummer = ?;";
+        try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
+                PreparedStatement updateAngebot = myConn.prepareStatement(updateString)) {
+            
+            updateAngebot.setString(1, hinweis);
+            updateAngebot.setString(2, faktura);
+            updateAngebot.setDouble(3, nettoBetrag);
+            updateAngebot.setDouble(4, bruttoBetrag);
+            updateAngebot.setDouble(5, mwst);
+            updateAngebot.setInt(6, zZ);
+            updateAngebot.setInt(7, skontoTage);
+            updateAngebot.setDouble(8, skontoPr);
+            updateAngebot.setDouble(9, skontoBetrag);
+            updateAngebot.setString(10, aNummer);
+            
+            updateAngebot.executeUpdate();
+        }
+    }
     /*
     @Override
     public void updateKunde(String attr, String id,

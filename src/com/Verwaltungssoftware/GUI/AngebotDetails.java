@@ -65,7 +65,7 @@ public class AngebotDetails {
             ConfirmBox.display2("Fehler", "Fehler beim Laden der Daten");
             System.out.println(exc.getMessage());
         }
-       Label aNr = new Label("Angebotsnummer");
+        Label aNr = new Label("Angebotsnummer");
         aNr.setPrefWidth(200);
         Label kNr = new Label("Kundennummer");
         kNr.setPrefWidth(200);
@@ -105,7 +105,6 @@ public class AngebotDetails {
         Label datumL = new Label(aDatum);
         TextArea zusatzT = new TextArea(angebot.getHinweis());
         zusatzT.setPrefWidth(300);
-        
 
         anredeT.setEditable(false);
         aNRT.setEditable(false);
@@ -116,6 +115,38 @@ public class AngebotDetails {
         plzT.setEditable(false);
         ortT.setEditable(false);
 
+        Label summe3 = new Label("Nettobetrag");
+        summe3.setPrefWidth(100);
+        Label mwtStr = new Label("Mehrwertsteuer");
+        mwtStr.setPrefWidth(100);
+        Label bruttopreis = new Label("Bruttobetrag");
+        bruttopreis.setPrefWidth(100);
+        Label gültig = new Label("Zahlungsziel");
+        gültig.setPrefWidth(100);
+        Label fakturatext = new Label("Fakturatext");
+        fakturatext.setPrefWidth(100);
+        Label skontotage = new Label("Skontotage");
+        skontotage.setPrefWidth(100);
+        Label skonto = new Label("Skonto in Prozent");
+        skonto.setPrefWidth(100);
+        Label netto = new Label("Netto");
+        netto.setPrefWidth(100);
+        Label skontobetrag = new Label("Skontobetrag");
+        skontobetrag.setPrefWidth(100);
+
+        TextField summe4 = new TextField(String.valueOf(angebot.getNettoBetrag()));
+        summe4.setEditable(false);
+        TextField mwtStrT = new TextField(String.valueOf(angebot.getMwSt()));
+        mwtStrT.setEditable(false);
+        TextField bruttopreisT = new TextField(String.valueOf(angebot.getBruttoBetrag()));
+        bruttopreisT.setEditable(false);
+        TextField gültigT = new TextField(String.valueOf(angebot.getZahlungsZiel()));
+        TextArea fakturatextT = new TextArea(angebot.getFakturaText());
+        TextField skontotageT = new TextField(String.valueOf(angebot.getSkontoTage()));
+        TextField skontoT = new TextField(String.valueOf(angebot.getSkontoProzent()));
+        TextField skontobetragT = new TextField(String.valueOf(angebot.getSkontoBetrag()));
+        skontobetragT.setEditable(false);
+
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button pdf = new Button("In PDF umwandeln");
@@ -123,9 +154,9 @@ public class AngebotDetails {
         delete.setOnAction(e -> {
             boolean test = ConfirmBox.display("Angebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
-                try{
+                try {
                     sql.deleteAngebot(aNummer);
-                } catch(SQLException exc){
+                } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Löschen des Angebots");
                 }
                 popupStage.close();
@@ -168,7 +199,7 @@ public class AngebotDetails {
 
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> popupStage.close());
-        
+
         HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
         laTe1.setSpacing(8);
@@ -199,7 +230,7 @@ public class AngebotDetails {
         HBox laTe10 = new HBox();
         laTe10.setPadding(new Insets(10));
         laTe10.setSpacing(8);
-        
+
         laTe1.getChildren().addAll(aNr, aNRT);
         laTe2.getChildren().addAll(datum, datumL);
         laTe3.getChildren().addAll(kNr, kNRT);
@@ -210,7 +241,7 @@ public class AngebotDetails {
         laTe8.getChildren().addAll(plz, plzT);
         laTe9.getChildren().addAll(ort, ortT);
         laTe10.getChildren().addAll(zusatz, zusatzT);
-        
+
         VBox sum = new VBox();
         sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8, laTe9, laTe10);
 
@@ -280,9 +311,9 @@ public class AngebotDetails {
         delete2.setOnAction(e -> {
             boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
-                try{
+                try {
                     sql.deleteAngebot(aNummer);
-                } catch(SQLException exc){
+                } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Löschen des Angebots");
                 }
                 popupStage.close();
@@ -336,38 +367,6 @@ public class AngebotDetails {
 
         posten.setContent(tableButtons); // TAB POSTEN ENDE
 
-        Label summe3 = new Label("Nettobetrag");
-        summe3.setPrefWidth(100);
-        Label mwtStr = new Label("Mehrwertsteuer");
-        mwtStr.setPrefWidth(100);
-        Label bruttopreis = new Label("Bruttobetrag");
-        bruttopreis.setPrefWidth(100);
-        Label gültig = new Label("Zahlungsziel");
-        gültig.setPrefWidth(100);
-        Label fakturatext = new Label("Fakturatext");
-        fakturatext.setPrefWidth(100);
-        Label skontotage = new Label("Skontotage");
-        skontotage.setPrefWidth(100);
-        Label skonto = new Label("Skonto in Prozent");
-        skonto.setPrefWidth(100);
-        Label netto = new Label("Netto");
-        netto.setPrefWidth(100);
-        Label skontobetrag = new Label("Skontobetrag");
-        skontobetrag.setPrefWidth(100);
-
-        TextField summe4 = new TextField(String.valueOf(angebot.getNettoBetrag()));
-        summe4.setEditable(false);
-        TextField mwtStrT = new TextField(String.valueOf(angebot.getMwSt()));
-        mwtStrT.setEditable(false);
-        TextField bruttopreisT = new TextField(String.valueOf(angebot.getBruttoBetrag()));
-        bruttopreisT.setEditable(false);
-        TextField gültigT = new TextField(String.valueOf(angebot.getZahlungsZiel()));
-        TextArea fakturatextT = new TextArea(angebot.getFakturaText());
-        TextField skontotageT = new TextField(String.valueOf(angebot.getSkontoTage()));
-        TextField skontoT = new TextField(String.valueOf(angebot.getSkontoProzent()));
-        TextField skontobetragT = new TextField(String.valueOf(angebot.getSkontoBetrag()));
-        skontobetragT.setEditable(false);
-
         Button cancel3 = new Button("Abbrechen");
         cancel3.setOnAction(e -> popupStage.close());
         Button pdf3 = new Button("In PDF umwandeln");
@@ -375,9 +374,9 @@ public class AngebotDetails {
         delete3.setOnAction(e -> {
             boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
-                try{
+                try {
                     sql.deleteAngebot(aNummer);
-                } catch(SQLException exc){
+                } catch (SQLException exc) {
                     ConfirmBox.display2("Fehler", "Fehler beim Löschen des Angebots");
                 }
                 popupStage.close();
@@ -386,14 +385,25 @@ public class AngebotDetails {
             }
         });
         Button confirm3 = new Button("Bestätigen");
-        confirm3.setOnAction(e -> popupStage.close());
+        confirm3.setOnAction(e -> {
+            try{
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()), 
+                        Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()), 
+                        Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
+                sql.loadDataAngebot(false);
+            } catch(SQLException exc){
+                ConfirmBox.display2("Fehler", "Fehler beim Aktualisieren des Angebots");
+                System.out.println(exc.getMessage());
+            }
+            popupStage.close();
+        });
 
         HBox buttons3 = new HBox();
         buttons3.getChildren().addAll(cancel3, pdf3, delete3, confirm3);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
-        
+
         HBox laTe15 = new HBox();
         laTe15.setPadding(new Insets(10));
         laTe15.setSpacing(8);
@@ -409,13 +419,13 @@ public class AngebotDetails {
         HBox laTe19 = new HBox();
         laTe19.setPadding(new Insets(10));
         laTe19.setSpacing(8);
-        
+
         laTe15.getChildren().addAll(summe3, summe4, skontotage, skontotageT);
         laTe16.getChildren().addAll(mwtStr, mwtStrT, skonto, skontoT);
         laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT);
         laTe18.getChildren().addAll(gültig, gültigT);
         laTe19.getChildren().addAll(fakturatext, fakturatextT);
-        
+
         VBox sum3 = new VBox();
         sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19);
 

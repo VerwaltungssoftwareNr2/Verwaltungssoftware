@@ -95,7 +95,7 @@ public class PdfCreator {
             PdfPTable adresseTable = new PdfPTable(1);
             adresseTable.setHorizontalAlignment(Element.ALIGN_LEFT);
             adresseTable.setWidthPercentage(40);
-            Chunk d = new Chunk(user.getCompany() + " · " + user.getaStreet() + " · " + user.getaPlz() + " " + user.getaOrt());
+            Chunk d = new Chunk(user.getCompany() + " · " + user.getaStreet() + " " + user.getaHausnummer() + " · " + user.getaPlz() + " " + user.getaOrt());
             d.setUnderline(0.1f, -2f);
             d.setFont(titleFont);
             Paragraph p = new Paragraph(d);

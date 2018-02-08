@@ -34,7 +34,16 @@ public class InfoBox {
 
         //blockieren von aktionen
         popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setTitle("Informationen ändern");
+        try {
+            sql.checkUserConfig();
+            if (!sql.getCheckUserConfig()) {
+                popupStage.setTitle("Erstanmeldung");
+            } else {
+                popupStage.setTitle("Informationen ändern");
+            }
+        } catch (SQLException exc) {
+            ConfirmBox.display2("Fehler", "Fehler bei Überprüfung der Erstanmeldung");
+        }
         popupStage.setMinWidth(300);
 
         Label allgemeinheader = new Label("Allgemeine Informationen"); //HEADLINE
@@ -49,6 +58,8 @@ public class InfoBox {
         strasse.setPrefWidth(200);
         Label ort = new Label("Ort");
         ort.setPrefWidth(200);
+        Label hausnummer = new Label("Hausnummer");
+        hausnummer.setPrefWidth(200);
         Label plz = new Label("Postleitzahl");
         plz.setPrefWidth(200);
         Label land = new Label("Land");
@@ -102,6 +113,8 @@ public class InfoBox {
         strasseF.setPrefWidth(300);
         final TextField ortF = new TextField();
         ortF.setPrefWidth(300);
+        final TextField hausnummerF = new TextField();
+        hausnummerF.setPrefWidth(300);
         final TextField plzF = new TextField();
         plzF.setPrefWidth(300);
         final TextField landF = new TextField();
@@ -143,7 +156,6 @@ public class InfoBox {
         final TextField companyNoT = new TextField();
         companyNoT.setPrefWidth(300);
 
-        
         HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
         laTe1.setSpacing(8);
@@ -222,38 +234,41 @@ public class InfoBox {
         HBox laTe26 = new HBox();
         laTe26.setPadding(new Insets(10));
         laTe26.setSpacing(8);
-        
+        HBox laTe27 = new HBox();
+        laTe27.setPadding(new Insets(10));
+        laTe27.setSpacing(8);
+
         laTe1.getChildren().addAll(allgemeinheader, allHeaderT);
         laTe2.getChildren().addAll(nameUnternehmen, nameUF);
         laTe3.getChildren().addAll(vornameUnternehmer, vornameUF);
         laTe4.getChildren().addAll(nachnameUnternehmer, nachnameUF);
         laTe5.getChildren().addAll(strasse, strasseF);
-        laTe6.getChildren().addAll(ort, ortF);
-        laTe7.getChildren().addAll(plz, plzF);
-        laTe8.getChildren().addAll(land, landF);
-        laTe9.getChildren().addAll(telefon, telefonF);
-        laTe10.getChildren().addAll(fax, faxF);
-        laTe11.getChildren().addAll(bankheader, bankHeaderT);
-        laTe12.getChildren().addAll(bank, bankF);
-        laTe13.getChildren().addAll(kontonummer, kontonrT);
-        laTe14.getChildren().addAll(bic, bicF);
-        laTe15.getChildren().addAll(iban, ibanF);
-        laTe16.getChildren().addAll(blz, blzT);
-        laTe17.getChildren().addAll(finanz, finanzT);
-        laTe18.getChildren().addAll(amt, amtT);
-        laTe19.getChildren().addAll(hrb, hrbT);
-        laTe20.getChildren().addAll(steuernummer, steuernummerT);
-        laTe21.getChildren().addAll(ustID, ustIDT);
-        laTe22.getChildren().addAll(gb, gbT);
-        laTe23.getChildren().addAll(street, streetT);
-        laTe24.getChildren().addAll(town, townT);
-        laTe25.getChildren().addAll(country, countryT);
-        laTe26.getChildren().addAll(companyNo, companyNoT);
-        
+        laTe6.getChildren().addAll(hausnummer, hausnummerF);
+        laTe7.getChildren().addAll(ort, ortF);
+        laTe8.getChildren().addAll(plz, plzF);
+        laTe9.getChildren().addAll(land, landF);
+        laTe10.getChildren().addAll(telefon, telefonF);
+        laTe11.getChildren().addAll(fax, faxF);
+        laTe12.getChildren().addAll(bankheader, bankHeaderT);
+        laTe13.getChildren().addAll(bank, bankF);
+        laTe14.getChildren().addAll(kontonummer, kontonrT);
+        laTe15.getChildren().addAll(bic, bicF);
+        laTe16.getChildren().addAll(iban, ibanF);
+        laTe17.getChildren().addAll(blz, blzT);
+        laTe18.getChildren().addAll(finanz, finanzT);
+        laTe19.getChildren().addAll(amt, amtT);
+        laTe20.getChildren().addAll(hrb, hrbT);
+        laTe21.getChildren().addAll(steuernummer, steuernummerT);
+        laTe22.getChildren().addAll(ustID, ustIDT);
+        laTe23.getChildren().addAll(gb, gbT);
+        laTe24.getChildren().addAll(street, streetT);
+        laTe25.getChildren().addAll(town, townT);
+        laTe26.getChildren().addAll(country, countryT);
+        laTe27.getChildren().addAll(companyNo, companyNoT);
+
         VBox sum = new VBox();
-        sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8, laTe9, laTe10, laTe11, laTe12, laTe13, laTe14, laTe15, laTe16, laTe17, laTe18, laTe19, laTe20, laTe21, laTe22, laTe23, laTe24, laTe25, laTe26);
-        
-        
+        sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8, laTe9, laTe10, laTe11, laTe12, laTe13, laTe14, laTe15, laTe16, laTe17, laTe18, laTe19, laTe20, laTe21, laTe22, laTe23, laTe24, laTe25, laTe26, laTe27);
+
         try {
             sql.checkUserConfig();
             if (sql.getCheckUserConfig()) {
@@ -262,6 +277,7 @@ public class InfoBox {
                 vornameUF.setText(user.getPreName());
                 nachnameUF.setText(user.getLastName());
                 strasseF.setText(user.getaStreet());
+                hausnummerF.setText(user.getaHausnummer());
                 ortF.setText(user.getaOrt());
                 plzF.setText(user.getaPlz());
                 landF.setText(user.getaLand());
@@ -289,7 +305,7 @@ public class InfoBox {
         confirm.setOnAction(e -> {
             User user2 = new User(bankF.getText(), kontonrT.getText(), blzT.getText(), steuernummerT.getText(), ustIDT.getText(),
                     nameUF.getText(), streetT.getText(), townT.getText(), countryT.getText(), companyNoT.getText(),
-                    vornameUF.getText(), nachnameUF.getText(), strasseF.getText(), plzF.getText(), landF.getText(), ortF.getText(), telefonF.getText(),
+                    vornameUF.getText(), nachnameUF.getText(), strasseF.getText(), hausnummerF.getText(), plzF.getText(), landF.getText(), ortF.getText(), telefonF.getText(),
                     faxF.getText(), bankF.getText(), bicF.getText(), ibanF.getText(), amtT.getText(), hrbT.getText());
             try {
                 if (!sql.getCheckUserConfig()) {
