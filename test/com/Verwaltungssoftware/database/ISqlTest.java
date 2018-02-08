@@ -239,7 +239,7 @@ public class ISqlTest {
         String o = "";
         String l = "";
         ISql instance = new SqlConnector("root", "lucas");
-        instance.safeNewKunde(a, vn, n, s, h, z, p, o, l);
+        instance.safeNewKunde(a, vn, n, s, h, z, p, o);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -261,7 +261,7 @@ public class ISqlTest {
         String o = "";
         String l = "";
         ISql instance = new SqlConnector("root", "lucas");
-        instance.updateKunde(kNummer, a, vn, n, s, h, z, p, o, l);
+        instance.updateKunde(kNummer, a, vn, n, s, h, z, p, o);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
