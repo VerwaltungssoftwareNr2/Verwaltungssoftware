@@ -77,6 +77,7 @@ public class GUI_Verwaltungssoftware extends Application {
                 this.password = pass.getText();
                 primaryStage.setScene(mainScreen);
                 pass.clear();
+                primaryStage.setMaximized(true);
                 try {
                     sql.checkUserConfig();
                 } catch (SQLException exc) {

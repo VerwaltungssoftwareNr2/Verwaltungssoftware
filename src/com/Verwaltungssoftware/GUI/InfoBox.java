@@ -25,7 +25,7 @@ import javafx.stage.Stage;
  *
  * @author Lucas
  */
-public class InfoBox {//brauche scrollbox, weil zu viel sachen
+public class InfoBox {
 
     static User user = null;
 

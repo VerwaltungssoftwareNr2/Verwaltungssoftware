@@ -57,7 +57,7 @@ public class ISqlTest {
         String datum = ld.toString();
         ISql instance = new SqlConnector("root", "lucas");
         String expResult = "2018-oooo5-A";
-        String result = instance.generateRandomOfferNumber(datum);
+        String result = instance.generateNextOfferNumber(datum);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
     }
@@ -71,7 +71,7 @@ public class ISqlTest {
         String datum = "";
         ISql instance = new SqlConnector("root", "lucas");
         String expResult = "";
-        String result = instance.generateRandomBillNumber(datum);
+        String result = instance.generateNextBillNumber(datum);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
