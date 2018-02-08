@@ -287,7 +287,7 @@ public class PdfCreator {
                     if (a.getRabattmenge() == null) {
                         gesamtpreis = verkaufspreis * menge;
                     } else { //wenn Rabatt besteht
-                        gesamtpreis = verkaufspreis * menge * (Double.parseDouble(a.getRabattmenge()) / 100);
+                        gesamtpreis = verkaufspreis * menge * (1 - Double.parseDouble(a.getRabattmenge()) / 100);
                     }
                     table.addCell(String.valueOf(gesamtpreis));
                     count++;
@@ -304,7 +304,7 @@ public class PdfCreator {
                     if (a.getRabattmenge() == null) {
                         alternativpreis = verkaufspreis * menge;
                     } else { //wenn Rabatt besteht
-                        alternativpreis = verkaufspreis * menge * Double.parseDouble(a.getRabattmenge());
+                        alternativpreis = verkaufspreis * menge * (1 - Double.parseDouble(a.getRabattmenge()));
                     }
                     tableAlt.addCell(String.valueOf(alternativpreis));
                 }
