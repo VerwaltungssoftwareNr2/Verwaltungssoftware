@@ -458,7 +458,7 @@ public class PdfCreator {
             innerFooterTableLeft.addCell(fIC5);
 
             //Bild in der Mitte
-            Image image = Image.getInstance("D:\\Studium\\Semester 3\\Buchhaltungsanwendung\\Vorlagen\\dwaMitglied.jpg");
+            Image image = Image.getInstance("dwaMitglied.jpg");
             image.setScaleToFitHeight(true);
 
             //innere rechte Tabelle
