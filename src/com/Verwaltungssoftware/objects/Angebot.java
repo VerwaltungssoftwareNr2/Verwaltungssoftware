@@ -10,7 +10,6 @@ public class Angebot {
     private double nettoBetrag, bruttoBetrag, mwSt, skontoBetrag, skontoProzent;
     private int zahlungsZiel, skontoTage;
     String fakturaText, hinweis;
-    //private final ArrayList<Artikel> waren;
 
     public Angebot(String aNummer, String k, String date, String a, double netto, double brutto,
             double mwSt, double skontoB, double skontoPr, int zZ, int skontoT, String fakt, String h) {
@@ -29,8 +28,6 @@ public class Angebot {
         skontoTage = skontoT;
         fakturaText = fakt;
         hinweis = h;
-        
-        //waren = new ArrayList<>();
     }
 
     public void setAngebotsnummer(String a) {

@@ -445,8 +445,6 @@ public class SqlConnector implements ISql {
                         rsKunde.getString("ort"),
                         rsKunde.getString("land")));
             }
-        } catch (SQLException exc) {
-            throw exc;
         }
     }
 
@@ -1210,7 +1208,8 @@ public class SqlConnector implements ISql {
 
     @Override
     public void updateKunde(String kNummer, String uName, String a, String vn, String n, String s, String h, String z, String p) throws SQLException {
-        String updateString = "update kunde set unternehmensname = ?, anrede = ?, vorname = ?, name = ?, straße = ?, hausnummer = ?, zusatz = ?, postleitzahl = ? where kundennummer = ?";
+        String updateString = "update kunde set unternehmensname = ?, anrede = ?, vorname = ?, name = ?, "
+                + "straße = ?, hausnummer = ?, zusatz = ?, postleitzahl = ? where kundennummer = ?";
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement updateKunde = myConn.prepareStatement(updateString)) {
 
@@ -1309,7 +1308,7 @@ public class SqlConnector implements ISql {
      * @return neue Rechnungsnummer
      * @throws SQLException
      */
-    public String generateRandomBillNumber(String datum) throws SQLException {
+    public String generateNextBillNumber(String datum) throws SQLException {
         String stringLetzteRechnungen = "select * from angebot where angebotsnummer like '%R%' order by angebotsnummer asc;";
         ResultSet rsLetzteRechnungen = null;
         String letzteRechnung = null;
@@ -1384,7 +1383,7 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public String generateRandomOfferNumber(String datum) throws SQLException {
+    public String generateNextOfferNumber(String datum) throws SQLException {
         String stringLetzteAngebote = "select * from angebot where angebotsnummer like '%A%' order by angebotsnummer asc;";
         ResultSet rsLetzteAngebot = null;
         String letztesAngebot = null;

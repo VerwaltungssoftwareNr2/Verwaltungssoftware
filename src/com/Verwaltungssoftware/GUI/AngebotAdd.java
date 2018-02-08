@@ -147,7 +147,7 @@ public class AngebotAdd {
         Button search2 = new Button("Suchen");
         Button cancel = new Button("Abbrechen");
         Button cont = new Button("Weiter");
-        
+
         HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
         laTe1.setSpacing(8);
@@ -178,7 +178,7 @@ public class AngebotAdd {
         HBox laTe10 = new HBox();
         laTe10.setPadding(new Insets(10));
         laTe10.setSpacing(8);
-        
+
         laTe1.getChildren().addAll(aNr, aNRT);
         laTe2.getChildren().addAll(datum, datumL);
         laTe3.getChildren().addAll(kNr, kNRT, search2);
@@ -193,7 +193,7 @@ public class AngebotAdd {
         search2.setOnAction(e -> {
             TablePopup.display(gui, "Angebot erstellen: Auswahl des Kunden", gui.kundenT);
             try {
-                aNRT.setText(gui.sql.generateRandomOfferNumber(ld.toString()));
+                aNRT.setText(gui.sql.generateNextOfferNumber(ld.toString()));
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Erstellen einer Angebotsnummer");
                 System.out.println(exc.getMessage());
@@ -459,9 +459,9 @@ public class AngebotAdd {
         rabattT.setPrefWidth(300);
         TextArea zusatztextT = new TextArea();
         zusatztextT.setPrefWidth(300);
-        
+
         Button search = new Button("Suchen");
-        
+
         HBox laTe11 = new HBox();
         laTe11.setPadding(new Insets(10));
         laTe11.setSpacing(8);
@@ -474,7 +474,7 @@ public class AngebotAdd {
         HBox laTe14 = new HBox();
         laTe14.setPadding(new Insets(10));
         laTe14.setSpacing(8);
-        
+
         laTe11.getChildren().addAll(artNr, artNrT, alternativ, search);
         laTe12.getChildren().addAll(bezeichnung2, bezeichnungT, anzahl, anzahlT);
         laTe13.getChildren().addAll(nettopreis, nettopreisT, rabatt2, rabattT);
@@ -525,13 +525,13 @@ public class AngebotAdd {
                         }
                         if (art.getMengeTemp() != null) {
                             if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
                             } else {
                                 summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
                             }
                         } else {
                             if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
                             } else {
                                 summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
                             }
@@ -547,7 +547,7 @@ public class AngebotAdd {
                         if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) {
                             art.setMengeTemp(anzahlT.getText());
                             if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
                             } else {
                                 summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
                             }
@@ -566,9 +566,9 @@ public class AngebotAdd {
                     if (art.getArtikelnummer().equals(artNrT.getText())) {
                         art.setRabattTemp(rabattT.getText());
                         if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (Double.valueOf(rabattT.getText()) / 100)));
+                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
                         } else {
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(rabattT.getText()) / 100)));
+                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
                         }
                     }
                 }
@@ -589,10 +589,19 @@ public class AngebotAdd {
                 nettopreisT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
                 rabattT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
                 if (rabattT.getText() == null) {
-                    summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    } else {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                    }
                 } else {
-                    summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
-                    summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                    if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                        summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                    } else{
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                        summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                    }
                 }
                 summeT.setText(String.valueOf(summeTemp));
                 anzahlT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
@@ -674,20 +683,20 @@ public class AngebotAdd {
         TextField skontoT = new TextField();
         TextField skontobetragT = new TextField();
         skontobetragT.setEditable(false);
-        
+
         gültigT.setOnKeyReleased((KeyEvent ke) -> {
             if (!ke.getText().matches("[0-9]*")) {
                 StringBuilder sb = new StringBuilder(gültigT.getText());
-                sb.deleteCharAt(gültigT.getText().length()-1);
+                sb.deleteCharAt(gültigT.getText().length() - 1);
                 gültigT.setText(sb.toString());
                 gültigT.positionCaret(gültigT.getText().length());
             }
         });
-        
+
         skontotageT.setOnKeyReleased((KeyEvent ke) -> {
             if (!ke.getText().matches("[0-9]*")) {
                 StringBuilder sb = new StringBuilder(skontotageT.getText());
-                sb.deleteCharAt(skontotageT.getText().length()-1);
+                sb.deleteCharAt(skontotageT.getText().length() - 1);
                 skontotageT.setText(sb.toString());
                 skontotageT.positionCaret(skontotageT.getText().length());
             }
@@ -695,13 +704,13 @@ public class AngebotAdd {
         skontoT.setOnKeyReleased((KeyEvent ke) -> {
             if (!skontoT.getText().trim().isEmpty() && skontoT.getText().matches("\\d*(\\.\\d*)?")) {
                 skontobetragT.setText(String.valueOf(endpreisBrutto * (1 - (Double.valueOf(skontoT.getText()) / 100))));
-            } else{
-                if(!skontoT.getText().trim().isEmpty()){
-                StringBuilder sb = new StringBuilder(skontoT.getText());
-                sb.deleteCharAt(skontoT.getText().length()-1);
-                skontoT.setText(sb.toString());
-                skontoT.positionCaret(skontoT.getText().length());
-                } else{
+            } else {
+                if (!skontoT.getText().trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder(skontoT.getText());
+                    sb.deleteCharAt(skontoT.getText().length() - 1);
+                    skontoT.setText(sb.toString());
+                    skontoT.positionCaret(skontoT.getText().length());
+                } else {
                     skontobetragT.clear();
                 }
             }
@@ -724,7 +733,7 @@ public class AngebotAdd {
                             if (a.getRabattTemp() == null) {
                                 gesamtpreis = verkaufsPreis * m;
                             } else { //wenn Rabatt besteht
-                                gesamtpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattTemp()) / 100);
+                                gesamtpreis = verkaufsPreis * m * (1 - Double.parseDouble(a.getRabattTemp()) / 100);
                             }
                         } else if (a.getAlternative().equals("1") || a.getAlternative().equals("true")) { //wenn Artikel alternativ ist
                             gesamtpreis = 0;
@@ -733,7 +742,7 @@ public class AngebotAdd {
                             if (a.getRabattTemp() == null) {
                                 alternativpreis = verkaufsPreis * m;
                             } else { //wenn Rabatt besteht
-                                alternativpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattTemp()) / 100);
+                                alternativpreis = verkaufsPreis * m * (1 - Double.parseDouble(a.getRabattTemp()) / 100);
                             }
                         }
                     }
@@ -749,13 +758,12 @@ public class AngebotAdd {
                 mwtStrT.setEditable(false);
                 bruttopreisT.setText(String.valueOf(endpreisBrutto));
                 bruttopreisT.setEditable(false);
-                
 
                 popupStage.setScene(summen);
                 popupStage.setTitle(titleS);
             }
         });
-        
+
         VBox sum2 = new VBox();
         sum2.getChildren().addAll(laTe11, laTe12, laTe13, laTe14);
 
@@ -872,7 +880,7 @@ public class AngebotAdd {
                 e.consume();
             }
         });
-        
+
         HBox laTe15 = new HBox();
         laTe15.setPadding(new Insets(10));
         laTe15.setSpacing(8);
@@ -888,16 +896,16 @@ public class AngebotAdd {
         HBox laTe19 = new HBox();
         laTe19.setPadding(new Insets(10));
         laTe19.setSpacing(8);
-        
+
         laTe15.getChildren().addAll(summe3, summe4, skontotage, skontotageT);
         laTe16.getChildren().addAll(mwtStr, mwtStrT, skonto, skontoT);
         laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT);
         laTe18.getChildren().addAll(gültig, gültigT);
         laTe19.getChildren().addAll(fakturatext, fakturatextT);
-        
+
         VBox sum3 = new VBox();
         sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19);
-        
+
         HBox buttons4 = new HBox();
         buttons4.getChildren().addAll(abort, pdfButton, done);
         buttons4.setPadding(new Insets(10, 10, 10, 10));

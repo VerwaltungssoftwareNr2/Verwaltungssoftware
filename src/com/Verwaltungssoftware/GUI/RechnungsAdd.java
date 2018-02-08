@@ -146,7 +146,7 @@ public class RechnungsAdd {
         search2.setOnAction(e -> {
             TablePopup.display(gui, "Rechnung erstellen: Auswahl des Kunden", gui.kundenT);
             try {
-                rNRT.setText(gui.sql.generateRandomBillNumber(ld.toString()));
+                rNRT.setText(gui.sql.generateNextBillNumber(ld.toString()));
             } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Erstellen einer Rechnungsnummer");
                 System.out.println(exc.getMessage());
@@ -209,7 +209,7 @@ public class RechnungsAdd {
         HBox laTe10 = new HBox();
         laTe10.setPadding(new Insets(10));
         laTe10.setSpacing(8);
-        
+
         laTe1.getChildren().addAll(aNr, rNRT);
         laTe2.getChildren().addAll(datum, datumL);
         laTe3.getChildren().addAll(kNr, kNRT, search2);
@@ -229,7 +229,6 @@ public class RechnungsAdd {
         buttons.setPadding(new Insets(10, 10, 10, 10));
         buttons.setSpacing(8);
         buttons.setAlignment(Pos.CENTER);
-
 
         BorderPane pane = new BorderPane();
         pane.setCenter(sum);
@@ -512,13 +511,13 @@ public class RechnungsAdd {
                         }
                         if (art.getMengeTemp() != null) {
                             if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
                             } else {
                                 summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
                             }
                         } else {
                             if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
                             } else {
                                 summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand())));
                             }
@@ -534,7 +533,7 @@ public class RechnungsAdd {
                         if (Integer.valueOf(anzahlT.getText()) <= Integer.valueOf(art.getBestand())) {
                             art.setMengeTemp(anzahlT.getText());
                             if (art.getRabattTemp() != null) {
-                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(art.getRabattTemp()) / 100)));
+                                summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(art.getRabattTemp()) / 100)));
                             } else {
                                 summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp())));
                             }
@@ -553,9 +552,9 @@ public class RechnungsAdd {
                     if (art.getArtikelnummer().equals(artNrT.getText())) {
                         art.setRabattTemp(rabattT.getText());
                         if (art.getMengeTemp() == null) {//wenn null dann gesamter Bestand
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (Double.valueOf(rabattT.getText()) / 100)));
+                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getBestand()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
                         } else {
-                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (Double.valueOf(rabattT.getText()) / 100)));
+                            summeT.setText(String.valueOf(Double.valueOf(art.getVerkaufspreis()) * Double.valueOf(art.getMengeTemp()) * (1 - Double.valueOf(rabattT.getText()) / 100)));
                         }
                     }
                 }
@@ -576,10 +575,19 @@ public class RechnungsAdd {
                 nettopreisT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
                 rabattT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
                 if (rabattT.getText() == null) {
-                    summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    if (rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    } else {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                    }
                 } else {
-                    summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
-                    summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                    if (rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                        summeTemp = summeTemp * (1 - Double.valueOf(rabattT.getText()) / 100);
+                    } else {
+                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                        summeTemp = summeTemp * (1 - Double.valueOf(rabattT.getText()) / 100);
+                    }
                 }
                 summeT.setText(String.valueOf(summeTemp));
                 anzahlT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
@@ -665,31 +673,31 @@ public class RechnungsAdd {
         gültigT.setOnKeyReleased((KeyEvent ke) -> {
             if (!ke.getText().matches("[0-9]*")) {
                 StringBuilder sb = new StringBuilder(gültigT.getText());
-                sb.deleteCharAt(gültigT.getText().length()-1);
+                sb.deleteCharAt(gültigT.getText().length() - 1);
                 gültigT.setText(sb.toString());
                 gültigT.positionCaret(gültigT.getText().length());
             }
         });
-        
+
         skontotageT.setOnKeyReleased((KeyEvent ke) -> {
             if (!ke.getText().matches("[0-9]*")) {
                 StringBuilder sb = new StringBuilder(skontotageT.getText());
-                sb.deleteCharAt(skontotageT.getText().length()-1);
+                sb.deleteCharAt(skontotageT.getText().length() - 1);
                 skontotageT.setText(sb.toString());
                 skontotageT.positionCaret(skontotageT.getText().length());
             }
         });
-        
+
         skontoT.setOnKeyReleased((KeyEvent ke) -> {
             if (!skontoT.getText().trim().isEmpty() && skontoT.getText().matches("\\d*(\\.\\d*)?")) {
                 skontobetragT.setText(String.valueOf(endpreisBrutto * (1 - (Double.valueOf(skontoT.getText()) / 100))));
-            } else{
-                if(!skontoT.getText().trim().isEmpty()){
-                StringBuilder sb = new StringBuilder(skontoT.getText());
-                sb.deleteCharAt(skontoT.getText().length()-1);
-                skontoT.setText(sb.toString());
-                skontoT.positionCaret(skontoT.getText().length());
-                } else{
+            } else {
+                if (!skontoT.getText().trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder(skontoT.getText());
+                    sb.deleteCharAt(skontoT.getText().length() - 1);
+                    skontoT.setText(sb.toString());
+                    skontoT.positionCaret(skontoT.getText().length());
+                } else {
                     skontobetragT.clear();
                 }
             }
@@ -712,7 +720,7 @@ public class RechnungsAdd {
                             if (a.getRabattTemp() == null) {
                                 gesamtpreis = verkaufsPreis * m;
                             } else { //wenn Rabatt besteht
-                                gesamtpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattTemp()) / 100);
+                                gesamtpreis = verkaufsPreis * m * (1 - Double.parseDouble(a.getRabattTemp()) / 100);
                             }
                         } else if (a.getAlternative().equals("1") || a.getAlternative().equals("true")) { //wenn Artikel alternativ ist
                             gesamtpreis = 0;
@@ -721,7 +729,7 @@ public class RechnungsAdd {
                             if (a.getRabattTemp() == null) {
                                 alternativpreis = verkaufsPreis * m;
                             } else { //wenn Rabatt besteht
-                                alternativpreis = verkaufsPreis * m * (Double.parseDouble(a.getRabattTemp()) / 100);
+                                alternativpreis = verkaufsPreis * m * (1 - Double.parseDouble(a.getRabattTemp()) / 100);
                             }
                         }
                     }
@@ -742,8 +750,8 @@ public class RechnungsAdd {
                 popupStage.setTitle(titleS);
             }
         });
-        
-         HBox laTe11 = new HBox();
+
+        HBox laTe11 = new HBox();
         laTe11.setPadding(new Insets(10));
         laTe11.setSpacing(8);
         HBox laTe12 = new HBox();
@@ -755,15 +763,15 @@ public class RechnungsAdd {
         HBox laTe14 = new HBox();
         laTe14.setPadding(new Insets(10));
         laTe14.setSpacing(8);
-        
+
         laTe11.getChildren().addAll(artNr, artNrT, alternativ, search);
         laTe12.getChildren().addAll(bezeichnung2, bezeichnungT, anzahl, anzahlT);
         laTe13.getChildren().addAll(nettopreis, nettopreisT, rabatt2, rabattT);
         laTe14.getChildren().addAll(summe, summeT, zusatztext, zusatztextT);
-        
+
         VBox sum2 = new VBox();
         sum2.getChildren().addAll(laTe11, laTe12, laTe13, laTe14);
-    
+
         HBox buttons3 = new HBox();
         buttons3.getChildren().addAll(back2, delete, con);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
@@ -825,7 +833,7 @@ public class RechnungsAdd {
                         System.out.println(exc.getMessage());
                     }
                     popupStage.close();
-                } else{
+                } else {
                     ConfirmBox.display2("Fehler", "Daten sind unvollständig. Bitte alle Textfelder ausfüllen");
                 }
             } else {
@@ -879,7 +887,7 @@ public class RechnungsAdd {
             }
         });
 
-      HBox laTe15 = new HBox();
+        HBox laTe15 = new HBox();
         laTe15.setPadding(new Insets(10));
         laTe15.setSpacing(8);
         HBox laTe16 = new HBox();
@@ -894,16 +902,16 @@ public class RechnungsAdd {
         HBox laTe19 = new HBox();
         laTe19.setPadding(new Insets(10));
         laTe19.setSpacing(8);
-        
+
         laTe15.getChildren().addAll(summe3, summe4, skontotage, skontotageT);
         laTe16.getChildren().addAll(mwtStr, mwtStrT, skonto, skontoT);
         laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT);
         laTe18.getChildren().addAll(gültig, gültigT);
         laTe19.getChildren().addAll(fakturatext, fakturatextT);
-        
+
         VBox sum3 = new VBox();
         sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19);
-        
+
         HBox buttons4 = new HBox();
         buttons4.getChildren().addAll(abort, pdfButton, done);
         buttons4.setPadding(new Insets(10, 10, 10, 10));
