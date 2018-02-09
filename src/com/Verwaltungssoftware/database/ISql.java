@@ -213,7 +213,7 @@ public interface ISql {
 
     public void updateArtikel(String oldId, String newId, String bez, String z, String ePreis, String vPreis, String mwst, String m, String w) throws SQLException;
     
-    public void updateAngebot(String aNummer, String hinweis, String faktura, Double nettoBetrag, double mwst, double bruttoBetrag,
+    public void updateAngebot(String aNummer, String hinweis, String faktura, String akzeptiert, Double nettoBetrag, double mwst, double bruttoBetrag,
             int zZ, int skontoTage, double skontoPr, double skontoBetrag) throws SQLException;
 
     //----------------------------------------------------------------------------------------------------------------------------------------------------

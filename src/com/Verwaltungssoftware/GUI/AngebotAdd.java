@@ -452,6 +452,7 @@ public class AngebotAdd {
         anzahlT.setPrefWidth(300);
         TextField bezeichnungT = new TextField();
         bezeichnungT.setPrefWidth(300);
+        bezeichnungT.setEditable(false);
         TextField nettopreisT = new TextField();
         nettopreisT.setPrefWidth(300);
         TextField summeT = new TextField();
@@ -461,6 +462,7 @@ public class AngebotAdd {
         rabattT.setPrefWidth(300);
         TextArea zusatztextT = new TextArea();
         zusatztextT.setPrefWidth(300);
+        zusatztextT.setEditable(false);
 
         Button search = new Button("Suchen");
 

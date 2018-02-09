@@ -459,6 +459,7 @@ public class RechnungsAdd {
         anzahlT.setPrefWidth(300);
         TextField bezeichnungT = new TextField();
         bezeichnungT.setPrefWidth(300);
+        bezeichnungT.setEditable(false);
         TextField nettopreisT = new TextField();
         nettopreisT.setPrefWidth(300);
         TextField summeT = new TextField();
@@ -468,6 +469,7 @@ public class RechnungsAdd {
         rabattT.setPrefWidth(300);
         TextArea zusatztextT = new TextArea();
         zusatztextT.setPrefWidth(300);
+        zusatztextT.setEditable(false);
 
         artNrT.setOnKeyReleased((KeyEvent ke) -> {
             if (summeT.getText() != null) {

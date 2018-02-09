@@ -226,6 +226,7 @@ public class PdfCreator {
     public void loadTableData(String belegNummer, int zahlungsziel, int skontoZeit, double skontoBetrag, String faktura, boolean check) throws SQLException, DocumentException, IOException {
         try {
             //Haupttabelle
+            Font fontHaupt = FontFactory.getFont(FontFactory.TIMES, 9);
             float[] est = {1.5f, 3, 5, 3, 4, 2, 4};
             PdfPTable table = new PdfPTable(est);
             table.setWidthPercentage(100);
@@ -235,13 +236,13 @@ public class PdfCreator {
             table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
             table.getDefaultCell().setPadding(5);
             //HeaderSpalten der Haupttabelle
-            table.addCell("Pos.");
-            table.addCell("Art.Nr.");
-            table.addCell("Bezeichnung");
-            table.addCell("Menge");
-            table.addCell("Einzelpreis");
-            table.addCell("%");
-            table.addCell("Gesamtpreis");
+            table.addCell(new Paragraph("Pos.", fontHaupt));
+            table.addCell(new Paragraph("Art.Nr.", fontHaupt));
+            table.addCell(new Paragraph("Bezeichnung", fontHaupt));
+            table.addCell(new Paragraph("Menge", fontHaupt));
+            table.addCell(new Paragraph("Einzelpreis", fontHaupt));
+            table.addCell(new Paragraph("%", fontHaupt));
+            table.addCell(new Paragraph("Gesamtpreis", fontHaupt));
 
             table.setHeaderRows(1);
             table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
@@ -273,38 +274,38 @@ public class PdfCreator {
             double endpreisBrutto = 0;
             for (Artikel a : sql.getDataArtikelInAngebot()) {
                 if (a.getAlternative().equals("0")) {
-                    table.addCell("#" + count);
-                    table.addCell(a.getArtikelnummer());
-                    table.addCell(a.getBezeichnung() + "\n" + a.getZusatztext());
-                    table.addCell(a.getBestand());
-                    table.addCell(a.getVerkaufspreis());
-                    table.addCell(a.getRabattmenge());
+                    table.addCell(new Paragraph("#" + count, fontHaupt));
+                    table.addCell(new Paragraph(a.getArtikelnummer(), fontHaupt));
+                    table.addCell(new Paragraph(a.getBezeichnung() + "\n" + a.getZusatztext(), fontHaupt));
+                    table.addCell(new Paragraph(a.getBestand(), fontHaupt));
+                    table.addCell(new Paragraph(a.getVerkaufspreis(), fontHaupt));
+                    table.addCell(new Paragraph(a.getRabattmenge(), fontHaupt));
                     verkaufspreis = Double.parseDouble(a.getVerkaufspreis());
                     menge = Double.parseDouble(a.getBestand());
                     //wenn kein Rabatt besteht
                     if (a.getRabattmenge() == null) {
                         gesamtpreis = verkaufspreis * menge;
                     } else { //wenn Rabatt besteht
-                        gesamtpreis = verkaufspreis * menge * (1 - Double.parseDouble(a.getRabattmenge()) / 100);
+                        gesamtpreis = verkaufspreis * menge * (1 - (Double.parseDouble(a.getRabattmenge()) / 100));
                     }
-                    table.addCell(String.valueOf(gesamtpreis));
+                    table.addCell(new Paragraph(String.valueOf(gesamtpreis), fontHaupt));
                     count++;
                 } else if (a.getAlternative().equals("1")) { //wenn Artikel alternativ ist
                     gesamtpreis = 0;
-                    tableAlt.addCell(" ");
-                    tableAlt.addCell(a.getArtikelnummer());
-                    tableAlt.addCell(a.getBezeichnung() + "\n" + a.getZusatztext());
-                    tableAlt.addCell(a.getBestand());
-                    tableAlt.addCell(a.getVerkaufspreis());
-                    tableAlt.addCell(a.getRabattmenge());
+                    tableAlt.addCell(new Paragraph(" ", fontHaupt));
+                    tableAlt.addCell(new Paragraph(a.getArtikelnummer(), fontHaupt));
+                    tableAlt.addCell(new Paragraph(a.getBezeichnung() + "\n" + a.getZusatztext(), fontHaupt));
+                    tableAlt.addCell(new Paragraph(a.getBestand(), fontHaupt));
+                    tableAlt.addCell(new Paragraph(a.getVerkaufspreis(), fontHaupt));
+                    tableAlt.addCell(new Paragraph(a.getRabattmenge(), fontHaupt));
                     verkaufspreis = Double.parseDouble(a.getVerkaufspreis());
                     menge = Double.parseDouble(a.getBestand());
                     if (a.getRabattmenge() == null) {
                         alternativpreis = verkaufspreis * menge;
                     } else { //wenn Rabatt besteht
-                        alternativpreis = verkaufspreis * menge * (1 - Double.parseDouble(a.getRabattmenge()));
+                        alternativpreis = verkaufspreis * menge * (1 - (Double.parseDouble(a.getRabattmenge()) /100));
                     }
-                    tableAlt.addCell(String.valueOf(alternativpreis));
+                    tableAlt.addCell(new Paragraph(String.valueOf(alternativpreis), fontHaupt));
                 }
                 mwstEinzeln = gesamtpreis * (Double.parseDouble(a.getMwst()) / 100);
                 mwstGesamt += mwstEinzeln;
@@ -312,7 +313,7 @@ public class PdfCreator {
             }
             endpreisBrutto = endpreisNetto + mwstGesamt;
 
-            Font fontAlt = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
+            Font fontAlt = FontFactory.getFont(FontFactory.TIMES_BOLD, 8);
             Paragraph pAlt = new Paragraph("Alternativ bieten wir an: ", fontAlt);
             document.add(table);
             if (tableAlt.getRows().size() != 0) {
@@ -320,8 +321,8 @@ public class PdfCreator {
                 document.add(tableAlt);
             }
 
-            Font fontEnde = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
-            Font fontEndeWert = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
+            Font fontEnde = FontFactory.getFont(FontFactory.TIMES_BOLD, 8);
+            Font fontEndeWert = FontFactory.getFont(FontFactory.TIMES_BOLD, 10);
             float[] est2 = {2, 2, 2};
             PdfPTable tableEnd = new PdfPTable(est2);
             tableEnd.setWidthPercentage(100);

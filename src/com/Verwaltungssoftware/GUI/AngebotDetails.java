@@ -18,6 +18,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -134,6 +135,8 @@ public class AngebotDetails {
         netto.setPrefWidth(100);
         Label skontobetrag = new Label("Skontobetrag");
         skontobetrag.setPrefWidth(100);
+        Label akzeptiert = new Label("Akzeptiert");
+        akzeptiert.setPrefWidth(100);
 
         TextField summe4 = new TextField(String.valueOf(angebot.getNettoBetrag()));
         summe4.setEditable(false);
@@ -147,6 +150,15 @@ public class AngebotDetails {
         TextField skontoT = new TextField(String.valueOf(angebot.getSkontoProzent()));
         TextField skontobetragT = new TextField(String.valueOf(angebot.getSkontoBetrag()));
         skontobetragT.setEditable(false);
+        ChoiceBox akzeptiertC = new ChoiceBox();
+        String ja = "Ja";
+        String nein = "Nein";
+        akzeptiertC.getItems().addAll(ja, nein);
+        if(angebot.getAkzeptiert().equals(ja)){
+            akzeptiertC.setValue(ja);
+        } else{
+            akzeptiertC.setValue(nein);
+        }
 
         gültigT.setOnKeyReleased((KeyEvent ke) -> {
             if (!ke.getText().matches("[0-9]*")) {
@@ -233,7 +245,7 @@ public class AngebotDetails {
         Button confirm = new Button("Bestätigen");
         confirm.setOnAction(e -> {
             try {
-                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), akzeptiertC.getSelectionModel().getSelectedItem().toString(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
                         Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()),
                         Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
                 sql.loadDataAngebot(false);
@@ -400,7 +412,7 @@ public class AngebotDetails {
         Button confirm2 = new Button("Bestätigen");
         confirm2.setOnAction(e -> {
             try {
-                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), akzeptiertC.getSelectionModel().getSelectedItem().toString(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
                         Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()),
                         Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
                 sql.loadDataAngebot(false);
@@ -442,7 +454,7 @@ public class AngebotDetails {
         Button confirm3 = new Button("Bestätigen");
         confirm3.setOnAction(e -> {
             try {
-                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), akzeptiertC.getSelectionModel().getSelectedItem().toString(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
                         Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()),
                         Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
                 sql.loadDataAngebot(false);
@@ -474,15 +486,19 @@ public class AngebotDetails {
         HBox laTe19 = new HBox();
         laTe19.setPadding(new Insets(10));
         laTe19.setSpacing(8);
+        HBox laTe20 = new HBox();
+        laTe20.setPadding(new Insets(10));
+        laTe20.setSpacing(8);
 
         laTe15.getChildren().addAll(summe3, summe4, skontotage, skontotageT);
         laTe16.getChildren().addAll(mwtStr, mwtStrT, skonto, skontoT);
-        laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT);
+        laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT, akzeptiertC);
         laTe18.getChildren().addAll(gültig, gültigT);
         laTe19.getChildren().addAll(fakturatext, fakturatextT);
+        laTe20.getChildren().addAll(akzeptiert, akzeptiertC);
 
         VBox sum3 = new VBox();
-        sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19);
+        sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19, laTe20);
 
         VBox all = new VBox();
         all.getChildren().addAll(sum3, buttons3);

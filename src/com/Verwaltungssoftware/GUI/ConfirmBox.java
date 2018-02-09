@@ -32,9 +32,7 @@ public class ConfirmBox {
         
         Label text = new Label(message);
         Button yes = new Button("Ja");
-        yes.setPrefSize(50, 25);
         Button no = new Button("Nein");
-        no.setPrefSize(50, 25);
         
         yes.setOnAction(e -> {
             bool = true;
@@ -70,7 +68,6 @@ public class ConfirmBox {
         
         Label text = new Label(message);
         Button ok = new Button("Okay");
-        ok.setPrefSize(50, 25);
         
         ok.setOnAction(e -> {
              popupStage.close();
@@ -86,7 +83,7 @@ public class ConfirmBox {
         pane.setCenter(text);
         pane.setBottom(buttons);
         
-        usure = new Scene(pane, 400, 100);
+        usure = new Scene(pane, 600, 100);
         popupStage.setScene(usure);
         popupStage.showAndWait();
         

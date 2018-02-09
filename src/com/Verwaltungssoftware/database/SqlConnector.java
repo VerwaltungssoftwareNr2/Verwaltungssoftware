@@ -278,7 +278,7 @@ public class SqlConnector implements ISql {
     @Override
     public void updateUserConfig(User user) throws SQLException {
         String insertString = "insert into User_config(BID, bankName, kontoNr, blz, steuerNummer, ustId, company, street, town, country, companyNo,"
-                + "preName, lastName, aStreet, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "preName, lastName, aStreet, aHausnummer, aPlz, aLand, aOrt, aTel, aFax, aBankName, aBic, aIban, aAmt, aHrb) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 Statement stmtDelete = myConn.createStatement();
@@ -328,16 +328,16 @@ public class SqlConnector implements ISql {
             stmtInsert.setString(13, user.getLastName());
             stmtInsert.setString(14, user.getaStreet());
             stmtInsert.setString(15, user.getaHausnummer());
-            stmtInsert.setString(15, user.getaPlz());
-            stmtInsert.setString(16, user.getaLand());
-            stmtInsert.setString(17, user.getaOrt());
-            stmtInsert.setString(18, user.getaTel());
-            stmtInsert.setString(19, user.getaFax());
-            stmtInsert.setString(20, user.getaBankName());
-            stmtInsert.setString(21, user.getaBic());
-            stmtInsert.setString(22, user.getaIban());
-            stmtInsert.setString(23, user.getaAmt());
-            stmtInsert.setString(24, user.getaHrb());
+            stmtInsert.setString(16, user.getaPlz());
+            stmtInsert.setString(17, user.getaLand());
+            stmtInsert.setString(18, user.getaOrt());
+            stmtInsert.setString(19, user.getaTel());
+            stmtInsert.setString(20, user.getaFax());
+            stmtInsert.setString(21, user.getaBankName());
+            stmtInsert.setString(22, user.getaBic());
+            stmtInsert.setString(23, user.getaIban());
+            stmtInsert.setString(24, user.getaAmt());
+            stmtInsert.setString(25, user.getaHrb());
 
             stmtInsert.executeUpdate();
         }
@@ -547,7 +547,7 @@ public class SqlConnector implements ISql {
                             rsAngebot.getString("angebotsnummer"),
                             rsAngebot.getString("kunde"),
                             rsAngebot.getString("datum"),
-                            "noch ausstehend/nein",
+                            "nein",
                             rsAngebot.getDouble("Nettobetrag"),
                             rsAngebot.getDouble("Bruttobetrag"),
                             rsAngebot.getDouble("Mehrwertsteuer"),
@@ -562,7 +562,7 @@ public class SqlConnector implements ISql {
                             rsAngebot.getString("angebotsnummer"),
                             rsAngebot.getString("kunde"),
                             rsAngebot.getString("datum"),
-                            "Ja/Rechnung erstellt",
+                            "Ja",
                             rsAngebot.getDouble("Nettobetrag"),
                             rsAngebot.getDouble("Bruttobetrag"),
                             rsAngebot.getDouble("Mehrwertsteuer"),
@@ -593,7 +593,7 @@ public class SqlConnector implements ISql {
                             rsAngebot.getString("angebotsnummer"),
                             rsAngebot.getString("kunde"),
                             rsAngebot.getString("datum"),
-                            "noch ausstehend/nein",
+                            "nein",
                             rsAngebot.getDouble("Nettobetrag"),
                             rsAngebot.getDouble("Bruttobetrag"),
                             rsAngebot.getDouble("Mehrwertsteuer"),
@@ -608,7 +608,7 @@ public class SqlConnector implements ISql {
                             rsAngebot.getString("angebotsnummer"),
                             rsAngebot.getString("kunde"),
                             rsAngebot.getString("datum"),
-                            "Ja/Rechnung erstellt",
+                            "Ja",
                             rsAngebot.getDouble("Nettobetrag"),
                             rsAngebot.getDouble("Bruttobetrag"),
                             rsAngebot.getDouble("Mehrwertsteuer"),
@@ -792,7 +792,7 @@ public class SqlConnector implements ISql {
                             rsSearchAngebot.getString("angebotsnummer"),
                             rsSearchAngebot.getString("kunde"),
                             rsSearchAngebot.getString("datum"),
-                            "noch ausstehend/nein",
+                            "nein",
                             rsSearchAngebot.getDouble("Nettobetrag"),
                             rsSearchAngebot.getDouble("Bruttobetrag"),
                             rsSearchAngebot.getDouble("Mehrwertsteuer"),
@@ -807,7 +807,7 @@ public class SqlConnector implements ISql {
                             rsSearchAngebot.getString("angebotsnummer"),
                             rsSearchAngebot.getString("kunde"),
                             rsSearchAngebot.getString("datum"),
-                            "ja/Rechnung erstellt",
+                            "ja",
                             rsSearchAngebot.getDouble("Nettobetrag"),
                             rsSearchAngebot.getDouble("Bruttobetrag"),
                             rsSearchAngebot.getDouble("Mehrwertsteuer"),
@@ -893,7 +893,6 @@ public class SqlConnector implements ISql {
             stmtSearchArtikel.setString(4, "%" + filter + "%");
             stmtSearchArtikel.setString(5, "%" + filter + "%");
             stmtSearchArtikel.setString(6, "%" + filter + "%");
-            stmtSearchArtikel.setString(7, "%" + filter + "%");
             
             rsSearchArtikel = stmtSearchArtikel.executeQuery();
 
@@ -1302,23 +1301,30 @@ public class SqlConnector implements ISql {
     }
 
     @Override
-    public void updateAngebot(String aNummer, String hinweis, String faktura, Double nettoBetrag, double mwst, double bruttoBetrag,
+    public void updateAngebot(String aNummer, String hinweis, String faktura, String akzeptiert, Double nettoBetrag, double mwst, double bruttoBetrag,
             int zZ, int skontoTage, double skontoPr, double skontoBetrag) throws SQLException {
-        String updateString = "update angebot set hinweis = ?, fakturatext = ?, nettobetrag = ?, bruttobetrag = ?, mehrwertsteuer = ?,"
+        String updateString = "update angebot set hinweis = ?, fakturatext = ?, akzeptiert = ?, nettobetrag = ?, bruttobetrag = ?, mehrwertsteuer = ?,"
                 + " zahlungsziel = ?, skontotage = ?, skontoprozent = ?, skontobetrag = ? where angebotsnummer = ?;";
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
                 PreparedStatement updateAngebot = myConn.prepareStatement(updateString)) {
             
+            boolean test;
+            if(akzeptiert.equals("Ja")){
+                test = true;
+            } else{
+                test = false;
+            }
             updateAngebot.setString(1, hinweis);
             updateAngebot.setString(2, faktura);
-            updateAngebot.setDouble(3, nettoBetrag);
-            updateAngebot.setDouble(4, bruttoBetrag);
-            updateAngebot.setDouble(5, mwst);
-            updateAngebot.setInt(6, zZ);
-            updateAngebot.setInt(7, skontoTage);
-            updateAngebot.setDouble(8, skontoPr);
-            updateAngebot.setDouble(9, skontoBetrag);
-            updateAngebot.setString(10, aNummer);
+            updateAngebot.setBoolean(3, test);
+            updateAngebot.setDouble(4, nettoBetrag);
+            updateAngebot.setDouble(5, bruttoBetrag);
+            updateAngebot.setDouble(6, mwst);
+            updateAngebot.setInt(7, zZ);
+            updateAngebot.setInt(8, skontoTage);
+            updateAngebot.setDouble(9, skontoPr);
+            updateAngebot.setDouble(10, skontoBetrag);
+            updateAngebot.setString(11, aNummer);
             
             updateAngebot.executeUpdate();
         }
