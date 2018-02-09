@@ -289,19 +289,21 @@ public class RechnungsAdd {
 
         aAndR.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                String nummer = aAndR.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer();
-                System.out.println(nummer);
-                try {
-                    gui.sql.loadArtikelFromAngebot(nummer);
-                } catch (SQLException exc) {
-                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel der Rechnung");
-                    System.out.println(exc.getMessage());
-                }
+                if (!aAndR.getSelectionModel().isEmpty()) {
+                    String nummer = aAndR.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer();
+                    System.out.println(nummer);
+                    try {
+                        gui.sql.loadArtikelFromAngebot(nummer);
+                    } catch (SQLException exc) {
+                        ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel der Rechnung");
+                        System.out.println(exc.getMessage());
+                    }
 
-                aFromAR.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-                aFromAR.setItems(gui.sql.getDataArtikelInAngebot());
-                if (aFromAR.getColumns().isEmpty()) {
-                    aFromAR.getColumns().addAll(artikelnummer, bezeichnung, zusatztextTC, einkaufspreis, verkaufspreis, mwst, menge, datumA);
+                    aFromAR.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                    aFromAR.setItems(gui.sql.getDataArtikelInAngebot());
+                    if (aFromAR.getColumns().isEmpty()) {
+                        aFromAR.getColumns().addAll(artikelnummer, bezeichnung, zusatztextTC, einkaufspreis, verkaufspreis, mwst, menge, datumA);
+                    }
                 }
             }
         });
@@ -574,38 +576,40 @@ public class RechnungsAdd {
         });
         rechnungEntwurf.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                double summeTemp;
-                artNrT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer());
-                tempOldId = artNrT.getText();
-                bezeichnungT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBezeichnung());
-                nettopreisT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
-                rabattT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
-                if (rabattT.getText() == null) {
-                    if (rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                if (!rechnungEntwurf.getSelectionModel().isEmpty()) {
+                    double summeTemp;
+                    artNrT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer());
+                    tempOldId = artNrT.getText();
+                    bezeichnungT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBezeichnung());
+                    nettopreisT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
+                    rabattT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
+                    if (rabattT.getText() == null) {
+                        if (rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                        } else {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                        }
                     } else {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                        if (rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                            summeTemp = summeTemp * (1 - Double.valueOf(rabattT.getText()) / 100);
+                        } else {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                            summeTemp = summeTemp * (1 - Double.valueOf(rabattT.getText()) / 100);
+                        }
                     }
-                } else {
-                    if (rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
-                        summeTemp = summeTemp * (1 - Double.valueOf(rabattT.getText()) / 100);
-                    } else {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
-                        summeTemp = summeTemp * (1 - Double.valueOf(rabattT.getText()) / 100);
-                    }
-                }
-                summeT.setText(String.valueOf(summeTemp));
-                anzahlT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
-                anzahlT.setPromptText("Aktueller Bestand: " + rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
-                zusatztextT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getZusatztext());
-                for (Artikel art : dataNewRechnung) {
-                    if (artNrT.getText().equals(art.getArtikelnummer())) {
-                        if (art.getAlternative() != null) {
-                            if (art.getAlternative().equals("1")) {
-                                alternativ.setSelected(true);
-                            } else {
-                                alternativ.setSelected(false);
+                    summeT.setText(String.valueOf(summeTemp));
+                    anzahlT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                    anzahlT.setPromptText("Aktueller Bestand: " + rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    zusatztextT.setText(rechnungEntwurf.getSelectionModel().getSelectedItems().get(0).getZusatztext());
+                    for (Artikel art : dataNewRechnung) {
+                        if (artNrT.getText().equals(art.getArtikelnummer())) {
+                            if (art.getAlternative() != null) {
+                                if (art.getAlternative().equals("1")) {
+                                    alternativ.setSelected(true);
+                                } else {
+                                    alternativ.setSelected(false);
+                                }
                             }
                         }
                     }

@@ -6,7 +6,6 @@
 package com.verwaltungssoftware.GUI;
 
 import com.itextpdf.text.DocumentException;
-import static com.verwaltungssoftware.GUI.AngebotDetails.kunde;
 import com.verwaltungssoftware.database.ISql;
 import com.verwaltungssoftware.objects.Angebot;
 import com.verwaltungssoftware.objects.Kunde;
@@ -15,8 +14,6 @@ import com.verwaltungssoftware.pdf.PdfCreator;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -89,7 +86,7 @@ public class RechnungDetails {
         Label zusatz = new Label("Hinweis");
         zusatz.setPrefWidth(200);
 
-         TextField anredeT = new TextField(kunde.getAnrede());
+        TextField anredeT = new TextField(kunde.getAnrede());
         anredeT.setPrefWidth(300);
         TextField aNRT = new TextField(rNummer);
         aNRT.setPrefWidth(300);
@@ -167,10 +164,8 @@ public class RechnungDetails {
                 System.out.println(exc.getMessage());
             }
         });
-        Button confirm = new Button("Bestätigen");
-        confirm.setOnAction(e -> popupStage.close());
 
-                HBox laTe1 = new HBox();
+        HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
         laTe1.setSpacing(8);
         HBox laTe2 = new HBox();
@@ -200,7 +195,7 @@ public class RechnungDetails {
         HBox laTe10 = new HBox();
         laTe10.setPadding(new Insets(10));
         laTe10.setSpacing(8);
-        
+
         laTe1.getChildren().addAll(aNr, aNRT);
         laTe2.getChildren().addAll(datum, datumL);
         laTe3.getChildren().addAll(kNr, kNRT);
@@ -211,12 +206,12 @@ public class RechnungDetails {
         laTe8.getChildren().addAll(plz, plzT);
         laTe9.getChildren().addAll(ort, ortT);
         laTe10.getChildren().addAll(zusatz, zusatzT);
-        
+
         VBox sum = new VBox();
         sum.getChildren().addAll(laTe1, laTe2, laTe3, laTe4, laTe5, laTe6, laTe7, laTe8, laTe9, laTe10);
 
         HBox buttons = new HBox();
-        buttons.getChildren().addAll(cancel, pdf, confirm);
+        buttons.getChildren().addAll(cancel, pdf);
         buttons.setPadding(new Insets(10, 10, 10, 10));
         buttons.setSpacing(8);
         buttons.setAlignment(Pos.CENTER);
@@ -323,11 +318,9 @@ public class RechnungDetails {
                 System.out.println(exc.getMessage());
             }
         });
-        Button confirm2 = new Button("Bestätigen");
-        confirm2.setOnAction(e -> popupStage.close());
 
         HBox buttons2 = new HBox();
-        buttons2.getChildren().addAll(cancel2, pdf2, confirm2);
+        buttons2.getChildren().addAll(cancel2, pdf2);
         buttons2.setPadding(new Insets(10, 10, 10, 10));
         buttons2.setSpacing(8);
         buttons2.setAlignment(Pos.CENTER);
@@ -364,8 +357,11 @@ public class RechnungDetails {
         bruttopreisT.setEditable(false);
         TextField gültigT = new TextField(String.valueOf(rechnung.getZahlungsZiel()));
         TextArea fakturatextT = new TextArea(rechnung.getFakturaText());
+        fakturatextT.setEditable(false);
         TextField skontotageT = new TextField(String.valueOf(rechnung.getSkontoTage()));
+        skontotageT.setEditable(false);
         TextField skontoT = new TextField(String.valueOf(rechnung.getSkontoProzent()));
+        skontoT.setEditable(false);
         TextField skontobetragT = new TextField(String.valueOf(rechnung.getSkontoBetrag()));
         skontobetragT.setEditable(false);
 
@@ -386,11 +382,9 @@ public class RechnungDetails {
                 e.consume();
             }
         });
-        Button confirm3 = new Button("Bestätigen");
-        confirm3.setOnAction(e -> popupStage.close());
 
         HBox buttons3 = new HBox();
-        buttons3.getChildren().addAll(cancel3, pdf3, confirm3);
+        buttons3.getChildren().addAll(cancel3, pdf3);
         buttons3.setPadding(new Insets(10, 10, 10, 10));
         buttons3.setSpacing(8);
         buttons3.setAlignment(Pos.CENTER);
@@ -410,13 +404,13 @@ public class RechnungDetails {
         HBox laTe19 = new HBox();
         laTe19.setPadding(new Insets(10));
         laTe19.setSpacing(8);
-        
+
         laTe15.getChildren().addAll(summe3, summe4, skontotage, skontotageT);
         laTe16.getChildren().addAll(mwtStr, mwtStrT, skonto, skontoT);
         laTe17.getChildren().addAll(bruttopreis, bruttopreisT, skontobetrag, skontobetragT);
         laTe18.getChildren().addAll(gültig, gültigT);
         laTe19.getChildren().addAll(fakturatext, fakturatextT);
-        
+
         VBox sum3 = new VBox();
         sum3.getChildren().addAll(laTe15, laTe16, laTe17, laTe18, laTe19);
 

@@ -26,6 +26,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -147,6 +148,38 @@ public class AngebotDetails {
         TextField skontobetragT = new TextField(String.valueOf(angebot.getSkontoBetrag()));
         skontobetragT.setEditable(false);
 
+        gültigT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!ke.getText().matches("[0-9]*")) {
+                StringBuilder sb = new StringBuilder(gültigT.getText());
+                sb.deleteCharAt(gültigT.getText().length() - 1);
+                gültigT.setText(sb.toString());
+                gültigT.positionCaret(gültigT.getText().length());
+            }
+        });
+
+        skontotageT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!ke.getText().matches("[0-9]*")) {
+                StringBuilder sb = new StringBuilder(skontotageT.getText());
+                sb.deleteCharAt(skontotageT.getText().length() - 1);
+                skontotageT.setText(sb.toString());
+                skontotageT.positionCaret(skontotageT.getText().length());
+            }
+        });
+        skontoT.setOnKeyReleased((KeyEvent ke) -> {
+            if (!skontoT.getText().trim().isEmpty() && skontoT.getText().matches("\\d*(\\.\\d*)?")) {
+                skontobetragT.setText(String.valueOf(Double.valueOf(bruttopreisT.getText()) * (1 - (Double.valueOf(skontoT.getText()) / 100))));
+            } else {
+                if (!skontoT.getText().trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder(skontoT.getText());
+                    sb.deleteCharAt(skontoT.getText().length() - 1);
+                    skontoT.setText(sb.toString());
+                    skontoT.positionCaret(skontoT.getText().length());
+                } else {
+                    skontobetragT.clear();
+                }
+            }
+        });
+
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
         Button pdf = new Button("In PDF umwandeln");
@@ -198,7 +231,18 @@ public class AngebotDetails {
         });
 
         Button confirm = new Button("Bestätigen");
-        confirm.setOnAction(e -> popupStage.close());
+        confirm.setOnAction(e -> {
+            try {
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
+                        Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()),
+                        Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
+                sql.loadDataAngebot(false);
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Aktualisieren des Angebots");
+                System.out.println(exc.getMessage());
+            }
+            popupStage.close();
+        });
 
         HBox laTe1 = new HBox();
         laTe1.setPadding(new Insets(10));
@@ -309,7 +353,7 @@ public class AngebotDetails {
         Button pdf2 = new Button("In PDF umwandeln");
         Button delete2 = new Button("Angebot löschen");
         delete2.setOnAction(e -> {
-            boolean test = ConfirmBox.display("Agebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
+            boolean test = ConfirmBox.display("Angebot löschen", "Möchten Sie das Angebot wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden!", 600, 100);
             if (test == true) {
                 try {
                     sql.deleteAngebot(aNummer);
@@ -354,7 +398,18 @@ public class AngebotDetails {
             }
         });
         Button confirm2 = new Button("Bestätigen");
-        confirm2.setOnAction(e -> popupStage.close());
+        confirm2.setOnAction(e -> {
+            try {
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
+                        Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()),
+                        Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
+                sql.loadDataAngebot(false);
+            } catch (SQLException exc) {
+                ConfirmBox.display2("Fehler", "Fehler beim Aktualisieren des Angebots");
+                System.out.println(exc.getMessage());
+            }
+            popupStage.close();
+        });
 
         HBox buttons2 = new HBox();
         buttons2.getChildren().addAll(cancel2, pdf2, delete2, confirm2);
@@ -386,12 +441,12 @@ public class AngebotDetails {
         });
         Button confirm3 = new Button("Bestätigen");
         confirm3.setOnAction(e -> {
-            try{
-                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()), 
-                        Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()), 
+            try {
+                sql.updateAngebot(aNummer, zusatzT.getText(), fakturatextT.getText(), Double.valueOf(summe4.getText()), Double.valueOf(mwtStrT.getText()),
+                        Double.valueOf(bruttopreisT.getText()), Integer.valueOf(gültigT.getText()), Integer.valueOf(skontotageT.getText()),
                         Double.valueOf(skontoT.getText()), Double.valueOf(skontobetragT.getText()));
                 sql.loadDataAngebot(false);
-            } catch(SQLException exc){
+            } catch (SQLException exc) {
                 ConfirmBox.display2("Fehler", "Fehler beim Aktualisieren des Angebots");
                 System.out.println(exc.getMessage());
             }

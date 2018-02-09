@@ -282,19 +282,21 @@ public class AngebotAdd {
 
         aAndR.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                String nummer = aAndR.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer();
-                System.out.println(nummer);
-                try {
-                    gui.sql.loadArtikelFromAngebot(nummer);
-                } catch (SQLException exc) {
-                    ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel des Angebots");
-                    System.out.println(exc.getMessage());
-                }
+                if (!aAndR.getSelectionModel().isEmpty()) {
+                    String nummer = aAndR.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer();
+                    System.out.println(nummer);
+                    try {
+                        gui.sql.loadArtikelFromAngebot(nummer);
+                    } catch (SQLException exc) {
+                        ConfirmBox.display2("Fehler", "Fehler beim Laden der Artikel des Angebots");
+                        System.out.println(exc.getMessage());
+                    }
 
-                aFromAR.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-                aFromAR.setItems(gui.sql.getDataArtikelInAngebot());
-                if (aFromAR.getColumns().isEmpty()) {
-                    aFromAR.getColumns().addAll(artikelnummer, bezeichnung, zusatztextTC, einkaufspreis, verkaufspreis, mwst, menge, datumA);
+                    aFromAR.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                    aFromAR.setItems(gui.sql.getDataArtikelInAngebot());
+                    if (aFromAR.getColumns().isEmpty()) {
+                        aFromAR.getColumns().addAll(artikelnummer, bezeichnung, zusatztextTC, einkaufspreis, verkaufspreis, mwst, menge, datumA);
+                    }
                 }
             }
         });
@@ -588,38 +590,40 @@ public class AngebotAdd {
         });
         angebotEntwurf.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                double summeTemp;
-                artNrT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer());
-                tempOldId = artNrT.getText();
-                bezeichnungT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBezeichnung());
-                nettopreisT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
-                rabattT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
-                if (rabattT.getText() == null) {
-                    if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                if (!angebotEntwurf.getSelectionModel().isEmpty()) {
+                    double summeTemp;
+                    artNrT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getArtikelnummer());
+                    tempOldId = artNrT.getText();
+                    bezeichnungT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBezeichnung());
+                    nettopreisT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getVerkaufspreis());
+                    rabattT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getRabattTemp());
+                    if (rabattT.getText() == null) {
+                        if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                        } else {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                        }
                     } else {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                        if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                            summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                        } else {
+                            summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                            summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
+                        }
                     }
-                } else {
-                    if (angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp() == null) {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
-                        summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
-                    } else {
-                        summeTemp = Double.valueOf(nettopreisT.getText()) * Double.valueOf(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
-                        summeTemp = summeTemp * (Double.valueOf(rabattT.getText()) / 100);
-                    }
-                }
-                summeT.setText(String.valueOf(summeTemp));
-                anzahlT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
-                anzahlT.setPromptText("Aktueller Bestand: " + angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
-                zusatztextT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getZusatztext());
-                for (Artikel art : dataNewAngebot) {
-                    if (artNrT.getText().equals(art.getArtikelnummer())) {
-                        if (art.getAlternative() != null) {
-                            if (art.getAlternative().equals("1")) {
-                                alternativ.setSelected(true);
-                            } else {
-                                alternativ.setSelected(false);
+                    summeT.setText(String.valueOf(summeTemp));
+                    anzahlT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getMengeTemp());
+                    anzahlT.setPromptText("Aktueller Bestand: " + angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getBestand());
+                    zusatztextT.setText(angebotEntwurf.getSelectionModel().getSelectedItems().get(0).getZusatztext());
+                    for (Artikel art : dataNewAngebot) {
+                        if (artNrT.getText().equals(art.getArtikelnummer())) {
+                            if (art.getAlternative() != null) {
+                                if (art.getAlternative().equals("1")) {
+                                    alternativ.setSelected(true);
+                                } else {
+                                    alternativ.setSelected(false);
+                                }
                             }
                         }
                     }

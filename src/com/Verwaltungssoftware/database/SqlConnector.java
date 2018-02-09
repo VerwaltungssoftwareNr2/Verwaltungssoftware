@@ -717,7 +717,7 @@ public class SqlConnector implements ISql {
     @Override
     public void loadFilteredKunden(String filter) throws SQLException {
         String searchKundeString = "select * from kunde join postleitzahl on kunde.postleitzahl = postleitzahl.plz where vorname like ? or name like ? or kundennummer like ? or "
-                + "straße like ? or kunde.postleitzahl like ? or ort like ? or land like ?;";
+                + "straße like ? or kunde.postleitzahl like ? or ort like ? or land like ? or unternehmensname like ?;";
         ResultSet rsSearchKunde = null;
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -732,6 +732,7 @@ public class SqlConnector implements ISql {
             stmtSearchKunde.setString(5, "%" + filter + "%");
             stmtSearchKunde.setString(6, "%" + filter + "%");
             stmtSearchKunde.setString(7, "%" + filter + "%");
+            stmtSearchKunde.setString(8, "%" + filter + "%");
             rsSearchKunde = stmtSearchKunde.executeQuery();
 
             String temp = null;
@@ -876,7 +877,9 @@ public class SqlConnector implements ISql {
 
     @Override
     public void loadFilteredArtikel(String filter) throws SQLException {
-        String searchArtikelString = "select * from artikel left join warengruppe on artikel.warengruppe = warengruppe.wgid where artikelnummer like ? or artikel.bezeichnung like ? or warengruppe.bezeichnung like ?;";
+        String searchArtikelString = "select * from artikel left join warengruppe on artikel.warengruppe = warengruppe.wgid "
+                + "where artikelnummer like ? or artikel.bezeichnung like ? or warengruppe.bezeichnung like ? or artikel.einkaufspreis like ? or artikel.verkaufspreis like ? "
+                + "or artikel.bestand like ?;";
         ResultSet rsSearchArtikel = null;
 
         try (Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Verwaltungssoftware?useSSL=true", userInfo);
@@ -887,6 +890,11 @@ public class SqlConnector implements ISql {
             stmtSearchArtikel.setString(1, "%" + filter + "%");
             stmtSearchArtikel.setString(2, "%" + filter + "%");
             stmtSearchArtikel.setString(3, "%" + filter + "%");
+            stmtSearchArtikel.setString(4, "%" + filter + "%");
+            stmtSearchArtikel.setString(5, "%" + filter + "%");
+            stmtSearchArtikel.setString(6, "%" + filter + "%");
+            stmtSearchArtikel.setString(7, "%" + filter + "%");
+            
             rsSearchArtikel = stmtSearchArtikel.executeQuery();
 
             while (rsSearchArtikel.next()) {

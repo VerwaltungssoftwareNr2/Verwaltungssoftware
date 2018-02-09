@@ -57,6 +57,7 @@ public class Ortsverwaltung {
         TextField ortT = new TextField();
         TextField landT = new TextField();
 
+        ChoiceBox plzSum = new ChoiceBox();
         Button addB = new Button("Hinzufügen");
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> popupStage.close());
@@ -65,6 +66,7 @@ public class Ortsverwaltung {
                 try {
                     sql.safeNewPlz(plzT.getText(), ortT.getText(), landT.getText());
                     ConfirmBox.display2("Meldung", "Postleitzahl erfolgreich gespeichert");
+                    plzSum.getItems().add(plzT.getText());
                     plzT.clear();
                     ortT.clear();
                     landT.clear();
@@ -101,7 +103,6 @@ public class Ortsverwaltung {
 
         Label auswahl = new Label("Auswahl der Postleitzahl");
         auswahl.setPrefWidth(200);
-        ChoiceBox plzSum = new ChoiceBox();
         Label plz2 = new Label("Postleitzahl");
         plz2.setPrefWidth(200);
         Label ort2 = new Label("Ort");

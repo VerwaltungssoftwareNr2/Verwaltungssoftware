@@ -249,10 +249,12 @@ public class GUI_Verwaltungssoftware extends Application {
         rechnungT.setPrefSize(100000, 100000);
         rechnungT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(),
-                        rechnungT.getSelectionModel().getSelectedItems().get(0).getKunde(),
-                        rechnungT.getSelectionModel().getSelectedItems().get(0).getDatum());
-                rechnungT.refresh();
+                if (!rechnungT.getSelectionModel().isEmpty()) {
+                    RechnungDetails.display(sql, rechnungT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(),
+                            rechnungT.getSelectionModel().getSelectedItems().get(0).getKunde(),
+                            rechnungT.getSelectionModel().getSelectedItems().get(0).getDatum());
+                    rechnungT.refresh();
+                }
             }
         });
 
@@ -303,10 +305,12 @@ public class GUI_Verwaltungssoftware extends Application {
 
         angebotT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(),
-                        angebotT.getSelectionModel().getSelectedItems().get(0).getKunde(),
-                        angebotT.getSelectionModel().getSelectedItems().get(0).getDatum());
-                angebotT.refresh();
+                if (!angebotT.getSelectionModel().isEmpty()) {
+                    AngebotDetails.display(sql, angebotT.getSelectionModel().getSelectedItems().get(0).getAngebotsnummer(),
+                            angebotT.getSelectionModel().getSelectedItems().get(0).getKunde(),
+                            angebotT.getSelectionModel().getSelectedItems().get(0).getDatum());
+                    angebotT.refresh();
+                }
             }
         });
         VBox fAndT = createFilter(angebotT, "Angebot", false);
@@ -318,8 +322,10 @@ public class GUI_Verwaltungssoftware extends Application {
         artikelT.setPrefSize(100000, 100000);
         artikelT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                ArtikelDetails.display(artikelT.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(), sql);
-                artikelT.refresh();
+                if (!artikelT.getSelectionModel().isEmpty()) {
+                    ArtikelDetails.display(artikelT.getSelectionModel().getSelectedItems().get(0).getArtikelnummer(), sql);
+                    artikelT.refresh();
+                }
             }
         });
 
@@ -372,8 +378,10 @@ public class GUI_Verwaltungssoftware extends Application {
         kundenT.setPrefSize(100000, 100000);
         kundenT.setOnMouseClicked((MouseEvent me) -> {
             if (me.getClickCount() == 2) {
-                KundeDetails.display(kundenT.getSelectionModel().getSelectedItems().get(0).getKundennummer(), sql);
-                kundenT.refresh();
+                if (!kundenT.getSelectionModel().isEmpty()) {
+                    KundeDetails.display(kundenT.getSelectionModel().getSelectedItems().get(0).getKundennummer(), sql);
+                    kundenT.refresh();
+                }
             }
         });
 
